@@ -1,0 +1,3 @@
+1_ROOT_PATH=D:/00_eGov_work/JavaProject/UtilViewer/src/main/webapp
+2_ROOT_PATH=C:/start-webcontainer/workspace/ch22/src/main/webapp
+ROOT_PATH=C:/start-webcontainer/workspace/ch21/src/main/webapp

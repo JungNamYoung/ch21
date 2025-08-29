@@ -1,0 +1,18 @@
+#chatContainer {
+	width: 50%;
+	max-height: 400px;
+	overflow-y: auto;
+	border: 1px solid #ccc;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.user-message {
+	color: blue;
+	font-weight: bold;
+}
+
+.bot-message {
+	color: green;
+	font-weight: bold;
+}
