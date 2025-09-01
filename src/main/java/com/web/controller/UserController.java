@@ -17,7 +17,7 @@ public class UserController {
 
   private final Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
 
-  @Autowired(name = "userService")
+  @Autowired
   public UserService userService;
 
   @RequestMapping("/selectUser.do")

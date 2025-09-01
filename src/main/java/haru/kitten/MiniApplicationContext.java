@@ -88,15 +88,15 @@ public class MiniApplicationContext {
   }
 
   private Object createProxyIfNeeded(Object bean) throws Exception {
-    
+
     String transactionMangerName = transactionalProxyRegister.findTransactionManagerName(bean.getClass());
-    
+
     if (transactionMangerName != null) {
       return transactionalProxyRegister.createProxyInstance(bean, miniMyBatis.findMiniTxHandler(transactionMangerName));
     }
 
     List<Object> aspectInstances = aspectManager.findBeanAspect(bean);
-    
+
     if (aspectInstances.size() > Define.COUNT_0) {
       return aspectManager.makeProxyInstance(bean, aspectInstances);
     }
@@ -140,17 +140,17 @@ public class MiniApplicationContext {
   private String resolveBeanName(Class<?> clazz) {
     if (clazz.isAnnotationPresent(Service.class)) {
       Service service = clazz.getAnnotation(Service.class);
-      
+
       if (!service.value().isEmpty()) {
         return service.value();
       }
     }
-    
+
     if (clazz.isAnnotationPresent(Controller.class)) {
       String simpleName = clazz.getSimpleName();
       return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
     }
-    
+
     return clazz.getSimpleName();
   }
 
@@ -176,17 +176,20 @@ public class MiniApplicationContext {
     Autowired autowired = field.getAnnotation(Autowired.class);
     String autowiredName = autowired.name();
 
-    BeanDefinition beanDefinition = findBean(autowiredName);
-
-    Object dependency = beanDefinition.getTargetBean();
-
-    if (beanDefinition.getProxyInstance() != null) {
-      dependency = beanDefinition.getProxyInstance();
+    BeanDefinition beanDefinition = null;
+    if (!autowiredName.isEmpty()) {
+      beanDefinition = findBean(autowiredName);
+    } else {
+      beanDefinition = findBeanByType(field.getType());
     }
 
-    if (dependency == null) {
-      throw new RuntimeException("빈 주입 실패 - " + autowiredName + " 빈을 찾을 수 없습니다.");
+    if (beanDefinition == null) {
+      String msg = autowiredName.isEmpty() ? field.getType().getSimpleName() : autowiredName;
+      throw new RuntimeException("빈 주입 실패 - " + msg + " 빈을 찾을 수 없습니다.");
     }
+
+    Object dependency = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
+
     field.setAccessible(true);
 
     if (!field.getType().isAssignableFrom(dependency.getClass())) {
@@ -229,6 +232,17 @@ public class MiniApplicationContext {
     for (BeanDefinition beanDefinition : beanDefinitions) {
       if (beanDefinition.getBeanName().equals(beanName))
         return beanDefinition;
+    }
+
+    return null;
+  }
+
+  private BeanDefinition findBeanByType(Class<?> type) {
+    for (BeanDefinition beanDefinition : beanDefinitions) {
+      Object candidate = beanDefinition.getTargetBean();
+      if (type.isAssignableFrom(candidate.getClass())) {
+        return beanDefinition;
+      }
     }
 
     return null;

@@ -19,7 +19,7 @@ import haru.logger.LoggerManager;
 @Service("userService")
 public class UserServiceImpl implements UserService {
 
-  @Autowired(name = "sqlSessionUser")
+  @Autowired
   SqlSession sqlSessionUser;
 
   private final Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
