@@ -19,6 +19,7 @@ package haru.kitten;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Paths;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -58,8 +59,9 @@ public class MiniServletContainer {
     System.out.println(str);
 
     TokenEx tokenEx = new TokenEx(UtilExt.getClassPath(Haru.CONFIG_HARU));
+    String webRoot = Paths.get("").toAbsolutePath().resolve(tokenEx.get(Haru.ROOT_PATH)).toString();
 
-    miniServletContext = new MiniServletContext(tokenEx.get(Haru.ROOT_PATH));
+    miniServletContext = new MiniServletContext(webRoot);
 
     MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet();
 
