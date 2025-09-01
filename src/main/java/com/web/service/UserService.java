@@ -1,9 +1,9 @@
-package haru.web.service;
+package com.web.service;
 
 import java.util.List;
 
-import haru.web.vo.UserCol;
-import haru.web.vo.UserVo;
+import com.web.vo.UserCol;
+import com.web.vo.UserVo;
 
 public interface UserService {
 	public List<UserVo> selectUserList(UserCol userCol);

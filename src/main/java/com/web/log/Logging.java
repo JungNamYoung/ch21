@@ -1,4 +1,4 @@
-package haru.web.log;
+package com.web.log;
 
 import java.lang.reflect.Method;
 import java.util.logging.Logger;

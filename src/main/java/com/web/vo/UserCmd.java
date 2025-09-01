@@ -1,4 +1,4 @@
-package haru.web.vo;
+package com.web.vo;
 
 public class UserCmd {
   private String cmdId;

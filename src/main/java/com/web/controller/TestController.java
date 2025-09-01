@@ -1,4 +1,4 @@
-package haru.web.controller;
+package com.web.controller;
 
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;

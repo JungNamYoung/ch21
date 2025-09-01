@@ -1,4 +1,4 @@
-package haru.web.controller;
+package com.web.controller;
 
 import java.util.logging.Logger;
 

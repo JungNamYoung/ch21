@@ -1,17 +1,16 @@
-package haru.web.controller;
+package com.web.controller;
 
 import java.util.List;
+import java.util.logging.Logger;
+
+import com.web.service.UserService;
+import com.web.vo.UserVo;
 
 import haru.annotation.di.Autowired;
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
 import haru.logger.LoggerManager;
 import haru.model.MiniModel;
-//import haru.model.ModelAndView;
-import haru.web.service.UserService;
-import haru.web.vo.UserVo;
-
-import java.util.logging.Logger;
 
 @Controller
 public class UserController {

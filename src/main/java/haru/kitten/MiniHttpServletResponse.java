@@ -37,17 +37,16 @@ public class MiniHttpServletResponse implements HttpServletResponse {
   static Logger logger = LoggerManager.getLogger(MiniHttpServletResponse.class.getSimpleName());
 
   private final HttpExchange exchange;
-  private final OutputStream outputStream;
-  private final PrintWriter writer;
+  private OutputStream outputStream;
+  private PrintWriter writer;
   private int statusCode = HttpServletResponse.SC_OK;
   private String contentType = Define.TEXT_PLAIN;
   private boolean headersSent = false;
   private long contentLength = 0;
+  private boolean contentLengthSet = false;
 
   public MiniHttpServletResponse(HttpExchange exchange) {
     this.exchange = exchange;
-    this.outputStream = exchange.getResponseBody();
-    this.writer = new PrintWriter(outputStream);
   }
 
   @Override
@@ -68,6 +67,10 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
   @Override
   public PrintWriter getWriter() {
+    if (writer == null) {
+      initOutputStream();
+      writer = new PrintWriter(outputStream);
+    }
     return writer;
   }
 
@@ -77,11 +80,22 @@ public class MiniHttpServletResponse implements HttpServletResponse {
     sendHeaders();
 
     try {
-      writer.flush();
-      outputStream.flush();
-      outputStream.close();
+      if (writer != null) {
+        writer.flush();
+        writer.close();
+      } else if (outputStream != null) {
+        outputStream.flush();
+        outputStream.close();
+      }
     } catch (Exception ex) {
       ex.printStackTrace();
+    }
+  }
+
+  private void initOutputStream() {
+    if (outputStream == null) {
+      sendHeaders();
+      outputStream = exchange.getResponseBody();
     }
   }
 
@@ -89,7 +103,12 @@ public class MiniHttpServletResponse implements HttpServletResponse {
     if (!headersSent) {
       try {
         exchange.getResponseHeaders().set(Define.CONTENT_TYPE, contentType);
-        exchange.sendResponseHeaders(statusCode, contentLength);
+        if (contentLengthSet) {
+          exchange.sendResponseHeaders(statusCode, contentLength);
+        } else {
+          exchange.getResponseHeaders().remove(Define.CONTENT_LENGTH);
+          exchange.sendResponseHeaders(statusCode, 0);
+        }
 
         logger.info("send - Response - Headers");
 
@@ -113,6 +132,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
   @Override
   public ServletOutputStream getOutputStream() throws IOException {
+    initOutputStream();
     return new MiniServletOutputStream(outputStream);
   }
 
@@ -133,6 +153,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
     checkSendHeader();
 
     contentLength = len;
+    contentLengthSet = true;
 
     exchange.getResponseHeaders().set(Define.CONTENT_LENGTH, String.valueOf(len));
   }

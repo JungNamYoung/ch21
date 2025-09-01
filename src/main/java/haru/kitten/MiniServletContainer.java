@@ -63,7 +63,7 @@ public class MiniServletContainer {
 
     miniServletContext = new MiniServletContext(webRoot);
 
-    MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet();
+    MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(tokenEx.get(Haru.KEY_SCAN_PACKAGE).toString());
 
     server.createContext(MiniServletContainer.getContextPath(), new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
 
