@@ -69,6 +69,9 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     String realJspPath = webAppRoot + relativePath;
     Path jspFilePath = Paths.get(realJspPath);
 
+    logger.info("realJspPath : " + realJspPath);
+    logger.info("webAppRoot : " + webAppRoot);
+    
     File outputDir = new File(webAppRoot + "/output/compiledJspServlets");
     if (!outputDir.exists()) {
       outputDir.mkdirs();
@@ -232,6 +235,10 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
   private void compileJspToServlet(String jspFilePath, String outputDir, String packagePath) {
 
+      logger.info("jspFilePath : " + jspFilePath);
+      logger.info("outputDir : " + outputDir);
+      logger.info("packagePath : " + packagePath);
+      
     try {
       File file = new File(jspFilePath);
       JspC jspCompiler = new JspC();

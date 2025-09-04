@@ -10,11 +10,20 @@ public class TokenEx {
 
   Map<String, String> map = new HashMap<>();
 
-  public TokenEx(String path) {
+  public TokenEx(String path, String src) {
 
+    ArrayList<String> list = null;
+    
+    if(path.length() > 0 && src.length() == 0) {
     FileEx.exist(path);
-
-    ArrayList<String> list = FileEx.readEx(path, false);
+    	list =	FileEx.readEx(path, false);
+    }
+    else if(path.length() == 0 && src.length() > 0) {
+    	list = LineEx.toEffectiveLines(src);
+    }
+    else {
+    	throw new RuntimeException(Define.NOT_APPLICABLE);
+    }
 
     for (int index = 0; index < list.size(); ++index) {
 

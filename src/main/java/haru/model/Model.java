@@ -3,7 +3,7 @@ package haru.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MiniModel {
+public class Model {
   private Map<String, Object> model = new HashMap<>();
 
   public void addAttribute(String key, Object value) {

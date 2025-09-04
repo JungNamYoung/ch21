@@ -10,7 +10,7 @@ import haru.annotation.di.Autowired;
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
 import haru.logger.LoggerManager;
-import haru.model.MiniModel;
+import haru.model.Model;
 
 @Controller
 public class UserController {
@@ -21,7 +21,7 @@ public class UserController {
   public UserService userService;
 
   @RequestMapping("/selectUser.do")
-  public String selectUser(MiniModel model) {
+  public String selectUser(Model model) {
 
     logger.info("selectUser()");
 
@@ -30,11 +30,11 @@ public class UserController {
     model.addAttribute("author", "david");
     model.addAttribute("results", result);
     
-    return "haru/user";
+    return "web/user";
   }
 
   @RequestMapping("/changeUser.do")
-  public String changeUser(MiniModel model) {
+  public String changeUser(Model model) {
     userService.changeUser(null);
     return null;
   }
@@ -44,6 +44,6 @@ public class UserController {
 
     logger.info("실행함 : chat.do");
 
-    return "haru/chat";
+    return "web/chat";
   }
 }

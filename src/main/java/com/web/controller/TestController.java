@@ -9,7 +9,7 @@ public class TestController {
   @RequestMapping("/test")
   public String test() {
     System.out.println("핸들러 실행됨");
-    return "haru/testView";
+    return "web/testView";
   }
 
 }

@@ -174,18 +174,18 @@ public class MiniApplicationContext {
 
   private void injectFieldDependency(Object bean, Field field) {
     Autowired autowired = field.getAnnotation(Autowired.class);
-    String autowiredName = autowired.name();
+//    String autowiredName = autowired.name();
 
     BeanDefinition beanDefinition = null;
-    if (!autowiredName.isEmpty()) {
-      beanDefinition = findBean(autowiredName);
-    } else {
+//    if (!autowiredName.isEmpty()) {
+//      beanDefinition = findBean(autowiredName);
+//    } else {
       beanDefinition = findBeanByType(field.getType());
-    }
+//    }
 
     if (beanDefinition == null) {
-      String msg = autowiredName.isEmpty() ? field.getType().getSimpleName() : autowiredName;
-      throw new RuntimeException("빈 주입 실패 - " + msg + " 빈을 찾을 수 없습니다.");
+//      String msg = autowiredName.isEmpty() ? field.getType().getSimpleName() : autowiredName;
+      throw new RuntimeException("빈 주입 실패 : " + " 빈을 찾을 수 없습니다.");
     }
 
     Object dependency = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
@@ -213,11 +213,13 @@ public class MiniApplicationContext {
 
     try {
 
-      SqlSession sqlSession = miniMyBatis.getSqlSessionBySessionId(autowired.name());
+//      SqlSession sqlSession = miniMyBatis.getSqlSessionBySessionId(autowired.name());
+      SqlSession sqlSession = miniMyBatis.getSqlSessionByType(field.getType());
 
       field.set(bean, sqlSession);
 
-      logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | " + autowired.name());
+      //logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | " + autowired.name());
+      logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | ");
 
     } catch (IllegalArgumentException | IllegalAccessException e) {
       e.printStackTrace();
@@ -280,3 +282,4 @@ public class MiniApplicationContext {
     this.annotatedAspectClasses = aspectClasses;
   }
 }
+

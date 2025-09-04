@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 
 import com.sun.net.httpserver.HttpServer;
 
+import haru.define.Define;
 import haru.define.Haru;
 import haru.util.TokenEx;
 import haru.util.UtilExt;
@@ -55,17 +56,23 @@ public class MiniServletContainer {
 
     HttpServer server = HttpServer.create(new InetSocketAddress(Haru.PORT), 0);
 
-    String str = String.format("\nMiniServletContainer started on port: %d with context path: %s", Haru.PORT, MiniServletContainer.getContextPath());
-    System.out.println(str);
+		System.out.printf("%nMiniServletContainer started on port: %d with context path: %s%n", Haru.PORT,
+				MiniServletContainer.getContextPath());
+		System.out.println("user.dir : " + Paths.get("").toAbsolutePath());
 
-    TokenEx tokenEx = new TokenEx(UtilExt.getClassPath(Haru.CONFIG_HARU));
-    String webRoot = Paths.get("").toAbsolutePath().resolve(tokenEx.get(Haru.ROOT_PATH)).toString();
+		TokenEx tokenEx = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_HARU));
+
+		String webRoot = UtilExt.resolveWebRoot(tokenEx);
+
+		System.out.println("webRoot : " + webRoot);
 
     miniServletContext = new MiniServletContext(webRoot);
 
-    MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(tokenEx.get(Haru.KEY_SCAN_PACKAGE).toString());
+		MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(
+				tokenEx.get(Haru.KEY_SCAN_PACKAGE).toString());
 
-    server.createContext(MiniServletContainer.getContextPath(), new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
+		server.createContext(MiniServletContainer.getContextPath(),
+				new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
 
     server.setExecutor(null);
     server.start();

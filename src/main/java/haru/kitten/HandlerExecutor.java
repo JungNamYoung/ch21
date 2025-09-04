@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 import haru.define.Define;
 import haru.logger.LoggerManager;
-import haru.model.MiniModel;
+import haru.model.Model;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -35,18 +35,18 @@ public class HandlerExecutor {
 
   public static void execute(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
 
-    MiniModel miniModel = new MiniModel();
+    Model model = new Model();
 
     miniHttpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
-    Object result = HandlerExecutor.invokeHandler(handlerMapping, miniHttpServletRequest, miniHttpServletResponse, miniModel);
+    Object result = HandlerExecutor.invokeHandler(handlerMapping, miniHttpServletRequest, miniHttpServletResponse, model);
 
     if (result instanceof String) {
-      HandlerExecutor.renderView((String) result, miniHttpServletRequest, miniHttpServletResponse, miniModel);
+      HandlerExecutor.renderView((String) result, miniHttpServletRequest, miniHttpServletResponse, model);
     } else if (result instanceof List<?>) {
       HandlerExecutor.renderList((List<?>) result, miniHttpServletResponse);
     } else if (result == null) {
-      HandlerExecutor.renderJson(miniModel, miniHttpServletResponse);
+      HandlerExecutor.renderJson(model, miniHttpServletResponse);
     } else {
       throw new RuntimeException(Define.NOT_APPLICABLE);
     }
@@ -59,14 +59,14 @@ public class HandlerExecutor {
 
   }
 
-  static Object invokeHandler(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, MiniModel miniModel) {
+  static Object invokeHandler(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Model model) {
     Object result = null;
     try {
       Object targetBean = (handlerMapping.getBeanDefinition().getProxyInstance() != null) ? handlerMapping.getBeanDefinition().getProxyInstance() : handlerMapping.getBeanDefinition().getTargetBean();
 
       Method method = handlerMapping.getMethod();
 
-      Object[] args = createArguments(method, miniModel, miniHttpServletRequest, miniHttpServletResponse);
+      Object[] args = createArguments(method, model, miniHttpServletRequest, miniHttpServletResponse);
 
       result = method.invoke(targetBean, args);
 
@@ -77,14 +77,14 @@ public class HandlerExecutor {
     return result;
   }
 
-  static private Object[] createArguments(Method method, MiniModel miniModel, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
+  static private Object[] createArguments(Method method, Model model, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     Parameter[] parameters = method.getParameters();
     Object[] args = new Object[parameters.length];
 
     for (int i = 0; i < parameters.length; i++) {
       Class<?> paramType = parameters[i].getType();
-      if (paramType.equals(MiniModel.class)) {
-        args[i] = miniModel;
+      if (paramType.equals(Model.class)) {
+        args[i] = model;
       } else if (paramType.equals(MiniHttpServletRequest.class)) {
         args[i] = miniHttpServletRequest;
       } else if (paramType.equals(MiniHttpServletResponse.class)) {
@@ -110,18 +110,18 @@ public class HandlerExecutor {
     return args;
   }
 
-  static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, MiniModel miniModel) {
+  static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Model model) {
     String jspPath = Define.WEB_INF + "jsp/" + viewName + Define.EXT_JSP;
 
-    for (Map.Entry<String, Object> entry : miniModel.getAttributes().entrySet()) {
-      logger.info("miniModel - " + entry.getKey() + " - " + entry.getValue());
+    for (Map.Entry<String, Object> entry : model.getAttributes().entrySet()) {
+      logger.info("model - " + entry.getKey() + " - " + entry.getValue());
     }
 
     RequestDispatcher requestDispatcher = miniHttpServletRequest.getRequestDispatcher(jspPath);
     MiniRequestDispatcher miniRequestDispatcher = (MiniRequestDispatcher) requestDispatcher;
 
     try {
-      miniRequestDispatcher.compileAndExecute(miniHttpServletRequest, miniHttpServletResponse, miniModel.getAttributes());
+      miniRequestDispatcher.compileAndExecute(miniHttpServletRequest, miniHttpServletResponse, model.getAttributes());
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -134,8 +134,8 @@ public class HandlerExecutor {
     }
   }
 
-  static void renderJson(MiniModel miniModel, MiniHttpServletResponse miniHttpServletResponse) {
-    Object jsonData = miniModel.getAttribute(Define.JSON);
+  static void renderJson(Model model, MiniHttpServletResponse miniHttpServletResponse) {
+    Object jsonData = model.getAttribute(Define.JSON);
 
     if (jsonData != null) {
       miniHttpServletResponse.setContentType(Define.APP_JSON + Define.CHARSET_UTF_8);

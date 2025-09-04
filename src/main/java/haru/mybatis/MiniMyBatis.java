@@ -62,6 +62,16 @@ public class MiniMyBatis {
     throw new RuntimeException(Define.NOT_APPLICABLE);
   }
 
+  public SqlSession getSqlSessionByType(Class<?> type) {
+
+	    for (TransactionalSqlSession transactionalSqlSession : TransactionalSqlSessions) {
+	      if (type.isAssignableFrom(transactionalSqlSession.getSqlSession().getClass()))
+	        return transactionalSqlSession.getSqlSession();
+	    }
+
+	    throw new RuntimeException(Define.NOT_APPLICABLE);
+	  }
+
   public SqlSession getSqlSessionByTxManager(String transactionManagerName) {
     for (TransactionalSqlSession transactionalSqlSession : TransactionalSqlSessions) {
       if (transactionalSqlSession.getTransactionManagerName().equals(transactionManagerName))

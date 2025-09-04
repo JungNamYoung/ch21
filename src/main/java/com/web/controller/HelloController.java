@@ -13,13 +13,13 @@ public class HelloController {
 
   @RequestMapping("/sayHello.do")
   public String sayHello() {
-    return "haru/say_hello";
+    return "web/say_hello";
   }
 
   @RequestMapping("/my.do")
   public String sayMy() {
     logger.info("sayMy()");
-    return "haru/my";
+    return "web/my";
   }
 
 }

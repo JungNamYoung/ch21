@@ -3,8 +3,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>web.container</groupId>
-  <artifactId>ch22</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>ch21</artifactId>
+  <version>0.0.1</version>
 
   <dependencies>
     <!-- ###################################### -->
@@ -38,13 +38,6 @@
       <artifactId>ant</artifactId>
       <version>1.10.14</version>
     </dependency>
-    <!-- ###################################### -->
-<!--    <dependency>-->
-<!--      <groupId>jakarta.servlet</groupId>-->
-<!--      <artifactId>jakarta.servlet-api</artifactId>-->
-<!--      <version>6.0.0</version>-->
-<!--    </dependency>-->
-    <!-- ###################################### -->
     <dependency>
       <groupId>jakarta.servlet.jsp.jstl</groupId>
       <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
@@ -67,7 +60,33 @@
           <release>23</release>
         </configuration>
       </plugin>
-    </plugins>
+    <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.6.0</version>
+				<configuration>
+					<finalName>ch21</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptors>
+						<descriptor>src/assembly/dist.xml</descriptor>
+					</descriptors>
+					<archive>
+						<manifest>
+							<mainClass>haru.kitten.MiniServletContainer</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-dist</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
   </build>
 
 </project>
