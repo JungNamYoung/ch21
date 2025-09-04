@@ -7,6 +7,7 @@ import com.web.service.UserService;
 import com.web.vo.UserVo;
 
 import haru.annotation.di.Autowired;
+import haru.annotation.di.Resource;
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
 import haru.logger.LoggerManager;
@@ -19,13 +20,16 @@ public class UserController {
 
   @Autowired
   public UserService userService;
+  
+  @Resource(name="userService")
+  public UserService userServiceExt;
 
   @RequestMapping("/selectUser.do")
   public String selectUser(Model model) {
 
     logger.info("selectUser()");
 
-    List<UserVo> result = userService.selectUserList(null);
+    List<UserVo> result = userServiceExt.selectUserList(null);
 
     model.addAttribute("author", "david");
     model.addAttribute("results", result);
@@ -35,7 +39,7 @@ public class UserController {
 
   @RequestMapping("/changeUser.do")
   public String changeUser(Model model) {
-    userService.changeUser(null);
+    userServiceExt.changeUser(null);
     return null;
   }
 
