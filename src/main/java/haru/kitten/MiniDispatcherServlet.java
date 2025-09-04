@@ -74,7 +74,7 @@ public class MiniDispatcherServlet  implements DispatcherServlet {
 
         RequestMapping handlerMapping = method.getAnnotation(RequestMapping.class);
 
-        String [] pathRequest = handlerMapping.value();
+        String pathRequest = handlerMapping.value();
 
         handlerMappings.add(new HandlerMapping(pathRequest, method, beanDefinition));
 
