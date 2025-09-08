@@ -10,7 +10,23 @@ public class LineEx {
   }
 
   public static ArrayList<String> toEffectiveLines(String text) {
-    return text.lines().map(String::trim).filter(s -> !s.isEmpty() && !s.startsWith("#") && !s.startsWith("//")).map(s -> s.replaceFirst("\\s*=\\s*", "=")).collect(Collectors.toCollection(ArrayList::new));
+		ArrayList<String> effectiveLines = new ArrayList<>();
+
+		String[] lines = text.split("\\R");
+
+		for (String line : lines) {
+			String trimmedLine = line.trim();
+
+			if (trimmedLine.isEmpty() || trimmedLine.startsWith("#") || trimmedLine.startsWith("//")) {
+				continue;
+			}
+
+			String processedLine = trimmedLine.replaceFirst("\\s*=\\s*", "=");
+
+			effectiveLines.add(processedLine);
+		}
+
+		return effectiveLines;
   }
 
   public static void main(String[] args) {

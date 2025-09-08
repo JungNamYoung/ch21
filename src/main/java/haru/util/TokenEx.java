@@ -31,7 +31,15 @@ public class TokenEx {
 
       String[] values = str.split(Define.EQUAL);
 
+      if(values.length == 2) {
       map.put(values[Define.INDEX_0], values[Define.INDEX_1]);
+    }
+      else if(values.length == 1) {
+    	  map.put(values[Define.INDEX_0], Define.STR_BLANK);
+      }
+      else {
+    	  throw new RuntimeException(Define.NOT_APPLICABLE);
+      }
     }
   }
 

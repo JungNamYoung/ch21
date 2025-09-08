@@ -33,12 +33,14 @@ public class MiniServletContainer {
 
   private static MiniServletContext miniServletContext;
 
+	static String contextPath;
+
   public static MiniServletContext getMiniWebApplicationContext() {
     return miniServletContext;
   }
 
   public static String getContextPath() {
-    return Haru.CONTEXT_PATH;
+		return contextPath;
   }
 
   public static String getRealPath(String requestedResource) {
@@ -57,6 +59,8 @@ public class MiniServletContainer {
 		TokenEx tokenEx = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_HARU));
 		
 		int port = Integer.parseInt(tokenEx.get(Haru.PORT));
+		
+		contextPath = tokenEx.get(Haru.CONTEXT_PATH);
 		
 		HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 

@@ -89,6 +89,8 @@ public class HandlerExecutor {
         args[i] = miniHttpServletRequest;
       } else if (paramType.equals(MiniHttpServletResponse.class)) {
         args[i] = miniHttpServletResponse;
+      } else if (paramType.equals(MiniHttpSession.class)) {
+        args[i] = miniHttpServletRequest.getAttribute("miniHttpSession");
       } else {
 
         try {

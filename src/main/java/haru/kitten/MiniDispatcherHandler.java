@@ -39,7 +39,7 @@ class MiniDispatcherHandler implements HttpHandler {
 
   MiniServletContext miniServletContext;
   MiniDispatcherServlet miniDispatcherServlet;
-  
+
   Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
 
   public MiniDispatcherHandler(MiniServletContext miniServletContext, MiniDispatcherServlet miniDispatcherServlet) {
@@ -72,6 +72,8 @@ class MiniDispatcherHandler implements HttpHandler {
 
     MiniHttpServletRequest miniHttpServletRequest = new MiniHttpServletRequest(exchange);
     MiniHttpServletResponse miniHttpServletResponse = new MiniHttpServletResponse(exchange);
+
+    miniHttpServletRequest.setAttribute("miniHttpSession", miniHttpSession);
 
     List<Filter> filters = new ArrayList<>();
     filters.add(new SnParameterFilter());
