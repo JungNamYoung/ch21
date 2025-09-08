@@ -24,7 +24,7 @@ public class UserController {
   @Resource(name="userService")
   public UserService userServiceExt;
 
-  @RequestMapping("/selectUser.do")
+  @RequestMapping({"/selectUser.do", "/selectUserExt.do"})
   public String selectUser(Model model) {
 
     logger.info("selectUser()");
