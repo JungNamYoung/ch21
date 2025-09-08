@@ -26,6 +26,7 @@ import org.apache.ibatis.session.SqlSession;
 
 import haru.annotation.aop.Aspect;
 import haru.annotation.di.Autowired;
+import haru.annotation.di.Resource;
 import haru.annotation.di.Service;
 import haru.annotation.mvc.Controller;
 import haru.aop.AspectManager;
@@ -163,10 +164,12 @@ public class MiniApplicationContext {
       Field[] fields = bean.getClass().getDeclaredFields();
 
       for (Field field : fields) {
-        if ((field.getType() == SqlSession.class) && field.isAnnotationPresent(Autowired.class)) {
+        if ((field.getType() == SqlSession.class) && (field.isAnnotationPresent(Autowired.class) || field.isAnnotationPresent(Resource.class))) {
           injectSqlSession(bean, field);
         } else if (field.isAnnotationPresent(Autowired.class)) {
           injectFieldDependency(bean, field);
+        } else if (field.isAnnotationPresent(Resource.class)) {
+          injectResourceDependency(bean, field);
         }
       }
     }
@@ -180,7 +183,7 @@ public class MiniApplicationContext {
 //    if (!autowiredName.isEmpty()) {
 //      beanDefinition = findBean(autowiredName);
 //    } else {
-      beanDefinition = findBeanByType(field.getType());
+    beanDefinition = findBeanByType(field.getType());
 //    }
 
     if (beanDefinition == null) {
@@ -218,11 +221,43 @@ public class MiniApplicationContext {
 
       field.set(bean, sqlSession);
 
-      //logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | " + autowired.name());
+      // logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + "
+      // | " + autowired.name());
       logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | ");
 
     } catch (IllegalArgumentException | IllegalAccessException e) {
       e.printStackTrace();
+    }
+  }
+
+  private void injectResourceDependency(Object bean, Field field) {
+    Resource resource = field.getAnnotation(Resource.class);
+    String resourceName = resource.name();
+
+    BeanDefinition beanDefinition = null;
+    if (!resourceName.isEmpty()) {
+      beanDefinition = findBean(resourceName);
+    } else {
+      beanDefinition = findBeanByType(field.getType());
+    }
+    if (beanDefinition == null) {
+      throw new RuntimeException("빈 주입 실패: " + " 빈을 찾을 수 없습니다.");
+    }
+
+    Object dependency = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
+
+    field.setAccessible(true);
+
+    if (!field.getType().isAssignableFrom(dependency.getClass())) {
+      String msg = "주입 불가능 : 필드 타입 " + field.getType() + "은(는) " + dependency.getClass() + "을(를) 할당할 수 없습니다.";
+      logger.info("error | " + msg);
+    }
+
+    try {
+      field.set(bean, dependency);
+      logger.info("[dependency] inject | " + bean.getClass().getSimpleName() + " | " + dependency.getClass().getSimpleName());
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException("의존성 주입 실패", e);
     }
   }
 
@@ -282,4 +317,3 @@ public class MiniApplicationContext {
     this.annotatedAspectClasses = aspectClasses;
   }
 }
-
