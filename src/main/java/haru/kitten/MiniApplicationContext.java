@@ -221,8 +221,7 @@ public class MiniApplicationContext {
 
       field.set(bean, sqlSession);
 
-      // logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + "
-      // | " + autowired.name());
+      //logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | " + autowired.name());
       logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | ");
 
     } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -317,3 +316,4 @@ public class MiniApplicationContext {
     this.annotatedAspectClasses = aspectClasses;
   }
 }
+

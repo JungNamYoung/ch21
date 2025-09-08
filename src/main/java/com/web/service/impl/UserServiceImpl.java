@@ -24,14 +24,14 @@ public class UserServiceImpl implements UserService {
 
   private final Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
   
-  String SQL_NAME_SPACE = "web_container.user.";
+  private static String SQL_NAMESPACE = "com.web.service.impl.UserMapper.";
   
   public List<UserVo> selectUserList(UserCol userCol) {
 
     List<UserVo> list = null;
 
     try {
-      list = sqlSessionUser.selectList(SQL_NAME_SPACE + "selectUser", userCol);
+      list = sqlSessionUser.selectList(SQL_NAMESPACE + "selectUser", userCol);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -42,8 +42,8 @@ public class UserServiceImpl implements UserService {
   @Transactional(transactionManager = "txUser")
   public int changeUser(UserCol userCol) {
     logger.info("changeUser()");
-    int result = sqlSessionUser.insert(SQL_NAME_SPACE + "insertUser", userCol);
-    result = sqlSessionUser.update(SQL_NAME_SPACE + "updateUser", userCol);
+    int result = sqlSessionUser.insert(SQL_NAMESPACE + "insertUser", userCol);
+    result = sqlSessionUser.update(SQL_NAMESPACE + "updateUser", userCol);
     return result;
   }
 
