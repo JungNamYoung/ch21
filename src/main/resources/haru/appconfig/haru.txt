@@ -1,2 +1,3 @@
 ROOT_PATH=src/main/webapp
 SCAN_PACKAGE=com.web
+PORT = 8580

@@ -54,13 +54,15 @@ public class MiniServletContainer {
 
   public static void main(String[] args) throws IOException, ServletException {
 
-    HttpServer server = HttpServer.create(new InetSocketAddress(Haru.PORT), 0);
+		TokenEx tokenEx = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_HARU));
+		
+		int port = Integer.parseInt(tokenEx.get(Haru.PORT));
+		
+		HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-		System.out.printf("%nMiniServletContainer started on port: %d with context path: %s%n", Haru.PORT,
+		System.out.printf("%nMiniServletContainer started on port: %d with context path: %s%n", port,
 				MiniServletContainer.getContextPath());
 		System.out.println("user.dir : " + Paths.get("").toAbsolutePath());
-
-		TokenEx tokenEx = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_HARU));
 
 		String webRoot = UtilExt.resolveWebRoot(tokenEx);
 

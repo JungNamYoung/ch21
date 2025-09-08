@@ -10,6 +10,7 @@ import haru.annotation.di.Autowired;
 import haru.annotation.di.Resource;
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
+import haru.kitten.MiniHttpSession;
 import haru.logger.LoggerManager;
 import haru.model.Model;
 
@@ -25,9 +26,11 @@ public class UserController {
   public UserService userServiceExt;
 
   @RequestMapping({"/selectUser.do", "/selectUserExt.do"})
-  public String selectUser(Model model) {
+  public String selectUser(Model model, MiniHttpSession session) {
 
     logger.info("selectUser()");
+    
+    logger.info("id : " + session.getId());
 
     List<UserVo> result = userServiceExt.selectUserList(null);
 

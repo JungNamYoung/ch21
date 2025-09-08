@@ -21,6 +21,6 @@
     </environment>
   </environments>
   <mappers>
-    <mapper resource="haru/mappers/userMapper.xml" />
+    <mapper resource="haru/mappers/UserMapper.xml" />
   </mappers>
 </configuration>

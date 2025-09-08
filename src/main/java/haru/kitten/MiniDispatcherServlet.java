@@ -30,7 +30,7 @@ import haru.interceptor.InterceptorChain;
 import haru.logger.LoggerManager;
 import haru.security.SecurityFilter;
 
-public class MiniDispatcherServlet  implements DispatcherServlet {
+public class MiniDispatcherServlet implements DispatcherServlet {
 
   private List<HandlerMapping> handlerMappings = new ArrayList<>();
   private MiniApplicationContext miniApplicationContext = new MiniApplicationContext();
@@ -74,11 +74,10 @@ public class MiniDispatcherServlet  implements DispatcherServlet {
 
         RequestMapping handlerMapping = method.getAnnotation(RequestMapping.class);
 
-        String pathRequest = handlerMapping.value();
-
-        handlerMappings.add(new HandlerMapping(pathRequest, method, beanDefinition));
-
-        logger.info("[RequestMapping] " + pathRequest + " - " + beanDefinition.getTargetBean().getClass().getSimpleName() + "::" + method.getName());
+        for (String pathRequest : handlerMapping.value()) {
+          handlerMappings.add(new HandlerMapping(pathRequest, method, beanDefinition));
+          logger.info("[RequestMapping] " + pathRequest + " - " + beanDefinition.getTargetBean().getClass().getSimpleName() + "::" + method.getName());
+        }
       }
     }
   }
