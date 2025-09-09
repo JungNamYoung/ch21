@@ -51,10 +51,10 @@ class MiniDispatcherHandler implements HttpHandler {
   public void handle(HttpExchange exchange) throws IOException {
 
     System.out.println(Define.STR_BLANK);
-
     logger.info("HTTP server received");
 
     String requestPath = exchange.getRequestURI().getPath();
+    
     if (Define.FAVICON.equals(requestPath)) {
       logger.info("Ignoring " + Define.FAVICON + " request");
       exchange.sendResponseHeaders(HttpServletResponse.SC_NO_CONTENT, -1);

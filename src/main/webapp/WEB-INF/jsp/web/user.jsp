@@ -9,8 +9,10 @@
 <meta charset="UTF-8">
 <title>user</title>
 
-<link href="<c:url value="/haru/bundle/bootstrap.video/bootstrap.css"/>" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="<c:url value='/haru/css/user.css'/>">
+<c:set var="cp" value="${pageContext.request.contextPath eq '/' ? '' : pageContext.request.contextPath}"/>
+
+<link href="${cp}/haru/bundle/bootstrap.video/bootstrap.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="${cp}/haru/css/user.css">
 
 </head>
 <body>
@@ -18,12 +20,12 @@
     <div class="d-flex flex-column align-items-center gap-4 ">
 
       <h1 class="d-flex align-items-center">
-        <img class="img-fluid" style="width: 100px; height: auto; margin-right: 10px;" src="<c:url value='/haru/images/haru-logo.png'/>"> 
+        <img class="img-fluid" style="width: 100px; height: auto; margin-right: 10px;" src="${cp}/haru/images/haru-logo.png"> 
         <span> web-container</span>
       </h1>
       <h5>author : ${author}</h5>
 
-      <img class="img-fluid w-50" src="<c:url value='/haru/images/Countryside1.png'/>">
+      <img class="img-fluid w-50" src="${cp}/haru/images/Countryside1.png">
       <div class="table-responsive w-50">
         <table class="table table-bordered text-center">
           <thead class="table-light">
@@ -50,7 +52,7 @@
       </div>
       <div class="w-50">
         <video controls class="img-fluid">
-          <source src="<c:url value='/haru/video/output.mp4'/>" />
+          <source src="${cp}/haru/video/output.mp4" />
         </video>
       </div>
     </div>
@@ -59,7 +61,7 @@
 
 <script>
 document.getElementById('id-insert-update-user').addEventListener('click',function(){
-  fetch('<c:url value="/changeUser.do"/>', {
+  fetch('${cp}/changeUser.do', {
     method: 'POST',
     headers : {
       'Content-Type': 'application/json'
