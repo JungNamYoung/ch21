@@ -26,6 +26,7 @@ import org.apache.ibatis.session.SqlSession;
 
 import haru.annotation.aop.Aspect;
 import haru.annotation.di.Autowired;
+import haru.annotation.di.Repository;
 import haru.annotation.di.Resource;
 import haru.annotation.di.Service;
 import haru.annotation.mvc.Controller;
@@ -39,6 +40,7 @@ public class MiniApplicationContext {
   private List<BeanDefinition> beanDefinitions = new ArrayList<>();
   private TransactionalProxyRegister transactionalProxyRegister = new TransactionalProxyRegister();
   private Set<Class<?>> annotatedServiceClasses;
+  private Set<Class<?>> annotatedRepositoryClasses;
   private Set<Class<?>> annotatedControllerClasses;
   private Set<Class<?>> annotatedAspectClasses;
   private AspectManager aspectManager = new AspectManager();
@@ -59,12 +61,14 @@ public class MiniApplicationContext {
   private void scanAnnotatedClasses(String basePackage) {
     MiniAnnotationScanner scanner = new MiniAnnotationScanner(basePackage);
     annotatedServiceClasses = scanner.getTypesAnnotatedWith(Service.class);
+    annotatedRepositoryClasses = scanner.getTypesAnnotatedWith(Repository.class);
     annotatedControllerClasses = scanner.getTypesAnnotatedWith(Controller.class);
     annotatedAspectClasses = scanner.getTypesAnnotatedWith(Aspect.class);
   }
 
   private void initTransactionAndAop() throws Exception {
     transactionalProxyRegister.registerTransactionalClasses(annotatedServiceClasses);
+    transactionalProxyRegister.registerTransactionalClasses(annotatedRepositoryClasses);
     aspectManager.registerAspectBeans(annotatedAspectClasses);
     miniMyBatis.initSessionFactory();
   }
@@ -74,6 +78,7 @@ public class MiniApplicationContext {
 
     registerBeans(beanContainer, annotatedControllerClasses);
     registerBeans(beanContainer, annotatedServiceClasses);
+    registerBeans(beanContainer, annotatedRepositoryClasses);
 
     for (Object bean : beanContainer) {
       BeanDefinition beanDefinition = createInfoBeanWithProxy(bean);
@@ -130,6 +135,8 @@ public class MiniApplicationContext {
         logger.info("[bean] controller - create - " + tClass.getSimpleName());
       else if (tClass.isAnnotationPresent(Service.class))
         logger.info("[bean] service - create - " + tClass.getSimpleName());
+      else if (tClass.isAnnotationPresent(Repository.class))
+        logger.info("[bean] repository - create - " + tClass.getSimpleName());
       else {
         throw new RuntimeException(Define.NOT_APPLICABLE);
       }
@@ -144,6 +151,14 @@ public class MiniApplicationContext {
 
       if (!service.value().isEmpty()) {
         return service.value();
+      }
+    }
+
+    if (clazz.isAnnotationPresent(Repository.class)) {
+      Repository repository = clazz.getAnnotation(Repository.class);
+
+      if (!repository.value().isEmpty()) {
+        return repository.value();
       }
     }
 
@@ -221,7 +236,8 @@ public class MiniApplicationContext {
 
       field.set(bean, sqlSession);
 
-      //logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | " + autowired.name());
+      // logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + "
+      // | " + autowired.name());
       logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | ");
 
     } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -308,6 +324,14 @@ public class MiniApplicationContext {
     this.annotatedControllerClasses = controllerClasses;
   }
 
+  public Set<Class<?>> getRepositoryClasses() {
+    return annotatedRepositoryClasses;
+  }
+
+  public void setRepositoryClasses(Set<Class<?>> repositoryClasses) {
+    this.annotatedRepositoryClasses = repositoryClasses;
+  }
+
   public Set<Class<?>> getAspectClasses() {
     return annotatedAspectClasses;
   }
@@ -316,4 +340,3 @@ public class MiniApplicationContext {
     this.annotatedAspectClasses = aspectClasses;
   }
 }
-

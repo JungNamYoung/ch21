@@ -12,11 +12,12 @@ import com.web.vo.UserVo;
 
 import haru.annotation.aop.Transactional;
 import haru.annotation.di.Autowired;
+import haru.annotation.di.Repository;
 import haru.annotation.di.Service;
-import haru.define.Haru;
 import haru.logger.LoggerManager;
 
 @Service("userService")
+//@Repository("userService")
 public class UserServiceImpl implements UserService {
 
   @Autowired

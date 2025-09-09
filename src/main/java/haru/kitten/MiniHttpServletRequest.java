@@ -446,7 +446,6 @@ public class MiniHttpServletRequest implements HttpServletRequest {
 
   @Override
   public HttpSession getSession() {
-    // TODO Auto-generated method stub
 //    return null;
     return session;
   }
