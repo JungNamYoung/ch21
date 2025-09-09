@@ -1,4 +1,4 @@
 ROOT_PATH=src/main/webapp
 SCAN_PACKAGE=com.web
 PORT = 8580
-CONTEXT_PATH = /haru
+CONTEXT_PATH = / 

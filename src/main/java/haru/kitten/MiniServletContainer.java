@@ -64,8 +64,7 @@ public class MiniServletContainer {
 		
 		HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-		System.out.printf("%nMiniServletContainer started on port: %d with context path: %s%n", port,
-				MiniServletContainer.getContextPath());
+		System.out.printf("%nMiniServletContainer started on port: %d with context path: %s%n", port, contextPath);
 		System.out.println("user.dir : " + Paths.get("").toAbsolutePath());
 
 		String webRoot = UtilExt.resolveWebRoot(tokenEx);
@@ -77,8 +76,7 @@ public class MiniServletContainer {
 		MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(
 				tokenEx.get(Haru.KEY_SCAN_PACKAGE).toString());
 
-		server.createContext(MiniServletContainer.getContextPath(),
-				new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
+		server.createContext(contextPath,	new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
 
     server.setExecutor(null);
     server.start();

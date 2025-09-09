@@ -119,15 +119,11 @@ public class MiniServletContext implements ServletContext {
     return null;
   }
 
-//	@Override public Servlet getServlet(String name) { return null;}
-//	@Override public Enumeration<Servlet> getServlets() { return Collections.emptyEnumeration();}
-//	@Override public Enumeration<String> getServletNames() { return Collections.emptyEnumeration();}
   @Override
   public void log(String msg) {
     System.out.println(msg);
   }
 
-//	@Override public void log(Exception exception, String msg) { System.out.println(msg); exception.printStackTrace();}
   @Override
   public void log(String message, Throwable throwable) {
     System.out.println(message);
@@ -185,30 +181,6 @@ public class MiniServletContext implements ServletContext {
     return MiniServletContainer.getContextPath();
   }
 
-//	@Override
-//	public Dynamic addServlet(String servletName, String className) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public Dynamic addServlet(String servletName, Servlet servlet) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public Dynamic addServlet(String servletName, Class<? extends Servlet> servletClass) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
-//	@Override
-//	public Dynamic addJspFile(String servletName, String jspFile) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
   @Override
   public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
     // TODO Auto-generated method stub
@@ -226,30 +198,6 @@ public class MiniServletContext implements ServletContext {
     // TODO Auto-generated method stub
     return null;
   }
-
-//	@Override
-//	public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Filter filter) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
-//	@Override
-//	public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 
   @Override
   public FilterRegistration getFilterRegistration(String filterName) {
@@ -370,14 +318,6 @@ public class MiniServletContext implements ServletContext {
     // TODO Auto-generated method stub
 
   }
-
-//  public void setMiniDispatcherServlet(MiniDispatcherServlet miniDispatcherServlet) {
-//    this.miniDispatcherServlet = miniDispatcherServlet;
-//  }
-//
-//  public MiniDispatcherServlet getMiniDispatcherServlet() {
-//    return miniDispatcherServlet;
-//  }
 
   @Override
   public Dynamic addFilter(String filterName, Filter filter) {
