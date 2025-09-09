@@ -220,8 +220,14 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
     String contextPath = MiniServletContainer.getContextPath();
 
-    if (!url.startsWith(Define.HTTP) && !url.startsWith(contextPath)) {
-      url = contextPath + url;
+    if (!url.startsWith(Define.HTTP)) {
+      if (Define.SLASH.equals(contextPath)) {
+        if (!url.startsWith(Define.SLASH)) {
+          url = Define.SLASH + url;
+        }
+      } else if (!url.startsWith(contextPath)) {
+        url = contextPath + url;
+      }
     }
 
     return url;

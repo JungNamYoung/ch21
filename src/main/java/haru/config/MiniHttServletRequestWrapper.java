@@ -1,6 +1,7 @@
 package haru.config;
 
 import haru.kitten.MiniHttpSession;
+import haru.kitten.MiniServletContext;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;

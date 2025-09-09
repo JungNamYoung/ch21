@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
-import haru.define.Haru;
+import haru.define.Define;
 import haru.interceptor.ExecutionTimeInterceptor;
 import haru.interceptor.Interceptor;
 import haru.interceptor.InterceptorChain;
@@ -97,6 +97,8 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
     String requestUrl = miniHttpServletRequest.getRequestURI();
     String contextPath = MiniServletContainer.getContextPath();
+    
+    logger.info("requestUrl : " + requestUrl);
 
     if (SecurityFilter.isRestricted(requestUrl, miniHttpServletResponse))
       return;
@@ -109,7 +111,10 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     } else if (MiniResourceHandler.handle(miniHttpServletRequest, miniHttpServletResponse)) {
       logger.info("MiniResourceHandler.handle()");
     } else {
-      String requestUri = requestUrl.startsWith(contextPath) ? requestUrl.substring(contextPath.length()) : requestUrl;
+      String requestUri = requestUrl;
+      if (!Define.SLASH.equals(contextPath) && requestUrl.startsWith(contextPath)) {
+        requestUri = requestUrl.substring(contextPath.length());
+      }
 
       HandlerMapping handlerMapping = findHandlerMapping(requestUri);
 
