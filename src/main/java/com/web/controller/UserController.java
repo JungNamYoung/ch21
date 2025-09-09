@@ -33,9 +33,8 @@ public class UserController {
     
     logger.info("id : #1 : " + session.getId());
 
-    MiniHttpSession sess = (MiniHttpSession)request.getAttribute("miniHttpSession");
-    
-    logger.info("id : #2 : " + sess.getId());
+//    MiniHttpSession sess = (MiniHttpSession)request.getAttribute("miniHttpSession");
+//    logger.info("id : #2 : " + sess.getId());
     
     List<UserVo> result = userServiceExt.selectUserList(null);
 

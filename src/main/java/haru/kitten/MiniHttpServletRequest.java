@@ -55,6 +55,7 @@ public class MiniHttpServletRequest implements HttpServletRequest {
   private BufferedReader reader;
   private final Map<String, String> parameters = new HashMap<>();
   private Map<String, Object> attributes = new HashMap<>();
+  private MiniHttpSession session;
 
   public MiniHttpServletRequest(HttpExchange exchange) {
     this.exchange = exchange;
@@ -446,7 +447,8 @@ public class MiniHttpServletRequest implements HttpServletRequest {
   @Override
   public HttpSession getSession() {
     // TODO Auto-generated method stub
-    return null;
+//    return null;
+    return session;
   }
 
   @Override
@@ -531,5 +533,9 @@ public class MiniHttpServletRequest implements HttpServletRequest {
   public ServletConnection getServletConnection() {
     // TODO Auto-generated method stub
     return null;
+  }
+  
+  public void setSession(MiniHttpSession session) {
+    this.session = session;
   }
 }
