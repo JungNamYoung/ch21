@@ -17,7 +17,7 @@ echo APP_HOME : %APP_HOME%
 echo JAVA_OPTS : %JAVA_OPTS%
 rem echo PORT : %PORT%
 
-set JAVA_EXE="C:\start-webcontainer\SW\openjdk-23.0.2\bin\java.exe"
+set JAVA_EXE="%APP_HOME%.\sw\openjdk-23.0.2\bin\java.exe"
 echo JAVA_EXE : %JAVA_EXE%
 
 rem echo Starting REPORT on port %PORT% ...

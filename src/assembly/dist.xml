@@ -35,6 +35,13 @@
 			<useDefaultExcludes>true</useDefaultExcludes>
 		</fileSet>
 
+<fileSet>
+			<directory>sw</directory>
+			<outputDirectory>sw</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
 		<fileSet>
 			<directory>${project.build.outputDirectory}</directory>
 			<outputDirectory>classes</outputDirectory>
