@@ -34,7 +34,7 @@ public class MiniServletContainer {
   private static MiniServletContext miniServletContext;
 
   static String contextPath;
-
+  
   public static MiniServletContext getMiniWebApplicationContext() {
     return miniServletContext;
   }
@@ -70,7 +70,7 @@ public class MiniServletContainer {
 
     HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-    System.out.printf("%nMiniServletContainer started on port: %d with context path: %s%n", port, contextPath);
+    System.out.printf("%n%n%nMiniServletContainer started on port: %d with context-path: %s%n", port, contextPath);
     System.out.println("user.dir : " + Paths.get("").toAbsolutePath());
 
     String webAppRoot = UtilExt.resolveWebRoot(tokenEx);

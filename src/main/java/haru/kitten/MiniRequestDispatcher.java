@@ -84,7 +84,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
     compileJspToServlet(jspFilePath.toString(), outputDir.getAbsolutePath(), packagePath);
 
-    Path javaFile = Paths.get(outputDir.getAbsolutePath() + "/" + packagePath.replace(".", "/") + "/" + servletClassName + ".java");
+    Path javaFile = Paths.get(outputDir.getAbsolutePath() + Define.SLASH + packagePath.replace(".", Define.SLASH) + Define.SLASH + servletClassName + ".java");
     compileJavaFile(javaFile);
 
     String classPath = webAppRoot + "/output/compiledJspServlets";

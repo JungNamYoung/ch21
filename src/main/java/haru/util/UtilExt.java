@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.net.URI;
 
 import haru.define.Define;
+import haru.define.Haru;
 
 public class UtilExt {
 
@@ -41,13 +42,13 @@ public class UtilExt {
   }
 
   public static Path getConfFile(String relative) throws IOException {
-    String appHome = System.getProperty("app.home", Paths.get(".").toAbsolutePath().normalize().toString());
-    Path confPath = Paths.get(appHome, "conf").resolve(relative.replace("\\", "/"));
+    String appHome = System.getProperty(Haru.JVM_APP_HOME, Paths.get(".").toAbsolutePath().normalize().toString());
+    Path confPath = Paths.get(appHome, "conf").resolve(relative.replace("\\", Define.SLASH));
     if (Files.exists(confPath))
       return confPath;
 
-    String cpPath = relative.replace("\\", "/");
-    if (cpPath.startsWith("/"))
+    String cpPath = relative.replace("\\", Define.SLASH);
+    if (cpPath.startsWith(Define.SLASH))
       cpPath = cpPath.substring(1);
     ClassLoader cl = Thread.currentThread().getContextClassLoader();
     try (InputStream in = cl.getResourceAsStream(cpPath)) {
@@ -61,7 +62,7 @@ public class UtilExt {
 
   public static URI getResourceUri(String resourcePath) {
 
-    if (resourcePath.startsWith("/"))
+    if (resourcePath.startsWith(Define.SLASH))
       resourcePath = resourcePath.substring(1);
 
     URL url = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
@@ -80,13 +81,13 @@ public class UtilExt {
 
     URI uri = getResourceUri(resourcePath);
 
-    System.out.println("resource uri : " + uri);
+//    System.out.println("resource uri : " + uri);
 
     try {
       if ("file".equals(uri.getScheme())) {
         return Files.readString(Paths.get(uri), StandardCharsets.UTF_8);
       } else if ("jar".equals(uri.getScheme())) {
-        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath)) {
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.startsWith(Define.SLASH) ? resourcePath.substring(1) : resourcePath)) {
           if (in == null)
             throw new FileNotFoundException(resourcePath);
           return new String(in.readAllBytes(), StandardCharsets.UTF_8);
@@ -112,7 +113,7 @@ public class UtilExt {
   }
 
   public static String resolveWebRoot(TokenEx tokenEx) {
-    String webappProp = System.getProperty("webapp.dir");
+    String webappProp = System.getProperty(Haru.JVM_WEB_APP_DIR);
     if (webappProp != null && !webappProp.isBlank()) {
       Path p = Paths.get(webappProp).toAbsolutePath().normalize();
       if (Files.isDirectory(p))
@@ -120,13 +121,13 @@ public class UtilExt {
     }
 
     try {
-      Object v = tokenEx != null ? tokenEx.get("ROOT_PATH") : null;
+      Object v = tokenEx != null ? tokenEx.get(Haru.ROOT_PATH) : null;
       if (v != null) {
         String cfg = String.valueOf(v).trim();
         if (!cfg.isEmpty()) {
           Path p = Paths.get(cfg);
           if (!p.isAbsolute()) {
-            String appHome = System.getProperty("app.home", Paths.get("").toAbsolutePath().normalize().toString());
+            String appHome = System.getProperty(Haru.JVM_APP_HOME, Paths.get("").toAbsolutePath().normalize().toString());
             p = Paths.get(appHome).resolve(cfg);
           }
           p = p.toAbsolutePath().normalize();
@@ -137,7 +138,7 @@ public class UtilExt {
     } catch (Throwable ignore) {
     }
 
-    String appHome = System.getProperty("app.home", Paths.get("").toAbsolutePath().normalize().toString());
+    String appHome = System.getProperty(Haru.JVM_APP_HOME, Paths.get("").toAbsolutePath().normalize().toString());
     Path prod = Paths.get(appHome, "webapp").toAbsolutePath().normalize();
     if (Files.isDirectory(prod))
       return prod.toString();

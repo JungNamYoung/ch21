@@ -9,4 +9,6 @@ public class Haru {
   public static final String KEY_SCAN_PACKAGE = "SCAN_PACKAGE";
   public static final String TRANSFER_ENCODING = "Transfer-Encoding";
   public static final String CONFIG_HARU = "haru/appconfig/haru.txt";
+  public static final String JVM_APP_HOME = "app.home";
+  public static final String JVM_WEB_APP_DIR = "webapp.dir";
 }

@@ -73,7 +73,7 @@ public class MiniResourceHandler {
       miniHttpServletResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
       miniHttpServletResponse.setHeader("Accept-Ranges", Define.BYTES);
       miniHttpServletResponse.setContentLengthLong(contentLength);
-      miniHttpServletResponse.setHeader("Content-Range", "bytes " + start + Define.DASH + end + "/" + fileLength);
+      miniHttpServletResponse.setHeader("Content-Range", "bytes " + start + Define.DASH + end + Define.SLASH + fileLength);
       miniHttpServletResponse.setHeader(Define.CONNECTION, "keep-alive");
       miniHttpServletResponse.setHeader("keep-Alive", "timeout=20");
       miniHttpServletResponse.sendHeaders();

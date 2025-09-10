@@ -4,15 +4,22 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
+
+import haru.define.Define;
+import haru.logger.LoggerManager;
 
 public class MiniAnnotationScanner {
   private final String basePackage;
   private final ClassLoader classLoader;
 
+  private final Logger logger = LoggerManager.getLogger(MiniAnnotationScanner.class.getSimpleName());
+  
   public MiniAnnotationScanner(String basePackage) {
     this.basePackage = basePackage.replace('.', '/');
     this.classLoader = Thread.currentThread().getContextClassLoader();
@@ -39,14 +46,22 @@ public class MiniAnnotationScanner {
 
     while (resources.hasMoreElements()) {
       URL resource = resources.nextElement();
-      File directory = new File(resource.getFile());
 
-      if (directory.exists() && directory.isDirectory()) {
-        classes.addAll(findClasses(directory, basePackage.replace('/', '.')));
+      try {
+        logger.info("resource.toURI() : " + resource.toURI());
+        
+        File directory = new File(resource.toURI());
+        if (directory.exists() && directory.isDirectory()) {
+          classes.addAll(findClasses(directory, basePackage.replace('/', '.')));
+        } else if (resource.getFile().contains(".jar")) {
+          throw new UnsupportedOperationException("jar 파일은 현재 지원하지 않습니다.");
+        } else {
+          throw new RuntimeException(Define.NOT_APPLICABLE);
+        }
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
       }
-      else if (resource.getFile().contains(".jar")) {
-        throw new UnsupportedOperationException("jar 파일은 현재 지원하지 않습니다.");
-      }
+
     }
     return classes;
   }
