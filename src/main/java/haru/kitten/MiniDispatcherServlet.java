@@ -37,10 +37,12 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private List<Interceptor> interceptors = new ArrayList<>();
   Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
 
-  public MiniDispatcherServlet(String scanPackage) {
+  public MiniDispatcherServlet(String basePackage) {
     try {
 
-      miniApplicationContext.initializeContext(scanPackage);
+    	logger.info("basePackage : " + basePackage);
+
+      miniApplicationContext.initializeContext(basePackage);
 //      miniApplicationContext.injectDependencies();
 
       requestMapping();
