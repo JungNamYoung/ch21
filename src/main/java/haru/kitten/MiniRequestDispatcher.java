@@ -41,6 +41,7 @@ import org.apache.jasper.TrimSpacesOption;
 import haru.config.MiniServletConfig;
 import haru.define.Define;
 import haru.logger.LoggerManager;
+import haru.util.IdentifierUtil;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -83,13 +84,13 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 		String jspRelative = relativePath.startsWith(Define.SLASH) ? relativePath.substring(1) : relativePath;
 		Path relPath = Paths.get(jspRelative).normalize();
 		String jspFileName = relPath.getFileName().toString();
-		String servletClassName = makeJavaIdentifier(jspFileName.replace(Define.EXT_JSP, "")) + "_jsp";
+		String servletClassName = IdentifierUtil.makeJavaIdentifier(jspFileName.replace(Define.EXT_JSP, "")) + "_jsp";
 
     String packagePath = "org.apache.jsp";
 		Path parent = relPath.getParent();
 		if (parent != null) {
 			for (Path segment : parent) {
-				packagePath += "." + makeJavaIdentifier(segment.toString());
+				packagePath += "." + IdentifierUtil.makeJavaIdentifier(segment.toString());
 			}
 		}
 
@@ -115,7 +116,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
       ClassLoader classLoader = new URLClassLoader(new URL[] { url }, ClassLoader.getSystemClassLoader());
 
-			String actualClassName = servletClassName.replace("-", "_002d");
+			String actualClassName = IdentifierUtil.makeQualifiedJavaIdentifier(servletClassName);
 
 			Class<?> servletClass = classLoader.loadClass(actualClassName);
       HttpServlet jspServletInstance = (HttpServlet) servletClass.getDeclaredConstructor().newInstance();
