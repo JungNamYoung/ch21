@@ -17,6 +17,5 @@
 package haru.kitten;
 
 public interface DispatcherServlet {
-//  public void service(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) throws ServletException, IOException;
   public void service(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse);
 }

@@ -10,7 +10,7 @@ public class SecurityFilter {
 
   public static boolean isRestricted(String requestUrl, MiniHttpServletResponse miniHttpServletResponse) {
 
-    if (requestUrl.contains(Define.WEB_INF)) {
+    if (requestUrl.contains(Define.WEB_INF_EX)) {
       try {
         miniHttpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
         miniHttpServletResponse.getWriter().write("403 Forbidden: Access to WEB-INF is not allowed.");

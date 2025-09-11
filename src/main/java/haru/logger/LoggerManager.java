@@ -9,6 +9,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import haru.define.Define;
 import haru.kitten.MiniServletContext;
 
 public class LoggerManager {
@@ -32,7 +33,7 @@ public class LoggerManager {
     logger.setLevel(Level.ALL);
 
     try {
-      FileHandler fileHandler = new FileHandler(MiniServletContext.getWebAppRoot() + "/logs/application.log", true);
+      FileHandler fileHandler = new FileHandler(MiniServletContext.getWebAppRoot() + Define.WEB_INF + "/logs/application.log", true);
       fileHandler.setFormatter(new SimpleFormatter() {
         @Override
         public String format(LogRecord record) {

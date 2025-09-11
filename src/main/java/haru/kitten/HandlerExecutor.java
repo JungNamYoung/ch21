@@ -113,7 +113,7 @@ public class HandlerExecutor {
   }
 
   static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Model model) {
-    String jspPath = Define.WEB_INF + "jsp/" + viewName + Define.EXT_JSP;
+    String jspPath = Define.WEB_INF_EX + "jsp/" + viewName + Define.EXT_JSP;
 
     for (Map.Entry<String, Object> entry : model.getAttributes().entrySet()) {
       logger.info("model - " + entry.getKey() + " - " + entry.getValue());

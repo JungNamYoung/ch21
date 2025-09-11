@@ -56,11 +56,13 @@ public class MiniRequestDispatcher implements RequestDispatcher {
   private String webAppRoot;
   private String relativePath;
   private String jspPath;
+	private String webInf;
   private MiniServletContext miniServletContext;
   static Logger logger = LoggerManager.getLogger(MiniRequestDispatcher.class.getSimpleName());
 
   public MiniRequestDispatcher(String webAppRoot, String relativePath) {
     this.webAppRoot = webAppRoot;
+		this.webInf = webAppRoot + Define.WEB_INF;
     this.relativePath = relativePath;
 
     miniServletContext = MiniServletContainer.getMiniWebApplicationContext();
@@ -76,7 +78,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     logger.info("realJspPath : " + realJspPath);
     logger.info("webAppRoot : " + webAppRoot);
     
-    File outputDir = new File(webAppRoot + "/output/compiledJspServlets");
+		File outputDir = new File(webInf + "/output/compiledJspServlets");
     if (!outputDir.exists()) {
       outputDir.mkdirs();
     }
@@ -100,7 +102,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 				servletClassName + ".java");
     compileJavaFile(javaFile);
 
-    String classPath = webAppRoot + "/output/compiledJspServlets";
+		String classPath = webInf + "/output/compiledJspServlets";
 
 		executeServlet(classPath, miniHttpServletRequest, miniHttpServletResponse, packagePath + "." + servletClassName,
 				param);

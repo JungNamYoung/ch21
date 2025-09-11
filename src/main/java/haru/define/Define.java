@@ -46,7 +46,8 @@ public class Define {
   public static final String SLASH = "/";
   public static final String EXT_HTML = ".html";
   public static final String EXT_HTM = ".htm";
-  public static final String WEB_INF = "/WEB-INF/";
+  public static final String WEB_INF = "/WEB-INF";
+  public static final String WEB_INF_EX = WEB_INF + "/";
   public static final String HTTP = "http";
   public static final String JSON = "json";
 }
