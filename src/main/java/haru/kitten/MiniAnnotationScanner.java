@@ -47,10 +47,12 @@ public class MiniAnnotationScanner {
     while (resources.hasMoreElements()) {
       URL resource = resources.nextElement();
 
+			if ("file".equals(resource.getProtocol())) {
       try {
         logger.info("resource.toURI() : " + resource.toURI());
         
         File directory = new File(resource.toURI());
+
         if (directory.exists() && directory.isDirectory()) {
           classes.addAll(findClasses(directory, basePackage.replace('/', '.')));
         } else if (resource.getFile().contains(".jar")) {
@@ -61,6 +63,7 @@ public class MiniAnnotationScanner {
       } catch (URISyntaxException e) {
         e.printStackTrace();
       }
+			}
 
     }
     return classes;
@@ -86,4 +89,3 @@ public class MiniAnnotationScanner {
     return classes;
   }
 }
-

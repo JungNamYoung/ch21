@@ -50,6 +50,7 @@ public class LoggerManager {
 
   private static String formatLog(LogRecord record) {
     Date timestamp = new Date(record.getMillis());
-    return String.format(LOG_FORMAT, record.getLevel(), timestamp, record.getLoggerName(), record.getMessage());
+    //return String.format(LOG_FORMAT, record.getLevel(), timestamp, record.getLoggerName(), record.getMessage());
+    return String.format(LOG_FORMAT, record.getLevel(), timestamp, record.getMessage(), record.getLoggerName());
   }
 }
