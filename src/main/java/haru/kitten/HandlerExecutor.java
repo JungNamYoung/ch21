@@ -39,14 +39,14 @@ public class HandlerExecutor {
 
     miniHttpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
-    Object result = HandlerExecutor.invokeHandler(handlerMapping, miniHttpServletRequest, miniHttpServletResponse, model);
+    Object result = invokeHandler(handlerMapping, miniHttpServletRequest, miniHttpServletResponse, model);
 
     if (result instanceof String) {
-      HandlerExecutor.renderView((String) result, miniHttpServletRequest, miniHttpServletResponse, model);
+      renderView((String) result, miniHttpServletRequest, miniHttpServletResponse, model);
     } else if (result instanceof List<?>) {
-      HandlerExecutor.renderList((List<?>) result, miniHttpServletResponse);
+      renderList((List<?>) result, miniHttpServletResponse);
     } else if (result == null) {
-      HandlerExecutor.renderJson(model, miniHttpServletResponse);
+      renderJson(model, miniHttpServletResponse);
     } else {
       throw new RuntimeException(Define.NOT_APPLICABLE);
     }
