@@ -33,6 +33,10 @@ public class MiniResourceHandler {
 
   public static boolean handle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     String requestUri = miniHttpServletRequest.getRequestURI();
+    if (requestUri.endsWith(Define.EXT_JSP)) {
+      return false;
+    }
+
     String filePath = MiniServletContainer.getRealPath(requestUri);
 
     File file = new File(filePath);

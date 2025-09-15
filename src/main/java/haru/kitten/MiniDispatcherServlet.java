@@ -40,7 +40,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   public MiniDispatcherServlet(String basePackage) {
     try {
 
-    	logger.info("basePackage : " + basePackage);
+      logger.info("basePackage : " + basePackage);
 
       miniApplicationContext.initializeContext(basePackage);
 //      miniApplicationContext.injectDependencies();
@@ -99,7 +99,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
     String requestUrl = miniHttpServletRequest.getRequestURI();
     String contextPath = MiniServletContainer.getContextPath();
-    
+
     logger.info("requestUrl : " + requestUrl);
 
     if (SecurityFilter.isRestricted(requestUrl, miniHttpServletResponse))
@@ -110,6 +110,8 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
     if (HtmlResponseHandler.handle(requestUrl, miniHttpServletResponse)) {
       logger.info("HtmlResponseHandler.handle()");
+    } else if (JspResponseHandler.handle(miniHttpServletRequest, miniHttpServletResponse)) {
+      logger.info("JspResponseHandler.handle()");
     } else if (MiniResourceHandler.handle(miniHttpServletRequest, miniHttpServletResponse)) {
       logger.info("MiniResourceHandler.handle()");
     } else {
