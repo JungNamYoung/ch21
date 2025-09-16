@@ -6,7 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.net.URISyntaxException;
@@ -87,7 +91,8 @@ public class UtilExt {
       if ("file".equals(uri.getScheme())) {
         return Files.readString(Paths.get(uri), StandardCharsets.UTF_8);
       } else if ("jar".equals(uri.getScheme())) {
-        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.startsWith(Define.SLASH) ? resourcePath.substring(1) : resourcePath)) {
+				try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+						resourcePath.startsWith(Define.SLASH) ? resourcePath.substring(1) : resourcePath)) {
           if (in == null)
             throw new FileNotFoundException(resourcePath);
           return new String(in.readAllBytes(), StandardCharsets.UTF_8);
@@ -127,7 +132,8 @@ public class UtilExt {
         if (!cfg.isEmpty()) {
           Path p = Paths.get(cfg);
           if (!p.isAbsolute()) {
-            String appHome = System.getProperty(Haru.JVM_APP_HOME, Paths.get("").toAbsolutePath().normalize().toString());
+						String appHome = System.getProperty(Haru.JVM_APP_HOME,
+								Paths.get("").toAbsolutePath().normalize().toString());
             p = Paths.get(appHome).resolve(cfg);
           }
           p = p.toAbsolutePath().normalize();
@@ -146,4 +152,35 @@ public class UtilExt {
     Path dev = Paths.get(appHome, "src", "main", "webapp").toAbsolutePath().normalize();
     return dev.toString();
   }
+
+	public static void closeWindow(Map<String, Object> result, String title) {
+		try {
+			String os = System.getProperty("os.name").toLowerCase();
+
+			if (os.contains("win")) {
+
+				String cmd = String.format("taskkill /f /fi \"WINDOWTITLE eq %s\"", title);
+				// String cmd = "taskkill /f /fi \"WINDOWTITLE eq 양방향 수어*\"";
+				// String cmd = "taskkill /f /fi \"WINDOWTITLE eq 양방향 수어 동시 통역 서비스 - chrome\"";
+				Process process = Runtime.getRuntime().exec(cmd);
+				process.waitFor();
+
+				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "MS949"));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println(line);
+				}
+				reader.close();
+
+				result.put("close", "true");
+				result.put("message", "Windows에서 크롬이 종료되었습니다.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("close", "false");
+			result.put("message", "창 종료 중 오류가 발생했습니다.");
+		}
+
+//		model.addAttribute(Define.JSON, result);
+	}
 }

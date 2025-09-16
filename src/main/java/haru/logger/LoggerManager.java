@@ -11,6 +11,7 @@ import java.util.logging.SimpleFormatter;
 
 import haru.define.Define;
 import haru.kitten.MiniServletContext;
+import java.io.File;
 
 public class LoggerManager {
   private static final String LOG_FORMAT = "[haru][%1$s] %2$tT | %4$s | %3$s";
@@ -27,13 +28,23 @@ public class LoggerManager {
         }
       }
     };
-    
+
     consoleHandler.setLevel(Level.ALL);
     logger.addHandler(consoleHandler);
     logger.setLevel(Level.ALL);
 
+    String logDirPath = MiniServletContext.getWebAppRoot() + Define.WEB_INF + "/logs";
+    File logDir = new File(logDirPath);
+    if (!logDir.exists()) {
+      if (logDir.mkdirs()) {
+        System.out.println("Log directory created : " + logDirPath);
+      } else {
+        System.err.println("Failed to create log directory : " + logDirPath);
+      }
+    }
+
     try {
-      FileHandler fileHandler = new FileHandler(MiniServletContext.getWebAppRoot() + Define.WEB_INF + "/logs/application.log", true);
+      FileHandler fileHandler = new FileHandler(logDirPath + "/application.log", true);
       fileHandler.setFormatter(new SimpleFormatter() {
         @Override
         public String format(LogRecord record) {
