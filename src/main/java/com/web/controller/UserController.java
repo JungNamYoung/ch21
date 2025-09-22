@@ -16,6 +16,7 @@ import haru.kitten.MiniHttpServletRequest;
 import haru.kitten.MiniHttpSession;
 import haru.logger.LoggerManager;
 import haru.model.Model;
+import haru.model.ModelMap;
 
 @Controller
 public class UserController {
@@ -44,9 +45,11 @@ public class UserController {
   }
 
   @RequestMapping("/changeUser.do")
-  public String changeUser(Model model, Map<String, Object> params) {
+  public String changeUser(ModelMap modelMap) {
     userServiceExt.changeUser(null);
-    return null;
+    modelMap.addAttribute("url", "www.naver.com");
+    
+    return "web/chat";
   }
 
   @RequestMapping("/chat.do")
