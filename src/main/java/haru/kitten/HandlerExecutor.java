@@ -107,7 +107,7 @@ public class HandlerExecutor {
         }
 
         args[i] = convertParameterValue(paramValue, paramType);
-      } else if (paramType.equals(Model.class)) {
+      } else if (model != null && paramType.isInstance(model)) {
         args[i] = model;
       } else if (paramType.equals(MiniHttpServletRequest.class)) {
         args[i] = miniHttpServletRequest;

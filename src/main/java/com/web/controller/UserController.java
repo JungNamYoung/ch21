@@ -46,6 +46,7 @@ public class UserController {
 
   @RequestMapping("/changeUser.do")
   public String changeUser(ModelMap modelMap) {
+    
     userServiceExt.changeUser(null);
     modelMap.addAttribute("url", "www.naver.com");
     

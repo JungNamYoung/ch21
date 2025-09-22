@@ -192,17 +192,11 @@ public class MiniApplicationContext {
 
   private void injectFieldDependency(Object bean, Field field) {
     Autowired autowired = field.getAnnotation(Autowired.class);
-//    String autowiredName = autowired.name();
 
     BeanDefinition beanDefinition = null;
-//    if (!autowiredName.isEmpty()) {
-//      beanDefinition = findBean(autowiredName);
-//    } else {
     beanDefinition = findBeanByType(field.getType());
-//    }
 
     if (beanDefinition == null) {
-//      String msg = autowiredName.isEmpty() ? field.getType().getSimpleName() : autowiredName;
       throw new RuntimeException("빈 주입 실패 : " + " 빈을 찾을 수 없습니다.");
     }
 
@@ -296,43 +290,43 @@ public class MiniApplicationContext {
     return null;
   }
 
-  public TransactionalProxyRegister getTransactionEx() {
-    return transactionalProxyRegister;
-  }
+//  public TransactionalProxyRegister getTransactionEx() {
+//    return transactionalProxyRegister;
+//  }
 
-  public void setTransactionEx(TransactionalProxyRegister utilTransaction) {
-    this.transactionalProxyRegister = utilTransaction;
-  }
+//  public void setTransactionEx(TransactionalProxyRegister utilTransaction) {
+//    this.transactionalProxyRegister = utilTransaction;
+//  }
 
-  public Set<Class<?>> getServiceClasses() {
-    return annotatedServiceClasses;
-  }
+//  public Set<Class<?>> getServiceClasses() {
+//    return annotatedServiceClasses;
+//  }
 
-  public void setServiceClasses(Set<Class<?>> serviceClasses) {
-    this.annotatedServiceClasses = serviceClasses;
-  }
+//  public void setServiceClasses(Set<Class<?>> serviceClasses) {
+//    this.annotatedServiceClasses = serviceClasses;
+//  }
 
-  public Set<Class<?>> getControllerClasses() {
-    return annotatedControllerClasses;
-  }
+//  public Set<Class<?>> getControllerClasses() {
+//    return annotatedControllerClasses;
+//  }
 
-  public void setControllerClasses(Set<Class<?>> controllerClasses) {
-    this.annotatedControllerClasses = controllerClasses;
-  }
+//  public void setControllerClasses(Set<Class<?>> controllerClasses) {
+//    this.annotatedControllerClasses = controllerClasses;
+//  }
+//
+//  public Set<Class<?>> getRepositoryClasses() {
+//    return annotatedRepositoryClasses;
+//  }
 
-  public Set<Class<?>> getRepositoryClasses() {
-    return annotatedRepositoryClasses;
-  }
+//  public void setRepositoryClasses(Set<Class<?>> repositoryClasses) {
+//    this.annotatedRepositoryClasses = repositoryClasses;
+//  }
 
-  public void setRepositoryClasses(Set<Class<?>> repositoryClasses) {
-    this.annotatedRepositoryClasses = repositoryClasses;
-  }
+//  public Set<Class<?>> getAspectClasses() {
+//    return annotatedAspectClasses;
+//  }
 
-  public Set<Class<?>> getAspectClasses() {
-    return annotatedAspectClasses;
-  }
-
-  public void setAspectClasses(Set<Class<?>> aspectClasses) {
-    this.annotatedAspectClasses = aspectClasses;
-  }
+//  public void setAspectClasses(Set<Class<?>> aspectClasses) {
+//    this.annotatedAspectClasses = aspectClasses;
+//  }
 }
