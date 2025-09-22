@@ -289,44 +289,4 @@ public class MiniApplicationContext {
 
     return null;
   }
-
-//  public TransactionalProxyRegister getTransactionEx() {
-//    return transactionalProxyRegister;
-//  }
-
-//  public void setTransactionEx(TransactionalProxyRegister utilTransaction) {
-//    this.transactionalProxyRegister = utilTransaction;
-//  }
-
-//  public Set<Class<?>> getServiceClasses() {
-//    return annotatedServiceClasses;
-//  }
-
-//  public void setServiceClasses(Set<Class<?>> serviceClasses) {
-//    this.annotatedServiceClasses = serviceClasses;
-//  }
-
-//  public Set<Class<?>> getControllerClasses() {
-//    return annotatedControllerClasses;
-//  }
-
-//  public void setControllerClasses(Set<Class<?>> controllerClasses) {
-//    this.annotatedControllerClasses = controllerClasses;
-//  }
-//
-//  public Set<Class<?>> getRepositoryClasses() {
-//    return annotatedRepositoryClasses;
-//  }
-
-//  public void setRepositoryClasses(Set<Class<?>> repositoryClasses) {
-//    this.annotatedRepositoryClasses = repositoryClasses;
-//  }
-
-//  public Set<Class<?>> getAspectClasses() {
-//    return annotatedAspectClasses;
-//  }
-
-//  public void setAspectClasses(Set<Class<?>> aspectClasses) {
-//    this.annotatedAspectClasses = aspectClasses;
-//  }
 }
