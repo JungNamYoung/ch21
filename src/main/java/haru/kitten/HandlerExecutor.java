@@ -16,6 +16,7 @@
  */
 package haru.kitten;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -23,13 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import haru.annotation.mvc.RequestParam;
 import haru.define.Define;
 import haru.logger.LoggerManager;
 import haru.model.Model;
+import haru.model.ModelMap;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 
 public class HandlerExecutor {
 
@@ -37,7 +40,7 @@ public class HandlerExecutor {
 
   public static void execute(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
 
-    Model model = new Model();
+    Model model = new ModelMap();
 
     miniHttpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
@@ -86,8 +89,25 @@ public class HandlerExecutor {
     Object[] args = new Object[parameters.length];
 
     for (int i = 0; i < parameters.length; i++) {
-      Class<?> paramType = parameters[i].getType();
-      if (paramType.equals(Model.class)) {
+      Parameter parameter = parameters[i];
+      Class<?> paramType = parameter.getType();
+
+      if (parameter.isAnnotationPresent(RequestParam.class)) {
+        RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
+        String paramName = requestParam.value();
+
+        if (paramName == null || paramName.isEmpty()) {
+          paramName = parameter.getName();
+        }
+
+        String paramValue = miniHttpServletRequest.getParameter(paramName);
+
+        if (paramValue == null && requestParam.required()) {
+          throw new IllegalArgumentException("Required request parameter '" + paramName + "' is missing");
+        }
+
+        args[i] = convertParameterValue(paramValue, paramType);
+      } else if (paramType.equals(Model.class)) {
         args[i] = model;
       } else if (paramType.equals(MiniHttpServletRequest.class)) {
         args[i] = miniHttpServletRequest;
@@ -116,7 +136,60 @@ public class HandlerExecutor {
     return args;
   }
 
-static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Model model) {
+  private static Object convertParameterValue(String paramValue, Class<?> targetType) {
+    if (paramValue == null) {
+      if (targetType.isPrimitive()) {
+        if (targetType.equals(boolean.class)) {
+          return false;
+        } else if (targetType.equals(char.class)) {
+          return '\0';
+        } else if (targetType.equals(byte.class)) {
+          return (byte) 0;
+        } else if (targetType.equals(short.class)) {
+          return (short) 0;
+        } else if (targetType.equals(int.class)) {
+          return 0;
+        } else if (targetType.equals(long.class)) {
+          return 0L;
+        } else if (targetType.equals(float.class)) {
+          return 0.0f;
+        } else if (targetType.equals(double.class)) {
+          return 0.0d;
+        }
+      }
+      return null;
+    }
+
+    if (String.class.equals(targetType)) {
+      return paramValue;
+    } else if (Integer.class.equals(targetType) || int.class.equals(targetType)) {
+      return Integer.parseInt(paramValue);
+    } else if (Long.class.equals(targetType) || long.class.equals(targetType)) {
+      return Long.parseLong(paramValue);
+    } else if (Double.class.equals(targetType) || double.class.equals(targetType)) {
+      return Double.parseDouble(paramValue);
+    } else if (Float.class.equals(targetType) || float.class.equals(targetType)) {
+      return Float.parseFloat(paramValue);
+    } else if (Boolean.class.equals(targetType) || boolean.class.equals(targetType)) {
+      return Boolean.parseBoolean(paramValue);
+    } else if (Short.class.equals(targetType) || short.class.equals(targetType)) {
+      return Short.parseShort(paramValue);
+    } else if (Byte.class.equals(targetType) || byte.class.equals(targetType)) {
+      return Byte.parseByte(paramValue);
+    } else if (Character.class.equals(targetType) || char.class.equals(targetType)) {
+      if (paramValue.length() != 1) {
+        throw new IllegalArgumentException("Cannot convert parameter value '" + paramValue + "' to char");
+      }
+      return paramValue.charAt(0);
+    } else if (Enum.class.isAssignableFrom(targetType)) {
+      @SuppressWarnings({ "unchecked", "rawtypes" })
+      Class<? extends Enum> enumType = (Class<? extends Enum>) targetType.asSubclass(Enum.class);
+      return Enum.valueOf(enumType, paramValue);
+    }
+    return paramValue;
+  }
+
+  static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Model model) {
     String jspPath = Define.WEB_INF_EX + "jsp/" + viewName + Define.EXT_JSP;
 
     for (Map.Entry<String, Object> entry : model.getAttributes().entrySet()) {
@@ -156,16 +229,16 @@ static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRe
     Object jsonData = model.getAttribute(Define.JSON);
 
     if (jsonData != null) {
-			
-			ObjectMapper objectMapper = new ObjectMapper();
-			
-			try {
-				String jsonString = objectMapper.writeValueAsString(jsonData);
-      miniHttpServletResponse.setContentType(Define.APP_JSON + Define.CHARSET_UTF_8);
-				miniHttpServletResponse.getWriter().write(jsonString);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+
+      ObjectMapper objectMapper = new ObjectMapper();
+
+      try {
+        String jsonString = objectMapper.writeValueAsString(jsonData);
+        miniHttpServletResponse.setContentType(Define.APP_JSON + Define.CHARSET_UTF_8);
+        miniHttpServletResponse.getWriter().write(jsonString);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
 }

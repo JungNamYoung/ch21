@@ -1,20 +1,12 @@
 package haru.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class Model {
-  private Map<String, Object> model = new HashMap<>();
+public interface Model {
+  
+  void addAttribute(String key, Object value) ;
 
-  public void addAttribute(String key, Object value) {
-    model.put(key, value);
-  }
+  Object getAttribute(String key) ;
 
-  public Object getAttribute(String key) {
-    return model.get(key);
-  }
-
-  public Map<String, Object> getAttributes() {
-    return model;
-  }
+  Map<String, Object> getAttributes() ;
 }
