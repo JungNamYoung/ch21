@@ -50,4 +50,7 @@ public class Define {
   public static final String WEB_INF_EX = WEB_INF + "/";
   public static final String HTTP = "http";
   public static final String JSON = "json";
+  // --------------------------------------------------------
+  public static final String WEB_APP = "webapp";
+  public static final String FILE = "file";
 }

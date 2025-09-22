@@ -56,61 +56,55 @@ public class MiniRequestDispatcher implements RequestDispatcher {
   private String webAppRoot;
   private String relativePath;
   private String jspPath;
-	private String webInf;
+  private String webInf;
   private MiniServletContext miniServletContext;
   static Logger logger = LoggerManager.getLogger(MiniRequestDispatcher.class.getSimpleName());
 
   public MiniRequestDispatcher(String webAppRoot, String relativePath) {
     this.webAppRoot = webAppRoot;
-		this.webInf = webAppRoot + Define.WEB_INF;
+    this.webInf = webAppRoot + Define.WEB_INF;
     this.relativePath = relativePath;
 
     miniServletContext = MiniServletContainer.getMiniWebApplicationContext();
   }
 
-	public void compileAndExecute(MiniHttpServletRequest miniHttpServletRequest,
-			MiniHttpServletResponse miniHttpServletResponse, Map<String, Object> param)
-			throws ServletException, IOException {
+  public void compileAndExecute(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Map<String, Object> param) throws ServletException, IOException {
 
     String realJspPath = webAppRoot + relativePath;
     Path jspFilePath = Paths.get(realJspPath);
 
     logger.info("realJspPath : " + realJspPath);
     logger.info("webAppRoot : " + webAppRoot);
-    
-		File outputDir = new File(webInf + "/output/compiledJspServlets");
+
+    File outputDir = new File(webInf + "/output/compiledJspServlets");
     if (!outputDir.exists()) {
       outputDir.mkdirs();
     }
 
-		String jspRelative = relativePath.startsWith(Define.SLASH) ? relativePath.substring(1) : relativePath;
-		Path relPath = Paths.get(jspRelative).normalize();
-		String jspFileName = relPath.getFileName().toString();
-		String servletClassName = IdentifierUtil.makeJavaIdentifier(jspFileName.replace(Define.EXT_JSP, "")) + "_jsp";
+    String jspRelative = relativePath.startsWith(Define.SLASH) ? relativePath.substring(1) : relativePath;
+    Path relPath = Paths.get(jspRelative).normalize();
+    String jspFileName = relPath.getFileName().toString();
+    String servletClassName = IdentifierUtil.makeJavaIdentifier(jspFileName.replace(Define.EXT_JSP, "")) + "_jsp";
 
     String packagePath = "org.apache.jsp";
-		Path parent = relPath.getParent();
-		if (parent != null) {
-			for (Path segment : parent) {
-				packagePath += "." + IdentifierUtil.makeJavaIdentifier(segment.toString());
-			}
-		}
+    Path parent = relPath.getParent();
+    if (parent != null) {
+      for (Path segment : parent) {
+        packagePath += "." + IdentifierUtil.makeJavaIdentifier(segment.toString());
+      }
+    }
 
     compileJspToServlet(jspFilePath.toString(), outputDir.getAbsolutePath(), packagePath);
 
-		Path javaFile = Paths.get(outputDir.getAbsolutePath(), packagePath.replace('.', '/'),
-				servletClassName + ".java");
+    Path javaFile = Paths.get(outputDir.getAbsolutePath(), packagePath.replace('.', '/'), servletClassName + ".java");
     compileJavaFile(javaFile);
 
-		String classPath = webInf + "/output/compiledJspServlets";
+    String classPath = webInf + "/output/compiledJspServlets";
 
-		executeServlet(classPath, miniHttpServletRequest, miniHttpServletResponse, packagePath + "." + servletClassName,
-				param);
+    executeServlet(classPath, miniHttpServletRequest, miniHttpServletResponse, packagePath + "." + servletClassName, param);
   }
 
-	private void executeServlet(String classPath, MiniHttpServletRequest miniHttpServletRequest,
-			MiniHttpServletResponse miniHttpServletResponse, String servletClassName, Map<String, Object> param)
-			throws ServletException, IOException {
+  private void executeServlet(String classPath, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, String servletClassName, Map<String, Object> param) throws ServletException, IOException {
     try {
       File file = new File(classPath);
       URI uri = file.toURI();
@@ -118,15 +112,14 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
       ClassLoader classLoader = new URLClassLoader(new URL[] { url }, ClassLoader.getSystemClassLoader());
 
-			String actualClassName = IdentifierUtil.makeQualifiedJavaIdentifier(servletClassName);
+      String actualClassName = IdentifierUtil.makeQualifiedJavaIdentifier(servletClassName);
 
-			Class<?> servletClass = classLoader.loadClass(actualClassName);
+      Class<?> servletClass = classLoader.loadClass(actualClassName);
       HttpServlet jspServletInstance = (HttpServlet) servletClass.getDeclaredConstructor().newInstance();
 
       MiniHttpSession miniHttpSession = new MiniHttpSession(miniServletContext);
 
-			MiniHttServletRequestWrapper miniHttpServletRequestWrapper = new MiniHttServletRequestWrapper(
-					miniHttpServletRequest, miniServletContext, miniHttpSession);
+      MiniHttServletRequestWrapper miniHttpServletRequestWrapper = new MiniHttServletRequestWrapper(miniHttpServletRequest, miniServletContext, miniHttpSession);
 
       MiniServletConfig miniServletConfig = new MiniServletConfig(miniServletContext);
 
@@ -136,8 +129,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
       jspServletInstance.init(miniServletConfig);
 
-			Method jspServiceMethod = servletClass.getDeclaredMethod("_jspService", HttpServletRequest.class,
-					HttpServletResponse.class);
+      Method jspServiceMethod = servletClass.getDeclaredMethod("_jspService", HttpServletRequest.class, HttpServletResponse.class);
       jspServiceMethod.setAccessible(true);
 
       jspServiceMethod.invoke(jspServletInstance, miniHttpServletRequestWrapper, miniHttpServletResponse);
@@ -158,33 +150,33 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     return directive.substring(startIndex, endIndex);
   }
 
-	private String makeJavaIdentifier(String input) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			char c = input.charAt(i);
-			boolean valid;
-			if (c < 0x80) {
-				valid = i == 0 ? Character.isJavaIdentifierStart(c) : Character.isJavaIdentifierPart(c);
-			} else {
-				valid = false;
-			}
-			if (valid) {
-				sb.append(c);
-			} else {
-				sb.append('_');
-				String hex = Integer.toHexString(c);
-				while (hex.length() < 4) {
-					hex = '0' + hex;
-				}
-				sb.append(hex);
-			}
-		}
-		String result = sb.toString();
-		if (SourceVersion.isKeyword(result)) {
-			result = '_' + result;
-		}
-		return result;
-	}
+  private String makeJavaIdentifier(String input) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < input.length(); i++) {
+      char c = input.charAt(i);
+      boolean valid;
+      if (c < 0x80) {
+        valid = i == 0 ? Character.isJavaIdentifierStart(c) : Character.isJavaIdentifierPart(c);
+      } else {
+        valid = false;
+      }
+      if (valid) {
+        sb.append(c);
+      } else {
+        sb.append('_');
+        String hex = Integer.toHexString(c);
+        while (hex.length() < 4) {
+          hex = '0' + hex;
+        }
+        sb.append(hex);
+      }
+    }
+    String result = sb.toString();
+    if (SourceVersion.isKeyword(result)) {
+      result = '_' + result;
+    }
+    return result;
+  }
 
   private void compileJavaFile(Path javaFilePath) {
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -240,10 +232,10 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
   private void compileJspToServlet(String jspFilePath, String outputDir, String packagePath) {
 
-      logger.info("jspFilePath : " + jspFilePath);
-      logger.info("outputDir : " + outputDir);
-      logger.info("packagePath : " + packagePath);
-      
+    logger.info("jspFilePath : " + jspFilePath);
+    logger.info("outputDir : " + outputDir);
+    logger.info("packagePath : " + packagePath);
+
     try {
       File file = new File(jspFilePath);
       JspC jspCompiler = new JspC();

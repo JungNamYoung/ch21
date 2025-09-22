@@ -42,10 +42,12 @@ import jakarta.servlet.SessionTrackingMode;
 import jakarta.servlet.descriptor.JspConfigDescriptor;
 
 public class MiniServletContext implements ServletContext {
+
   static private String webAppRoot;
   private Hashtable<String, Object> attributes = new Hashtable<>();
 
   public MiniServletContext(String webAppRoot) {
+    
     this.webAppRoot = webAppRoot;
 
     attributes.put(InstanceManager.class.getName(), new SimpleInstanceManager());
@@ -53,15 +55,10 @@ public class MiniServletContext implements ServletContext {
 
   @Override
   public String getRealPath(String path) {
-    return webAppRoot + path;
-  }
-
-  static public String getWebAppRoot() {
-
     if (webAppRoot == null || webAppRoot.length() == Define.COUNT_0)
       throw new RuntimeException(Define.NOT_APPLICABLE);
 
-    return webAppRoot;
+    return webAppRoot + path;
   }
 
   @Override
@@ -162,7 +159,6 @@ public class MiniServletContext implements ServletContext {
 
   @Override
   public void setAttribute(String name, Object object) {
-
     attributes.put(name, object);
   }
 
@@ -173,7 +169,7 @@ public class MiniServletContext implements ServletContext {
 
   @Override
   public String getServletContextName() {
-    return "MiniServletContext";
+    return this.getClass().getSimpleName();
   }
 
   @Override

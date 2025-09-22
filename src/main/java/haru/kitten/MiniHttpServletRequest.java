@@ -113,10 +113,16 @@ public class MiniHttpServletRequest implements HttpServletRequest {
   private void parseQueryParameters(String query) {
     if (query != null) {
       for (String param : query.split("&")) {
-        String[] parts = param.split("=");
+        String[] parts = param.split("=", 2);
         if (parts.length == 2) {
           try {
             parameters.put(URLDecoder.decode(parts[0], Define.UTF8), URLDecoder.decode(parts[1], Define.UTF8));
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        } else if (parts.length == 1) {
+          try {
+            parameters.put(URLDecoder.decode(parts[0], Define.UTF8), "");
           } catch (Exception ex) {
             ex.printStackTrace();
           }
@@ -127,11 +133,7 @@ public class MiniHttpServletRequest implements HttpServletRequest {
 
   @Override
   public RequestDispatcher getRequestDispatcher(String path) {
-//		if (path.endsWith(Define.EXT_JSP)) {
-//			return new MiniRequestDispatcher(MiniServletContainer.getMiniWebApplicationContext().getWebAppRoot(), path);
-//		} else {
-    return new MiniRequestDispatcher(MiniServletContainer.getMiniWebApplicationContext().getWebAppRoot(), path);
-//		}
+    return new MiniRequestDispatcher(MiniServletContainer.getMiniWebApplicationContext().getRealPath(Define.STR_BLANK), path);
   }
 
   @Override

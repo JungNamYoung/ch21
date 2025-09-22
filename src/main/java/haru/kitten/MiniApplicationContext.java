@@ -230,14 +230,10 @@ public class MiniApplicationContext {
     Autowired autowired = field.getAnnotation(Autowired.class);
 
     try {
-
-//      SqlSession sqlSession = miniMyBatis.getSqlSessionBySessionId(autowired.name());
       SqlSession sqlSession = miniMyBatis.getSqlSessionByType(field.getType());
 
       field.set(bean, sqlSession);
 
-      // logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + "
-      // | " + autowired.name());
       logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | ");
 
     } catch (IllegalArgumentException | IllegalAccessException e) {

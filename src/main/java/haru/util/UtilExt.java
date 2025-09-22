@@ -21,7 +21,6 @@ import haru.define.Haru;
 
 public class UtilExt {
 
-  // getClassPath("config/info.txt")
   public static String getClassPath(String path) {
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     URL resource = classLoader.getResource(path);
@@ -80,19 +79,15 @@ public class UtilExt {
     }
   }
 
-  // public static String loadTextSmart(String resourcePath) throws IOException {
   public static String loadTextSmart(String resourcePath) {
 
     URI uri = getResourceUri(resourcePath);
 
-//    System.out.println("resource uri : " + uri);
-
     try {
-      if ("file".equals(uri.getScheme())) {
+      if (Define.FILE.equals(uri.getScheme())) {
         return Files.readString(Paths.get(uri), StandardCharsets.UTF_8);
       } else if ("jar".equals(uri.getScheme())) {
-				try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(
-						resourcePath.startsWith(Define.SLASH) ? resourcePath.substring(1) : resourcePath)) {
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.startsWith(Define.SLASH) ? resourcePath.substring(1) : resourcePath)) {
           if (in == null)
             throw new FileNotFoundException(resourcePath);
           return new String(in.readAllBytes(), StandardCharsets.UTF_8);
@@ -132,8 +127,7 @@ public class UtilExt {
         if (!cfg.isEmpty()) {
           Path p = Paths.get(cfg);
           if (!p.isAbsolute()) {
-						String appHome = System.getProperty(Haru.JVM_APP_HOME,
-								Paths.get("").toAbsolutePath().normalize().toString());
+            String appHome = System.getProperty(Haru.JVM_APP_HOME, Paths.get("").toAbsolutePath().normalize().toString());
             p = Paths.get(appHome).resolve(cfg);
           }
           p = p.toAbsolutePath().normalize();
@@ -145,42 +139,39 @@ public class UtilExt {
     }
 
     String appHome = System.getProperty(Haru.JVM_APP_HOME, Paths.get("").toAbsolutePath().normalize().toString());
-    Path prod = Paths.get(appHome, "webapp").toAbsolutePath().normalize();
+    Path prod = Paths.get(appHome, Define.WEB_APP).toAbsolutePath().normalize();
     if (Files.isDirectory(prod))
       return prod.toString();
 
-    Path dev = Paths.get(appHome, "src", "main", "webapp").toAbsolutePath().normalize();
+    Path dev = Paths.get(appHome, "src", "main", Define.WEB_APP).toAbsolutePath().normalize();
     return dev.toString();
   }
 
-	public static void closeWindow(Map<String, Object> result, String title) {
-		try {
-			String os = System.getProperty("os.name").toLowerCase();
+  public static void closeWindow(Map<String, Object> result, String title) {
+    try {
+      String os = System.getProperty("os.name").toLowerCase();
 
-			if (os.contains("win")) {
+      if (os.contains("win")) {
 
-				String cmd = String.format("taskkill /f /fi \"WINDOWTITLE eq %s\"", title);
-				// String cmd = "taskkill /f /fi \"WINDOWTITLE eq 양방향 수어*\"";
-				// String cmd = "taskkill /f /fi \"WINDOWTITLE eq 양방향 수어 동시 통역 서비스 - chrome\"";
-				Process process = Runtime.getRuntime().exec(cmd);
-				process.waitFor();
+        ProcessBuilder builder = new ProcessBuilder("taskkill", "/f", "/fi", "WINDOWTITLE eq " + title);
 
-				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "MS949"));
-				String line;
-				while ((line = reader.readLine()) != null) {
-					System.out.println(line);
-				}
-				reader.close();
+        Process process = builder.start();
+        process.waitFor();
 
-				result.put("close", "true");
-				result.put("message", "Windows에서 크롬이 종료되었습니다.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("close", "false");
-			result.put("message", "창 종료 중 오류가 발생했습니다.");
-		}
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "MS949"));
+        String line;
+        while ((line = reader.readLine()) != null) {
+          System.out.println(line);
+        }
+        reader.close();
 
-//		model.addAttribute(Define.JSON, result);
-	}
+        result.put("close", "true");
+        result.put("message", "Windows에서 크롬이 종료되었습니다.");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      result.put("close", "false");
+      result.put("message", "창 종료 중 오류가 발생했습니다.");
+    }
+  }
 }

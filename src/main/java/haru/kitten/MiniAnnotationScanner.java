@@ -47,7 +47,7 @@ public class MiniAnnotationScanner {
     while (resources.hasMoreElements()) {
       URL resource = resources.nextElement();
 
-			if ("file".equals(resource.getProtocol())) {
+			if (Define.FILE.equals(resource.getProtocol())) {
       try {
         logger.info("resource.toURI() : " + resource.toURI());
         

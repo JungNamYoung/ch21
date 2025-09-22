@@ -1,6 +1,7 @@
 package com.web.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.web.service.UserService;
@@ -10,6 +11,7 @@ import haru.annotation.di.Autowired;
 import haru.annotation.di.Resource;
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
+import haru.annotation.mvc.RequestParam;
 import haru.kitten.MiniHttpServletRequest;
 import haru.kitten.MiniHttpSession;
 import haru.logger.LoggerManager;
@@ -32,9 +34,6 @@ public class UserController {
     logger.info("selectUser()");
     
     logger.info("id : #1 : " + session.getId());
-
-//    MiniHttpSession sess = (MiniHttpSession)request.getAttribute("miniHttpSession");
-//    logger.info("id : #2 : " + sess.getId());
     
     List<UserVo> result = userServiceExt.selectUserList(null);
 
@@ -45,15 +44,15 @@ public class UserController {
   }
 
   @RequestMapping("/changeUser.do")
-  public String changeUser(Model model) {
+  public String changeUser(Model model, Map<String, Object> params) {
     userServiceExt.changeUser(null);
     return null;
   }
 
   @RequestMapping("/chat.do")
-  public String chat() {
+  public String chat(@RequestParam("url") String siteUrl) {
 
-    logger.info("실행함 : chat.do");
+    logger.info("실행함 : chat.do : " + siteUrl);
 
     return "web/chat";
   }

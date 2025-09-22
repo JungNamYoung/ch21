@@ -35,8 +35,7 @@ public class HandlerExecutor {
 
   static Logger logger = LoggerManager.getLogger(HandlerExecutor.class.getSimpleName());
 
-	public static void execute(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest,
-			MiniHttpServletResponse miniHttpServletResponse) {
+  public static void execute(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
 
     Model model = new Model();
 
@@ -48,6 +47,8 @@ public class HandlerExecutor {
       renderView((String) result, miniHttpServletRequest, miniHttpServletResponse, model);
     } else if (result instanceof List<?>) {
       renderList((List<?>) result, miniHttpServletResponse);
+    } else if (result instanceof Map<?, ?>) {
+      renderJsonEx((Map<?, ?>) result, miniHttpServletResponse);
     } else if (result == null) {
       renderJson(model, miniHttpServletResponse);
     } else {
@@ -62,13 +63,10 @@ public class HandlerExecutor {
 
   }
 
-	static Object invokeHandler(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest,
-			MiniHttpServletResponse miniHttpServletResponse, Model model) {
+  static Object invokeHandler(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Model model) {
     Object result = null;
     try {
-			Object targetBean = (handlerMapping.getBeanDefinition().getProxyInstance() != null)
-					? handlerMapping.getBeanDefinition().getProxyInstance()
-					: handlerMapping.getBeanDefinition().getTargetBean();
+      Object targetBean = (handlerMapping.getBeanDefinition().getProxyInstance() != null) ? handlerMapping.getBeanDefinition().getProxyInstance() : handlerMapping.getBeanDefinition().getTargetBean();
 
       Method method = handlerMapping.getMethod();
 
@@ -83,8 +81,7 @@ public class HandlerExecutor {
     return result;
   }
 
-	static private Object[] createArguments(Method method, Model model, MiniHttpServletRequest miniHttpServletRequest,
-			MiniHttpServletResponse miniHttpServletResponse) {
+  static private Object[] createArguments(Method method, Model model, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     Parameter[] parameters = method.getParameters();
     Object[] args = new Object[parameters.length];
 
@@ -119,8 +116,7 @@ public class HandlerExecutor {
     return args;
   }
 
-	static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRequest,
-			MiniHttpServletResponse miniHttpServletResponse, Model model) {
+static void renderView(String viewName, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Model model) {
     String jspPath = Define.WEB_INF_EX + "jsp/" + viewName + Define.EXT_JSP;
 
     for (Map.Entry<String, Object> entry : model.getAttributes().entrySet()) {
@@ -131,8 +127,7 @@ public class HandlerExecutor {
     MiniRequestDispatcher miniRequestDispatcher = (MiniRequestDispatcher) requestDispatcher;
 
     try {
-			miniRequestDispatcher.compileAndExecute(miniHttpServletRequest, miniHttpServletResponse,
-					model.getAttributes());
+      miniRequestDispatcher.compileAndExecute(miniHttpServletRequest, miniHttpServletResponse, model.getAttributes());
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -142,6 +137,18 @@ public class HandlerExecutor {
     miniHttpServletResponse.setContentType(Define.TEXT_PLAIN_EX);
     for (Object vo : results) {
       miniHttpServletResponse.getWriter().write(vo.toString() + Define.ENTER_EX);
+    }
+  }
+
+  static void renderJsonEx(Map<?, ?> results, MiniHttpServletResponse miniHttpServletResponse) {
+    miniHttpServletResponse.setContentType(Define.APP_JSON + Define.CHARSET_UTF_8);
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    try {
+      String jsonString = objectMapper.writeValueAsString(results);
+      miniHttpServletResponse.getWriter().write(jsonString);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 

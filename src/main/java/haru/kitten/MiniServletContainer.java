@@ -50,7 +50,7 @@ public class MiniServletContainer {
       requestedResource = requestedResource.substring(ctx.length());
     }
 
-    String filePath = MiniServletContext.getWebAppRoot() + requestedResource;
+    String filePath = miniServletContext.getRealPath(Define.STR_BLANK) + requestedResource;
 
     return filePath;
   }

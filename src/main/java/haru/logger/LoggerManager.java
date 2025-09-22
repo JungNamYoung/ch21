@@ -1,5 +1,6 @@
 package haru.logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
@@ -10,8 +11,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import haru.define.Define;
-import haru.kitten.MiniServletContext;
-import java.io.File;
+import haru.kitten.MiniServletContainer;
 
 public class LoggerManager {
   private static final String LOG_FORMAT = "[haru][%1$s] %2$tT | %4$s | %3$s";
@@ -33,7 +33,8 @@ public class LoggerManager {
     logger.addHandler(consoleHandler);
     logger.setLevel(Level.ALL);
 
-    String logDirPath = MiniServletContext.getWebAppRoot() + Define.WEB_INF + "/logs";
+    String logDirPath = MiniServletContainer.getRealPath(Define.STR_BLANK) + Define.WEB_INF + "/logs";
+    
     File logDir = new File(logDirPath);
     if (!logDir.exists()) {
       if (logDir.mkdirs()) {
@@ -61,7 +62,6 @@ public class LoggerManager {
 
   private static String formatLog(LogRecord record) {
     Date timestamp = new Date(record.getMillis());
-    //return String.format(LOG_FORMAT, record.getLevel(), timestamp, record.getLoggerName(), record.getMessage());
     return String.format(LOG_FORMAT, record.getLevel(), timestamp, record.getMessage(), record.getLoggerName());
   }
 }
