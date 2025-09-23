@@ -1,25 +1,31 @@
 package com.web.log;
 
 import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 import haru.annotation.aop.After;
 import haru.annotation.aop.Around;
+import haru.annotation.aop.Aspect;
 import haru.annotation.aop.Before;
+import haru.logger.LoggerManager;
 
-//@Aspect
+@Aspect
 public class Session {
-  @Before("haru.web.controller.MyController.*")
+  
+  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  
+  @Before("com.web.controller.LoginController.*")
   public void logBefore(Method method, Object target, Object[] args) {
-    System.out.println("[session] Before | ");
+    logger.info("[session] Before");
   }
 
-  @After("haru.web.controller.MyController.*")
+  @After("com.web.controller.LoginController.*")
   public void logAfter(Method method, Object target, Object[] args) {
-    System.out.println("[session] After | ");
+    logger.info("[session] After");
   }
 
-  @Around("haru.web.controller.MyController.*")
+  @Around("com.web.controller.LoginController.*")
   public void logAround(Method method, Object target, Object[] args) {
-    System.out.println("[session] Around | ");
+    logger.info("[session] Around");
   }
 }

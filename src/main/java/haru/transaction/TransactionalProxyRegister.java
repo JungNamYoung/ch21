@@ -33,7 +33,7 @@ public class TransactionalProxyRegister {
 
         transactionalMetadataList.add(transcationalMetadata);
 
-        logger.info("[transaction] scan | " + serviceClass.getSimpleName());
+        logger.info("[transaction] scan : " + serviceClass.getSimpleName());
       }
 
     }

@@ -16,14 +16,14 @@ public class ExecutionTimeInterceptor implements Interceptor {
   public void preHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     long startTime = System.currentTimeMillis();
     miniHttpServletRequest.setAttribute(START_TIME, startTime);
-    logger.info("[interceptor] 요청 시작 - " + miniHttpServletRequest.getRequestURI());
+    logger.info("[interceptor] " + miniHttpServletRequest.getRequestURI());
   }
 
   @Override
   public void postHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     long startTime = (Long) miniHttpServletRequest.getAttribute(START_TIME);
     long endTime = System.currentTimeMillis();
-    logger.info("[interceptor] 처리 완료 - " + miniHttpServletRequest.getRequestURI() + ", " + (endTime - startTime) + "ms");
+    logger.info("[interceptor] " + miniHttpServletRequest.getRequestURI() + ", " + (endTime - startTime) + "ms");
   }
 
   @Override

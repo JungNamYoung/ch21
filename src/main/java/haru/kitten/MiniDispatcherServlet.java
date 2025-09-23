@@ -19,6 +19,8 @@ package haru.kitten;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import haru.annotation.mvc.Controller;
@@ -32,102 +34,113 @@ import haru.security.SecurityFilter;
 
 public class MiniDispatcherServlet implements DispatcherServlet {
 
-  private List<HandlerMapping> handlerMappings = new ArrayList<>();
-  private MiniApplicationContext miniApplicationContext = new MiniApplicationContext();
-  private List<Interceptor> interceptors = new ArrayList<>();
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private final Map<String, HandlerMapping> handlerMappings = new ConcurrentHashMap<>();
+  private final MiniApplicationContext appContext = new MiniApplicationContext();
+  private final List<Interceptor> interceptors = List.of(new ExecutionTimeInterceptor());
+  private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
 
   public MiniDispatcherServlet(String basePackage) {
     try {
-
-      logger.info("basePackage : " + basePackage);
-
-      miniApplicationContext.initializeContext(basePackage);
-//      miniApplicationContext.injectDependencies();
-
-      requestMapping();
-
-      interceptors.add(new ExecutionTimeInterceptor());
-
+      logger.info(() -> "basePackage : " + basePackage);
+      appContext.initializeContext(basePackage);
+      registerHandlerMappings();
     } catch (Exception e) {
       throw new RuntimeException("컨트롤러 등록 실패", e);
     }
   }
 
-  private void requestMapping() {
-    for (BeanDefinition beanDefinition : miniApplicationContext.getBeans()) {
-
-      Class<?> tClass = beanDefinition.getTargetBean().getClass();
-
-      if (tClass.isAnnotationPresent(Controller.class)) {
-
-        requestMappingSub(tClass, beanDefinition);
+  private void registerHandlerMappings() {
+    for (BeanDefinition beanDef : appContext.getBeans()) {
+      Class<?> type = beanDef.getTargetBean().getClass();
+      if (type.isAnnotationPresent(Controller.class)) {
+        registerControllerMethods(type, beanDef);
       }
     }
   }
 
-  private void requestMappingSub(Class<?> tClass, BeanDefinition beanDefinition) {
+  private void registerControllerMethods(Class<?> type, BeanDefinition beanDef) {
+    for (Method method : type.getDeclaredMethods()) {
+      if (!method.isAnnotationPresent(RequestMapping.class))
+        continue;
 
-    Method[] methods = tClass.getDeclaredMethods();
+      RequestMapping rm = method.getAnnotation(RequestMapping.class);
+      for (String raw : rm.value()) {
+        String path = normalizePath(raw);
+        HandlerMapping mapping = new HandlerMapping(path, method, beanDef);
 
-    for (Method method : methods) {
-
-      if (method.isAnnotationPresent(RequestMapping.class)) {
-
-        RequestMapping handlerMapping = method.getAnnotation(RequestMapping.class);
-
-        for (String pathRequest : handlerMapping.value()) {
-          handlerMappings.add(new HandlerMapping(pathRequest, method, beanDefinition));
-          logger.info("[RequestMapping] " + pathRequest + " - " + beanDefinition.getTargetBean().getClass().getSimpleName() + "::" + method.getName());
+        HandlerMapping prev = handlerMappings.putIfAbsent(path, mapping);
+        if (prev != null) {
+          logger.warning(() -> String.format("[Duplicate Mapping] %s => %s::%s (existing: %s::%s)", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName(), prev.getBeanDefinition().getTargetBean().getClass().getSimpleName(), prev.getMethod().getName()));
+        } else {
+          logger.info(() -> String.format("[RequestMapping] %s - %s::%s", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName()));
         }
       }
     }
   }
 
-  private HandlerMapping findHandlerMapping(String pathRequest) {
+  private String normalizePath(String path) {
+    if (path == null || path.isEmpty())
+      return "/";
+    String p = path.startsWith(Define.SLASH) ? path : Define.SLASH + path;
+    if (p.length() > 1 && p.endsWith(Define.SLASH))
+      p = p.substring(0, p.length() - 1);
+    return p;
+  }
 
-    for (HandlerMapping handlerMapping : handlerMappings) {
-      if (handlerMapping.getPathRequest().equals(pathRequest))
-        return handlerMapping;
+  private String resolveRequestUri(String requestUrl, String contextPath) {
+    if (!Define.SLASH.equals(contextPath) && requestUrl.startsWith(contextPath)) {
+      return requestUrl.substring(contextPath.length());
     }
+    return requestUrl;
+  }
 
-    return null;
+  private boolean handleByStaticHandlers(MiniHttpServletRequest req, MiniHttpServletResponse res) {
+    String url = req.getRequestURI();
+    if (HtmlResponseHandler.handle(url, res)) {
+      logger.info("HtmlResponseHandler.handle()");
+      return true;
+    }
+    if (JspResponseHandler.handle(req, res)) {
+      logger.info("JspResponseHandler.handle()");
+      return true;
+    }
+    if (MiniResourceHandler.handle(req, res)) {
+      logger.info("MiniResourceHandler.handle()");
+      return true;
+    }
+    return false;
+  }
+
+  private HandlerMapping findHandlerMapping(String path) {
+    return handlerMappings.get(path);
   }
 
   @Override
-  public void service(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
+  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
+    final String requestUrl = req.getRequestURI();
+    final String contextPath = MiniServletContainer.getContextPath();
+    logger.info(() -> "requestUrl : " + requestUrl);
 
-    String requestUrl = miniHttpServletRequest.getRequestURI();
-    String contextPath = MiniServletContainer.getContextPath();
-
-    logger.info("requestUrl : " + requestUrl);
-
-    if (SecurityFilter.isRestricted(requestUrl, miniHttpServletResponse))
+    if (SecurityFilter.isRestricted(requestUrl, res))
       return;
+    InterceptorChain chain = new InterceptorChain(interceptors);
+    try {
+      chain.preHandle(req, res);
 
-    InterceptorChain interceptorChain = new InterceptorChain(interceptors);
-    interceptorChain.preHandle(miniHttpServletRequest, miniHttpServletResponse);
+      if (handleByStaticHandlers(req, res))
+        return;
 
-    if (HtmlResponseHandler.handle(requestUrl, miniHttpServletResponse)) {
-      logger.info("HtmlResponseHandler.handle()");
-    } else if (JspResponseHandler.handle(miniHttpServletRequest, miniHttpServletResponse)) {
-      logger.info("JspResponseHandler.handle()");
-    } else if (MiniResourceHandler.handle(miniHttpServletRequest, miniHttpServletResponse)) {
-      logger.info("MiniResourceHandler.handle()");
-    } else {
-      String requestUri = requestUrl;
-      if (!Define.SLASH.equals(contextPath) && requestUrl.startsWith(contextPath)) {
-        requestUri = requestUrl.substring(contextPath.length());
+      String requestUri = resolveRequestUri(requestUrl, contextPath);
+      requestUri = normalizePath(requestUri);
+
+      HandlerMapping mapping = findHandlerMapping(requestUri);
+      if (mapping == null) {
+        ResponseHandler.handleNotFound(res, requestUri);
+        return;
       }
-
-      HandlerMapping handlerMapping = findHandlerMapping(requestUri);
-
-      if (handlerMapping == null) {
-        ResponseHandler.handleNotFound(miniHttpServletResponse, requestUri);
-      } else
-        HandlerExecutor.execute(handlerMapping, miniHttpServletRequest, miniHttpServletResponse);
+      HandlerExecutor.execute(mapping, req, res);
+    } finally {
+      chain.postHandle(req, res);
     }
-
-    interceptorChain.postHandle(miniHttpServletRequest, miniHttpServletResponse);
   }
 }

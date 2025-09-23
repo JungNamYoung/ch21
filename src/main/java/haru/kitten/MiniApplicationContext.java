@@ -16,9 +16,13 @@
  */
 package haru.kitten;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -39,10 +43,7 @@ import haru.transaction.TransactionalProxyRegister;
 public class MiniApplicationContext {
   private List<BeanDefinition> beanDefinitions = new ArrayList<>();
   private TransactionalProxyRegister transactionalProxyRegister = new TransactionalProxyRegister();
-  private Set<Class<?>> annotatedServiceClasses;
-  private Set<Class<?>> annotatedRepositoryClasses;
-  private Set<Class<?>> annotatedControllerClasses;
-  private Set<Class<?>> annotatedAspectClasses;
+  private Map<Class<? extends Annotation>, Set<Class<?>>> annotatedClasses = new HashMap<>();
   private AspectManager aspectManager = new AspectManager();
   MiniMyBatis miniMyBatis = new MiniMyBatis();
   Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
@@ -60,30 +61,29 @@ public class MiniApplicationContext {
 
   private void scanAnnotatedClasses(String basePackage) {
     MiniAnnotationScanner scanner = new MiniAnnotationScanner(basePackage);
-    annotatedServiceClasses = scanner.getTypesAnnotatedWith(Service.class);
-    annotatedRepositoryClasses = scanner.getTypesAnnotatedWith(Repository.class);
-    annotatedControllerClasses = scanner.getTypesAnnotatedWith(Controller.class);
-    annotatedAspectClasses = scanner.getTypesAnnotatedWith(Aspect.class);
+    registerAnnotatedClasses(Service.class, scanner);
+    registerAnnotatedClasses(Repository.class, scanner);
+    registerAnnotatedClasses(Controller.class, scanner);
+    registerAnnotatedClasses(Aspect.class, scanner);
   }
 
   private void initTransactionAndAop() throws Exception {
-    transactionalProxyRegister.registerTransactionalClasses(annotatedServiceClasses);
-    transactionalProxyRegister.registerTransactionalClasses(annotatedRepositoryClasses);
-    aspectManager.registerAspectBeans(annotatedAspectClasses);
+    transactionalProxyRegister.registerTransactionalClasses(getAnnotatedClasses(Service.class));
+    transactionalProxyRegister.registerTransactionalClasses(getAnnotatedClasses(Repository.class));
+    aspectManager.registerAspectBeans(getAnnotatedClasses(Aspect.class));
     miniMyBatis.initSessionFactory();
   }
 
   private void initializeBeans() throws Exception {
     List<Object> beanContainer = new ArrayList<>();
 
-    registerBeans(beanContainer, annotatedControllerClasses);
-    registerBeans(beanContainer, annotatedServiceClasses);
-    registerBeans(beanContainer, annotatedRepositoryClasses);
+    registerBeans(beanContainer, getAnnotatedClasses(Controller.class));
+    registerBeans(beanContainer, getAnnotatedClasses(Service.class));
+    registerBeans(beanContainer, getAnnotatedClasses(Repository.class));
 
     for (Object bean : beanContainer) {
       BeanDefinition beanDefinition = createInfoBeanWithProxy(bean);
       beanDefinitions.add(beanDefinition);
-      logProxyCreation(beanDefinition);
     }
   }
 
@@ -110,15 +110,6 @@ public class MiniApplicationContext {
     return null;
   }
 
-  private void logProxyCreation(BeanDefinition beanDefinition) {
-    if (beanDefinition.getProxyInstance() != null) {
-      String targetBean = beanDefinition.getTargetBean().getClass().getSimpleName();
-      String proxyInstance = beanDefinition.getProxyInstance().getClass().getSimpleName();
-      logger.info("[proxy] create | " + targetBean + " | " + proxyInstance);
-    }
-  }
-
-  // registerBeans()함수는 Controller, Service 어노테이션만 지원
   private void registerBeans(List<Object> beanContainer, Set<Class<?>> tClasses) {
 
     for (Class<?> tClass : tClasses) {
@@ -131,15 +122,19 @@ public class MiniApplicationContext {
         ex.printStackTrace();
       }
 
-      if (tClass.isAnnotationPresent(Controller.class))
-        logger.info("[bean] controller - create - " + tClass.getSimpleName());
-      else if (tClass.isAnnotationPresent(Service.class))
-        logger.info("[bean] service - create - " + tClass.getSimpleName());
-      else if (tClass.isAnnotationPresent(Repository.class))
-        logger.info("[bean] repository - create - " + tClass.getSimpleName());
-      else {
+      String msg = "create - ";
+
+      if (tClass.isAnnotationPresent(Controller.class)) {
+        msg = msg + "Controller - ";
+      } else if (tClass.isAnnotationPresent(Service.class)) {
+        msg = msg + "Service - ";
+      } else if (tClass.isAnnotationPresent(Repository.class)) {
+        msg = msg + "Repository - ";
+      } else {
         throw new RuntimeException(Define.NOT_APPLICABLE);
       }
+
+      logger.info(msg + tClass.getSimpleName());
 
       beanContainer.add(bean);
     }
@@ -182,71 +177,46 @@ public class MiniApplicationContext {
         if ((field.getType() == SqlSession.class) && (field.isAnnotationPresent(Autowired.class) || field.isAnnotationPresent(Resource.class))) {
           injectSqlSession(bean, field);
         } else if (field.isAnnotationPresent(Autowired.class)) {
-          injectFieldDependency(bean, field);
+          injectAutowiredDependency(bean, field);
         } else if (field.isAnnotationPresent(Resource.class)) {
-          injectResourceDependency(bean, field);
+          injectResourceBasedDependency(bean, field);
         }
       }
     }
   }
 
-  private void injectFieldDependency(Object bean, Field field) {
-    Autowired autowired = field.getAnnotation(Autowired.class);
-
-    BeanDefinition beanDefinition = null;
-    beanDefinition = findBeanByType(field.getType());
-
-    if (beanDefinition == null) {
-      throw new RuntimeException("빈 주입 실패 : " + " 빈을 찾을 수 없습니다.");
-    }
-
-    Object dependency = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
-
-    field.setAccessible(true);
-
-    if (!field.getType().isAssignableFrom(dependency.getClass())) {
-      String msg = "주입 불가능 : 필드 타입 " + field.getType() + "은(는) " + dependency.getClass() + "을(를) 할당할 수 없습니다.";
-      logger.info("error | " + msg);
-    }
-
-    try {
-      field.set(bean, dependency);
-      logger.info("[dependency] inject | " + bean.getClass().getSimpleName() + " | " + dependency.getClass().getSimpleName());
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException("의존성 주입 실패 ", e);
-    }
+  private void injectAutowiredDependency(Object bean, Field field) {
+    BeanDefinition beanDefinition = findBeanByType(field.getType());
+    assignDependency(bean, field, beanDefinition);
   }
 
   void injectSqlSession(Object bean, Field field) {
 
     field.setAccessible(true);
 
-    Autowired autowired = field.getAnnotation(Autowired.class);
-
     try {
       SqlSession sqlSession = miniMyBatis.getSqlSessionByType(field.getType());
 
       field.set(bean, sqlSession);
 
-      logger.info("[dependency #1] inject | " + bean.getClass().getSimpleName() + " | ");
+      logger.info("[dependency #1] inject : " + bean.getClass().getSimpleName());
 
     } catch (IllegalArgumentException | IllegalAccessException e) {
       e.printStackTrace();
     }
   }
 
-  private void injectResourceDependency(Object bean, Field field) {
+  private void injectResourceBasedDependency(Object bean, Field field) {
     Resource resource = field.getAnnotation(Resource.class);
     String resourceName = resource.name();
 
-    BeanDefinition beanDefinition = null;
-    if (!resourceName.isEmpty()) {
-      beanDefinition = findBean(resourceName);
-    } else {
-      beanDefinition = findBeanByType(field.getType());
-    }
+    BeanDefinition beanDefinition = !resourceName.isEmpty() ? findBean(resourceName) : findBeanByType(field.getType());
+    assignDependency(bean, field, beanDefinition);
+  }
+
+  private void assignDependency(Object bean, Field field, BeanDefinition beanDefinition) {
     if (beanDefinition == null) {
-      throw new RuntimeException("빈 주입 실패: " + " 빈을 찾을 수 없습니다.");
+      throw new RuntimeException("빈 주입 실패: 빈을 찾을 수 없습니다.");
     }
 
     Object dependency = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
@@ -260,10 +230,19 @@ public class MiniApplicationContext {
 
     try {
       field.set(bean, dependency);
-      logger.info("[dependency] inject | " + bean.getClass().getSimpleName() + " | " + dependency.getClass().getSimpleName());
+      logger.info("[dependency] inject : " + bean.getClass().getSimpleName() + " - " + dependency.getClass().getSimpleName());
     } catch (IllegalAccessException e) {
       throw new RuntimeException("의존성 주입 실패", e);
     }
+  }
+
+  private void registerAnnotatedClasses(Class<? extends Annotation> annotation, MiniAnnotationScanner scanner) {
+    Set<Class<?>> scannedClasses = scanner.findTypesAnnotatedWith(annotation);
+    annotatedClasses.put(annotation, scannedClasses != null ? scannedClasses : Collections.emptySet());
+  }
+
+  private Set<Class<?>> getAnnotatedClasses(Class<? extends Annotation> annotation) {
+    return annotatedClasses.getOrDefault(annotation, Collections.emptySet());
   }
 
   public List<BeanDefinition> getBeans() {

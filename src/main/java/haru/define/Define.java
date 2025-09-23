@@ -53,4 +53,5 @@ public class Define {
   // --------------------------------------------------------
   public static final String WEB_APP = "webapp";
   public static final String FILE = "file";
+  public static final String JAR="jar";
 }

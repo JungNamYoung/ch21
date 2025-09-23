@@ -57,8 +57,8 @@ class MiniDispatcherHandler implements HttpHandler {
     
     if (Define.FAVICON.equals(requestPath)) {
       logger.info("Ignoring " + Define.FAVICON + " request");
-//      exchange.sendResponseHeaders(HttpServletResponse.SC_NO_CONTENT, -1);
-//      return;
+      exchange.sendResponseHeaders(HttpServletResponse.SC_NO_CONTENT, -1);
+      return;
     }
 
     Headers headers = exchange.getRequestHeaders();

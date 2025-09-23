@@ -66,6 +66,7 @@ public class AspectManager {
   }
 
   public void registerAspectBeans(Set<Class<?>> aspectClasses) {
+    
     for (Class<?> aspectClass : aspectClasses) {
 
       Object aspectInstance = null;
@@ -78,7 +79,7 @@ public class AspectManager {
         ex.printStackTrace();
       }
 
-      logger.info("[aspect] create | " + aspectClass.getSimpleName());
+      logger.info("[aspect] create : " + aspectClass.getSimpleName());
     }
   }
 

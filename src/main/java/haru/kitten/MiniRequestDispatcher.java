@@ -70,11 +70,11 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
   public void compileAndExecute(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Map<String, Object> param) throws ServletException, IOException {
 
-    String realJspPath = webAppRoot + relativePath;
-    Path jspFilePath = Paths.get(realJspPath);
+    String jspPath = webAppRoot + relativePath;
+    Path jspFilePath = Paths.get(jspPath);
 
-    logger.info("realJspPath : " + realJspPath);
-    logger.info("webAppRoot : " + webAppRoot);
+    logger.info("jspPath : " + jspPath);
+//    logger.info("webAppRoot : " + webAppRoot);
 
     File outputDir = new File(webInf + "/output/compiledJspServlets");
     if (!outputDir.exists()) {

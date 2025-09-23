@@ -14,7 +14,7 @@ import haru.define.Define;
 import haru.kitten.MiniServletContainer;
 
 public class LoggerManager {
-  private static final String LOG_FORMAT = "[haru][%1$s] %2$tT | %4$s | %3$s";
+  private static final String LOG_FORMAT = "[haru][%1$s] %2$tT | %4$s | %5$s | %3$s";
 
   public static Logger getLogger(String name) {
     Logger logger = Logger.getLogger(name);
@@ -34,7 +34,7 @@ public class LoggerManager {
     logger.setLevel(Level.ALL);
 
     String logDirPath = MiniServletContainer.getRealPath(Define.STR_BLANK) + Define.WEB_INF + "/logs";
-    
+
     File logDir = new File(logDirPath);
     if (!logDir.exists()) {
       if (logDir.mkdirs()) {
@@ -61,7 +61,16 @@ public class LoggerManager {
   }
 
   private static String formatLog(LogRecord record) {
+    
     Date timestamp = new Date(record.getMillis());
-    return String.format(LOG_FORMAT, record.getLevel(), timestamp, record.getMessage(), record.getLoggerName());
+
+    String methodName = "unknown";
+    for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+      if (ste.getClassName().equals(record.getSourceClassName())) {
+        methodName = ste.getMethodName();
+        break;
+      }
+    }
+    return String.format(LOG_FORMAT, record.getLevel(), timestamp, record.getMessage(), record.getLoggerName(), methodName);
   }
 }
