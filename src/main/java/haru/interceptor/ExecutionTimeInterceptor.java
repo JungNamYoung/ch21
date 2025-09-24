@@ -2,9 +2,9 @@ package haru.interceptor;
 
 import java.util.logging.Logger;
 
-import haru.kitten.MiniHttpServletRequest;
-import haru.kitten.MiniHttpServletResponse;
-import haru.logger.LoggerManager;
+import haru.http.MiniHttpServletRequest;
+import haru.http.MiniHttpServletResponse;
+import haru.logging.LoggerManager;
 
 public class ExecutionTimeInterceptor implements Interceptor {
 

@@ -14,7 +14,7 @@ import haru.annotation.aop.Transactional;
 import haru.annotation.di.Autowired;
 import haru.annotation.di.Repository;
 import haru.annotation.di.Service;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 
 @Service("userService")
 //@Repository("userService")

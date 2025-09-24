@@ -1,7 +1,6 @@
 package com.web.controller;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import com.web.service.UserService;
@@ -12,11 +11,11 @@ import haru.annotation.di.Resource;
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
 import haru.annotation.mvc.RequestParam;
-import haru.kitten.MiniHttpServletRequest;
-import haru.kitten.MiniHttpSession;
-import haru.logger.LoggerManager;
-import haru.model.Model;
-import haru.model.ModelMap;
+import haru.http.MiniHttpServletRequest;
+import haru.http.MiniHttpSession;
+import haru.logging.LoggerManager;
+import haru.mvc.model.Model;
+import haru.mvc.model.ModelMap;
 
 @Controller
 public class UserController {

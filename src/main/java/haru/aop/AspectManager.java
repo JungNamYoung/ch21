@@ -13,7 +13,7 @@ import haru.annotation.aop.Before;
 //import org.junit.Before;
 
 import haru.define.Define;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 import net.sf.cglib.proxy.Enhancer;
 
 public class AspectManager {

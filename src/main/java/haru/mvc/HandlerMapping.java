@@ -14,9 +14,11 @@
  *
  * Copyright (C) [2018년] [SamuelSky]
  */
-package haru.kitten;
+package haru.mvc;
 
 import java.lang.reflect.Method;
+
+import haru.kitten.BeanDefinition;
 
 public class HandlerMapping {
   private String requestPpath;

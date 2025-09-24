@@ -25,6 +25,8 @@ import com.sun.net.httpserver.HttpServer;
 
 import haru.define.Define;
 import haru.define.Haru;
+import haru.mvc.MiniDispatcherServlet;
+import haru.servlet.MiniServletContext;
 import haru.util.TokenEx;
 import haru.util.UtilExt;
 import jakarta.servlet.ServletException;

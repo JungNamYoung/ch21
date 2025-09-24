@@ -1,4 +1,4 @@
-package haru.model;
+package haru.mvc.model;
 
 import java.util.Map;
 

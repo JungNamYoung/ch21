@@ -36,7 +36,7 @@ import haru.annotation.di.Service;
 import haru.annotation.mvc.Controller;
 import haru.aop.AspectManager;
 import haru.define.Define;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 import haru.mybatis.MiniMyBatis;
 import haru.transaction.TransactionalProxyRegister;
 

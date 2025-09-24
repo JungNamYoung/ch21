@@ -15,7 +15,7 @@
  * Copyright (C) [2018년] [SamuelSky]
  */
 
-package haru.kitten;
+package haru.http;
 
 import java.util.Enumeration;
 import java.util.Hashtable;

@@ -3,9 +3,9 @@ package haru.filter;
 import java.io.IOException;
 import java.util.List;
 
+import haru.http.MiniHttpServletRequest;
+import haru.http.MiniHttpServletResponse;
 import haru.kitten.DispatcherServlet;
-import haru.kitten.MiniHttpServletRequest;
-import haru.kitten.MiniHttpServletResponse;
 import jakarta.servlet.ServletException;
 
 public class MiniFilterChain implements FilterChain {

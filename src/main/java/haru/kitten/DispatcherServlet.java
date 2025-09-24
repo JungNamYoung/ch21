@@ -16,6 +16,9 @@
  */
 package haru.kitten;
 
+import haru.http.MiniHttpServletRequest;
+import haru.http.MiniHttpServletResponse;
+
 public interface DispatcherServlet {
   public void service(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse);
 }

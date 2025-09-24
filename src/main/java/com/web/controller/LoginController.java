@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 
 @Controller
 public class LoginController {

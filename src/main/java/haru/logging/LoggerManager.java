@@ -1,4 +1,4 @@
-package haru.logger;
+package haru.logging;
 
 import java.io.File;
 import java.io.IOException;

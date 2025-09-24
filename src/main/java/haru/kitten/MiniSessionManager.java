@@ -9,8 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import haru.define.Define;
+import haru.http.MiniHttpSession;
 //import haru.config.MiniHttpSession;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 import jakarta.servlet.ServletContext;
 
 public class MiniSessionManager {

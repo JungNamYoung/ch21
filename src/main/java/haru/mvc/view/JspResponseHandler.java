@@ -1,4 +1,4 @@
-package haru.kitten;
+package haru.mvc.view;
 
 import java.io.File;
 import java.util.HashMap;
@@ -6,7 +6,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import haru.define.Define;
-import haru.logger.LoggerManager;
+import haru.http.MiniHttpServletRequest;
+import haru.http.MiniHttpServletResponse;
+import haru.kitten.MiniServletContainer;
+import haru.logging.LoggerManager;
+import haru.servlet.MiniRequestDispatcher;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletResponse;
 

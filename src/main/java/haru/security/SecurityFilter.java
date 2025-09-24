@@ -3,7 +3,7 @@ package haru.security;
 import java.io.IOException;
 
 import haru.define.Define;
-import haru.kitten.MiniHttpServletResponse;
+import haru.http.MiniHttpServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class SecurityFilter {

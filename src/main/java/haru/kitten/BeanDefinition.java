@@ -2,7 +2,7 @@ package haru.kitten;
 
 import java.util.logging.Logger;
 
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 
 public class BeanDefinition {
   private final String beanName;

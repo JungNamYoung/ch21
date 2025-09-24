@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 import haru.mybatis.SqlSessionContext;
 
 public class SqlSessionTxHandler implements TxHandler {

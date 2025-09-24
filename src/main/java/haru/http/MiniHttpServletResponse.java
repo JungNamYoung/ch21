@@ -14,7 +14,7 @@
  *
  * Copyright (C) [2018년] [SamuelSky]
  */
-package haru.kitten;
+package haru.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,7 +27,8 @@ import com.sun.net.httpserver.HttpExchange;
 
 import haru.config.MiniServletOutputStream;
 import haru.define.Define;
-import haru.logger.LoggerManager;
+import haru.kitten.MiniServletContainer;
+import haru.logging.LoggerManager;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

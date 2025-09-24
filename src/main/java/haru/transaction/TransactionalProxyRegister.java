@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import net.sf.cglib.proxy.Enhancer;
 import haru.annotation.aop.Transactional;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 
 public class TransactionalProxyRegister {
 

@@ -1,9 +1,10 @@
-package haru.kitten;
+package haru.mvc.view;
 
 import java.util.logging.Logger;
 
 import haru.define.Define;
-import haru.logger.LoggerManager;
+import haru.http.MiniHttpServletResponse;
+import haru.logging.LoggerManager;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class ResponseHandler {

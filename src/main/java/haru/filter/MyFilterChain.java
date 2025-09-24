@@ -3,9 +3,9 @@ package haru.filter;
 import java.io.IOException;
 import java.util.List;
 
+import haru.http.MiniHttpServletRequest;
+import haru.http.MiniHttpServletResponse;
 import haru.kitten.DispatcherServletBase;
-import haru.kitten.MiniHttpServletRequest;
-import haru.kitten.MiniHttpServletResponse;
 import jakarta.servlet.ServletException;
 
 // haru이 아닌 순수한 서블릿 기반의 인터셉터 방식

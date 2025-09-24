@@ -7,7 +7,7 @@ import haru.annotation.aop.After;
 import haru.annotation.aop.Around;
 import haru.annotation.aop.Aspect;
 import haru.annotation.aop.Before;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 
 @Aspect
 public class UserCheck {

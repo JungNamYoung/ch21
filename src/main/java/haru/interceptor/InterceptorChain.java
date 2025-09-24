@@ -2,8 +2,8 @@ package haru.interceptor;
 
 import java.util.List;
 
-import haru.kitten.MiniHttpServletRequest;
-import haru.kitten.MiniHttpServletResponse;
+import haru.http.MiniHttpServletRequest;
+import haru.http.MiniHttpServletResponse;
 
 public class InterceptorChain {
   private final List<Interceptor> interceptors;

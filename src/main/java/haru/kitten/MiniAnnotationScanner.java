@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import haru.define.Define;
-import haru.logger.LoggerManager;
+import haru.logging.LoggerManager;
 
 public class MiniAnnotationScanner {
 
