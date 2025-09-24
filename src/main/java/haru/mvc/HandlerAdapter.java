@@ -100,31 +100,55 @@ public class HandlerAdapter {
 
   private void writeResponse(MiniResponse mr, MiniHttpServletRequest req, MiniHttpServletResponse res) throws IOException {
     res.setStatus(mr.status());
-    for (var e : mr.headers().entrySet())
+    String contentType = null;
+    for (var e : mr.headers().entrySet()) {
       res.setHeader(e.getKey(), e.getValue());
+      if ("Content-Type".equalsIgnoreCase(e.getKey())) {
+        contentType = e.getValue();
+      }
+    }
 
     if (mr instanceof ViewResult vr) {
       String jspPath = Define.WEB_INF_EX + "jsp/" + vr.viewName() + Define.EXT_JSP;
       try {
         ((MiniRequestDispatcher) req.getRequestDispatcher(jspPath)).compileAndExecute(req, res, vr.model().getAttributes());
-      } catch (ServletException e1) {
-        e1.printStackTrace();
-      } catch (IOException e1) {
-        e1.printStackTrace();
+      } catch (ServletException | IOException e) {
+        throw new RuntimeException("Failed to render view: " + vr.viewName(), e);
       }
     } else if (mr instanceof RedirectResult rr) {
-      // 상태
+      if (!res.isCommitted()) {
+        res.setHeader("Location", rr.location());
+      }
     } else if (mr instanceof JsonResult jr) {
-      writeBody(jr.body(), res, "application/json; charset=UTF-8");
+      writeBody(jr.body(), contentType, res);
     } else if (mr instanceof TextResult tr) {
-      writeText(tr.body(), res);
+      writeBody(tr.body(), contentType, res);
+    } else if (mr instanceof NoContentResult) {
+      // nothing to write
     }
   }
 
-  private void writeBody(Object body, MiniHttpServletResponse res, String contentType) throws IOException {
-    res.setContentType(contentType);
+  private void writeBody(Object body, String contentType, MiniHttpServletResponse res) throws IOException {
+    for (BodyWriter writer : bodyWriters) {
+      if (writer.supports(body, contentType)) {
+        writer.write(body, contentType, res);
+        return;
+      }
+    }
 
-    res.getWriter().write(objectMapper.writeValueAsString(body));
+    if (contentType == null || contentType.isBlank()) {
+      if (body instanceof String strBody) {
+        res.setContentType("text/plain; charset=UTF-8");
+        res.getWriter().write(strBody);
+      } else {
+        res.setContentType("application/json; charset=UTF-8");
+        res.getWriter().write(objectMapper.writeValueAsString(body));
+      }
+      return;
+    }
+
+    res.setContentType(contentType);
+    res.getWriter().write(body.toString());
   }
 
   private void writeText(String body, MiniHttpServletResponse res) throws IOException {

@@ -14,6 +14,7 @@
  *
  * Copyright (C) [2018년] [SamuelSky]
  */
+
 package haru.core;
 
 import java.lang.reflect.Method;
@@ -31,7 +32,9 @@ import haru.core.context.MiniApplicationContext;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.LoggerManager;
-import haru.mvc.HandlerExecutor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import haru.mvc.HandlerAdapter;
 import haru.mvc.HandlerMapping;
 import haru.mvc.core.DispatcherServlet;
 import haru.mvc.interceptor.ExecutionTimeInterceptor;
@@ -42,15 +45,26 @@ import haru.mvc.view.JspResponseHandler;
 import haru.mvc.view.ResponseHandler;
 import haru.servlet.resource.MiniResourceHandler;
 import haru.servlet.security.SecurityFilter;
+import haru.mvc.argument.ArgumentResolver;
+import haru.mvc.argument.CommandObjectArgumentResolver;
+import haru.mvc.argument.ModelArgumentResolver;
+import haru.mvc.argument.RequestParamArgumentResolver;
+import haru.mvc.argument.ServletArgumentResolver;
+import haru.mvc.result.BodyWriter;
+import haru.mvc.result.BytesBodyWriter;
+import haru.mvc.result.JsonBodyWriter;
+import haru.mvc.result.TextBodyWriter;
 
 public class MiniDispatcherServlet implements DispatcherServlet {
 
   private final Map<String, HandlerMapping> handlerMappings = new ConcurrentHashMap<>();
   private final MiniApplicationContext appContext = new MiniApplicationContext();
   private final List<Interceptor> interceptors = List.of(new ExecutionTimeInterceptor());
+  private final HandlerAdapter handlerAdapter;
   private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
 
   public MiniDispatcherServlet(String basePackage) {
+    handlerAdapter = createHandlerAdapter();
     try {
       logger.info(() -> "basePackage : " + basePackage);
       appContext.initializeContext(basePackage);
@@ -149,9 +163,16 @@ public class MiniDispatcherServlet implements DispatcherServlet {
         ResponseHandler.handleNotFound(res, requestUri);
         return;
       }
-      HandlerExecutor.execute(mapping, req, res);
+      handlerAdapter.handle(mapping, req, res);
     } finally {
       chain.postHandle(req, res);
     }
+  }
+
+  private HandlerAdapter createHandlerAdapter() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    List<ArgumentResolver> argumentResolvers = List.of(new ServletArgumentResolver(), new ModelArgumentResolver(), new RequestParamArgumentResolver(), new CommandObjectArgumentResolver());
+    List<BodyWriter> bodyWriters = List.of(new JsonBodyWriter(objectMapper), new TextBodyWriter(), new BytesBodyWriter());
+    return new HandlerAdapter(objectMapper, argumentResolvers, bodyWriters);
   }
 }
