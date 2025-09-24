@@ -40,6 +40,8 @@ public class HandlerExecutor {
 
   public static void execute(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
 
+    logger.info("실행");
+    
     Model model = new ModelMap();
 
     miniHttpServletResponse.setStatus(HttpServletResponse.SC_OK);

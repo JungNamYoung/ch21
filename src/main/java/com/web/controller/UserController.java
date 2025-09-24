@@ -21,7 +21,7 @@ import haru.model.ModelMap;
 @Controller
 public class UserController {
 
-  private final Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
 
   @Autowired
   public UserService userService;

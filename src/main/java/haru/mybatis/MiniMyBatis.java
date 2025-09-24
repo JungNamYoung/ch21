@@ -18,7 +18,7 @@ import haru.transaction.SqlSessionTxHandler;
 
 public class MiniMyBatis {
 
-  private List<TransactionalSqlSession> TransactionalSqlSessions = new ArrayList<>();
+  private List<TransactionalSqlSession> transactionalSqlSessions = new ArrayList<>();
   private Map<String, TxHandler> txHandlers = new HashMap<>();
 
   public void initSessionFactory() {
@@ -37,24 +37,22 @@ public class MiniMyBatis {
     try {
       InputStream inputStream = Resources.getResourceAsStream(dbConfig);
       SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(inputStream);
+      SqlSession sqlSessionProxy = SqlSessionProxyFactory.create(factory);
 
-      // 수동 커밋 설정
-      SqlSession sqlSession = factory.openSession(false);
+      TransactionalSqlSession transactionalSqlSession = new TransactionalSqlSession(sessionId, transactionManagerName, factory, sqlSessionProxy);
 
-      TransactionalSqlSession transactionalSqlSession = new TransactionalSqlSession(sessionId, transactionManagerName, sqlSession);
+      transactionalSqlSessions.add(transactionalSqlSession);
 
-      TransactionalSqlSessions.add(transactionalSqlSession);
+      txHandlers.put(transactionManagerName, new SqlSessionTxHandler(factory));
 
     } catch (Exception ex) {
-      ex.printStackTrace();
+      throw new RuntimeException("SqlSessionFactory 로드 실패", ex);
     }
-    
-    txHandlers.put(transactionManagerName, new SqlSessionTxHandler(getSqlSessionByTxManager(transactionManagerName)));
   }
 
   public SqlSession getSqlSessionBySessionId(String sessionId) {
 
-    for (TransactionalSqlSession transactionalSqlSession : TransactionalSqlSessions) {
+    for (TransactionalSqlSession transactionalSqlSession : transactionalSqlSessions) {
       if (transactionalSqlSession.getSessionId().equals(sessionId))
         return transactionalSqlSession.getSqlSession();
     }
@@ -64,17 +62,8 @@ public class MiniMyBatis {
 
   public SqlSession getSqlSessionByType(Class<?> type) {
 
-	    for (TransactionalSqlSession transactionalSqlSession : TransactionalSqlSessions) {
-	      if (type.isAssignableFrom(transactionalSqlSession.getSqlSession().getClass()))
-	        return transactionalSqlSession.getSqlSession();
-	    }
-
-	    throw new RuntimeException(Define.NOT_APPLICABLE);
-	  }
-
-  public SqlSession getSqlSessionByTxManager(String transactionManagerName) {
-    for (TransactionalSqlSession transactionalSqlSession : TransactionalSqlSessions) {
-      if (transactionalSqlSession.getTransactionManagerName().equals(transactionManagerName))
+    for (TransactionalSqlSession transactionalSqlSession : transactionalSqlSessions) {
+      if (type.isAssignableFrom(transactionalSqlSession.getSqlSession().getClass()))
         return transactionalSqlSession.getSqlSession();
     }
 

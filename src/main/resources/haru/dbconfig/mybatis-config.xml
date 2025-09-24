@@ -17,7 +17,7 @@
         <property name="url" value="jdbc:mariadb://127.0.0.1:3307/web_container" />
         <property name="username" value="haru" />
         <property name="password" value="haru" />
-      <property name="poolPingEnabled" value="true" />
+        <property name="poolPingEnabled" value="true" />
         <property name="poolPingQuery" value="SELECT 1" />
         <property name="poolPingConnectionsNotUsedFor" value="600000" />
       </dataSource>

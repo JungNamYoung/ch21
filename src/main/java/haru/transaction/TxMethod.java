@@ -1,4 +1,6 @@
 package haru.transaction;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -16,20 +18,19 @@ public class TxMethod implements MethodInterceptor {
 
   @Override
   public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-    Object result = null;
     txHandler.begin();
     try {
-      result = method.invoke(originalBean, args);
+      Object result = method.invoke(originalBean, args);
       txHandler.commit();
+      return result;
+    } catch (InvocationTargetException ex) {
+      txHandler.rollback();
+      throw ex.getCause();
     } catch (Throwable ex) {
       txHandler.rollback();
-      ex.printStackTrace();
+      throw ex;
     } finally {
-      // by JNY
-      // 지우지 말것
-//			miniTxHandler.close();
+      txHandler.close();
     }
-
-    return result;
   }
 }

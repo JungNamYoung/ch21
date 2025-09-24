@@ -9,7 +9,7 @@ import haru.logger.LoggerManager;
 @Controller
 public class LoginController {
 
-  private final Logger logger = LoggerManager.getLogger(LoginController.class.getSimpleName());
+  private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
 
   @RequestMapping("/sayHello.do")
   public String sayHello() {

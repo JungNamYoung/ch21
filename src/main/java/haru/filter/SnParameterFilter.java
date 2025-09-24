@@ -10,7 +10,7 @@ import jakarta.servlet.ServletException;
 
 public class SnParameterFilter implements Filter {
 
-  static Logger logger = LoggerManager.getLogger(SnParameterFilter.class.getSimpleName());
+  Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
 
   @Override
   public void doFilter(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, FilterChain filterChain) throws IOException, ServletException {
