@@ -18,10 +18,10 @@ package haru.mvc.view;
 
 import java.util.List;
 
-import haru.define.Define;
+import haru.constants.Define;
+import haru.core.bootstrap.MiniServletContainer;
 import haru.http.MiniHttpServletResponse;
-import haru.kitten.MiniServletContainer;
-import haru.util.FileEx;
+import haru.support.FileEx;
 
 public class HtmlResponseHandler {
 

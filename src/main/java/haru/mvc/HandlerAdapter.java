@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import haru.define.Define;
+import haru.constants.Define;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.LoggerManager;
@@ -23,7 +23,7 @@ import haru.mvc.result.NoContentResult;
 import haru.mvc.result.RedirectResult;
 import haru.mvc.result.TextResult;
 import haru.mvc.result.ViewResult;
-import haru.servlet.MiniRequestDispatcher;
+import haru.servlet.view.MiniRequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 

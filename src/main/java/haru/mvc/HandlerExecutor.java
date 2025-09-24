@@ -27,20 +27,20 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import haru.annotation.mvc.RequestParam;
-import haru.define.Define;
+import haru.constants.Define;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.http.MiniHttpSession;
 import haru.logging.LoggerManager;
 import haru.mvc.model.Model;
 import haru.mvc.model.ModelMap;
-import haru.servlet.MiniRequestDispatcher;
+import haru.servlet.view.MiniRequestDispatcher;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class HandlerExecutor {
 
-  static Logger logger = LoggerManager.getLogger(HandlerExecutor.class.getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(HandlerExecutor.class.getSimpleName());
 
   public static void execute(HandlerMapping handlerMapping, MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
 

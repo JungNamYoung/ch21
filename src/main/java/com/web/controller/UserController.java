@@ -20,7 +20,7 @@ import haru.mvc.model.ModelMap;
 @Controller
 public class UserController {
 
-  private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(UserController.class.getSimpleName());
 
   @Autowired
   public UserService userService;

@@ -28,8 +28,8 @@ import java.util.Set;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
 
-import haru.define.Define;
-import haru.kitten.MiniServletContainer;
+import haru.constants.Define;
+import haru.core.bootstrap.MiniServletContainer;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.FilterRegistration.Dynamic;

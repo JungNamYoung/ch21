@@ -11,8 +11,8 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
-import haru.define.Define;
-import haru.define.Haru;
+import haru.constants.Define;
+import haru.constants.Haru;
 import haru.transaction.TxHandler;
 import haru.transaction.SqlSessionTxHandler;
 

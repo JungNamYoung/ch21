@@ -18,7 +18,7 @@ package haru.mvc;
 
 import java.lang.reflect.Method;
 
-import haru.kitten.BeanDefinition;
+import haru.core.context.BeanDefinition;
 
 public class HandlerMapping {
   private String requestPpath;

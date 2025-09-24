@@ -12,7 +12,7 @@ import haru.logging.LoggerManager;
 @Aspect
 public class TimeCheck {
   
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(TimeCheck.class.getSimpleName());
   
   @Before("com.web.controller.JobController.*")
   public void logBefore(Method method, Object target, Object[] args) {

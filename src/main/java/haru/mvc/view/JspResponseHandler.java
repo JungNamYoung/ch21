@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import haru.define.Define;
+import haru.constants.Define;
+import haru.core.bootstrap.MiniServletContainer;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.kitten.MiniServletContainer;
 import haru.logging.LoggerManager;
-import haru.servlet.MiniRequestDispatcher;
+import haru.servlet.view.MiniRequestDispatcher;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletResponse;
 

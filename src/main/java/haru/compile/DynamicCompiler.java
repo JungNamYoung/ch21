@@ -8,7 +8,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import haru.define.Define;
+import haru.constants.Define;
 
 public class DynamicCompiler {
   public void make(String str) {

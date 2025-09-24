@@ -20,7 +20,7 @@ package haru.http;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import haru.define.Haru;
+import haru.constants.Haru;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 

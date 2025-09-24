@@ -32,9 +32,9 @@ import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 
-import haru.define.Define;
-import haru.kitten.MiniServletContainer;
-import haru.servlet.MiniRequestDispatcher;
+import haru.constants.Define;
+import haru.core.bootstrap.MiniServletContainer;
+import haru.servlet.view.MiniRequestDispatcher;
 //import haru.config.MiniWebApplicationContext;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;

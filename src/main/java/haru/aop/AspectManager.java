@@ -9,10 +9,7 @@ import java.util.logging.Logger;
 import haru.annotation.aop.After;
 import haru.annotation.aop.Around;
 import haru.annotation.aop.Before;
-
-//import org.junit.Before;
-
-import haru.define.Define;
+import haru.constants.Define;
 import haru.logging.LoggerManager;
 import net.sf.cglib.proxy.Enhancer;
 

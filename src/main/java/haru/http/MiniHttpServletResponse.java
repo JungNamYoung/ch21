@@ -25,10 +25,10 @@ import java.util.logging.Logger;
 
 import com.sun.net.httpserver.HttpExchange;
 
-import haru.config.MiniServletOutputStream;
-import haru.define.Define;
-import haru.kitten.MiniServletContainer;
+import haru.constants.Define;
+import haru.core.bootstrap.MiniServletContainer;
 import haru.logging.LoggerManager;
+import haru.servlet.io.MiniServletOutputStream;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;

@@ -2,7 +2,7 @@ package haru.mvc.view;
 
 import java.util.logging.Logger;
 
-import haru.define.Define;
+import haru.constants.Define;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.LoggerManager;
 import jakarta.servlet.http.HttpServletResponse;

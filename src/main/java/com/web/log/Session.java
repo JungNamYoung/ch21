@@ -12,7 +12,7 @@ import haru.logging.LoggerManager;
 @Aspect
 public class Session {
   
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(Session.class.getSimpleName());
   
   @Before("com.web.controller.LoginController.*")
   public void logBefore(Method method, Object target, Object[] args) {

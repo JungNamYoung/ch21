@@ -10,8 +10,8 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import haru.define.Define;
-import haru.kitten.MiniServletContainer;
+import haru.constants.Define;
+import haru.core.bootstrap.MiniServletContainer;
 
 public class LoggerManager {
   private static final String LOG_FORMAT = "[haru][%1$s] %2$tT | %4$s | %5$s | %3$s";
