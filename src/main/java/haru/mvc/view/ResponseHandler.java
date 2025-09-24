@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class ResponseHandler {
 
-  private static Logger logger = LoggerManager.getLogger(ResponseHandler.class.getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(ResponseHandler.class.getSimpleName());
 
   public static void handleNotFound(MiniHttpServletResponse miniHttpServletResponse, String requestUri) {
     try {

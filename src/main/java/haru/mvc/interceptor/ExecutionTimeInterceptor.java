@@ -10,7 +10,7 @@ public class ExecutionTimeInterceptor implements Interceptor {
 
   private static final String START_TIME = "startTime";
 
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(ExecutionTimeInterceptor.class.getSimpleName());
 
   @Override
   public void preHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {

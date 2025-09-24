@@ -28,7 +28,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class HandlerAdapter {
-  private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(HandlerAdapter.class.getSimpleName());
   private final ObjectMapper objectMapper;
   private final List<ArgumentResolver> argumentResolvers;
   private final List<BodyWriter> bodyWriters;

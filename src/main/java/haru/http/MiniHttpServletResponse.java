@@ -35,7 +35,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class MiniHttpServletResponse implements HttpServletResponse {
 
-  static Logger logger = LoggerManager.getLogger(MiniHttpServletResponse.class.getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(MiniHttpServletResponse.class.getSimpleName());
 
   private final HttpExchange exchange;
   private OutputStream outputStream;

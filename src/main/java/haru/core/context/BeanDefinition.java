@@ -9,7 +9,7 @@ public class BeanDefinition {
   private final Object targetBean;
   private final Object proxyInstance;
   
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(BeanDefinition.class.getSimpleName());
 
   public BeanDefinition(String beanName, Object targetBean, Object proxyInstance) {
     this.beanName = beanName;

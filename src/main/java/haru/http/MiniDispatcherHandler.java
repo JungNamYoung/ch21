@@ -44,7 +44,7 @@ public class MiniDispatcherHandler implements HttpHandler {
   MiniServletContext miniServletContext;
   MiniDispatcherServlet miniDispatcherServlet;
 
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(MiniDispatcherHandler.class.getSimpleName());
 
   public MiniDispatcherHandler(MiniServletContext miniServletContext, MiniDispatcherServlet miniDispatcherServlet) {
     this.miniServletContext = miniServletContext;

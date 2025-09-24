@@ -46,7 +46,7 @@ public class MiniApplicationContext {
   private Map<Class<? extends Annotation>, Set<Class<?>>> annotatedClasses = new HashMap<>();
   private AspectManager aspectManager = new AspectManager();
   MiniMyBatis miniMyBatis = new MiniMyBatis();
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(MiniApplicationContext.class.getSimpleName());
 
   public void initializeContext(String basePackage) {
     try {

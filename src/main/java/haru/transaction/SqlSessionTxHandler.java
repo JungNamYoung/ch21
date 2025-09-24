@@ -10,7 +10,7 @@ import haru.mybatis.SqlSessionContext;
 
 public class SqlSessionTxHandler implements TxHandler {
   private SqlSessionFactory sqlSessionFactory;
-  static Logger logger = LoggerManager.getLogger(SqlSessionTxHandler.class.getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(SqlSessionTxHandler.class.getSimpleName());
 
   public SqlSessionTxHandler(SqlSessionFactory sqlSessionFactory) {
     this.sqlSessionFactory = sqlSessionFactory;

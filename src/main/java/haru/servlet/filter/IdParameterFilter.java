@@ -10,7 +10,7 @@ import jakarta.servlet.ServletException;
 
 public class IdParameterFilter implements Filter {
 
-  Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(IdParameterFilter.class.getSimpleName());
 
   @Override
   public void doFilter(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, FilterChain filterChain) throws IOException, ServletException {

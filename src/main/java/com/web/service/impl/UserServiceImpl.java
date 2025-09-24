@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
   @Autowired
   SqlSession sqlSessionUser;
 
-  private final Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(UserServiceImpl.class.getSimpleName());
   
   private static String SQL_NAMESPACE = "com.web.service.impl.UserMapper.";
   

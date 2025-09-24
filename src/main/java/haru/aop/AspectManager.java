@@ -17,7 +17,7 @@ public class AspectManager {
   
   List<Object> aspectHolderList = new ArrayList<>();
   
-  Logger logger = LoggerManager.getLogger(this.getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(AspectManager.class.getSimpleName());
 
   public List<Object> findBeanAspect(Object bean) {
 

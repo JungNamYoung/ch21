@@ -64,7 +64,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
   private String jspPath;
   private String webInf;
   private MiniServletContext miniServletContext;
-  static Logger logger = LoggerManager.getLogger(MiniRequestDispatcher.class.getSimpleName());
+  private static Logger logger = LoggerManager.getLogger(MiniRequestDispatcher.class.getSimpleName());
 
   public MiniRequestDispatcher(String webAppRoot, String relativePath) {
     this.webAppRoot = webAppRoot;

@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JspResponseHandler {
 
-  static Logger logger = LoggerManager.getLogger(JspResponseHandler.class.getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(JspResponseHandler.class.getSimpleName());
 
   public static boolean handle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     String requestUri = miniHttpServletRequest.getRequestURI();

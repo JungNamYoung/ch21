@@ -61,7 +61,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private final MiniApplicationContext appContext = new MiniApplicationContext();
   private final List<Interceptor> interceptors = List.of(new ExecutionTimeInterceptor());
   private final HandlerAdapter handlerAdapter;
-  private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(MiniDispatcherServlet.class.getSimpleName());
 
   public MiniDispatcherServlet(String basePackage) {
     handlerAdapter = createHandlerAdapter();

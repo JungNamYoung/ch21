@@ -30,7 +30,7 @@ public class MiniAnnotationScanner {
   private final String basePackageName; // 예 : "app.web"
   private final String baseResourcePath; // 예 : "app/web"
   private final ClassLoader classLoader;
-  private final Logger logger = LoggerManager.getLogger(getClass().getSimpleName());
+  private static final Logger logger = LoggerManager.getLogger(MiniAnnotationScanner.class.getSimpleName());
 
   private final Map<Class<? extends Annotation>, Set<Class<?>>> cache = new ConcurrentHashMap<>();
 
