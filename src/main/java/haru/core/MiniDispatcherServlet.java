@@ -148,7 +148,9 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
     if (SecurityFilter.isRestricted(requestUrl, res))
       return;
+    
     InterceptorChain chain = new InterceptorChain(interceptors);
+    
     try {
       chain.preHandle(req, res);
 

@@ -11,23 +11,22 @@ import haru.servlet.filter.FilterChain;
 import haru.servlet.filter.MiniFilter;
 import jakarta.servlet.ServletException;
 
-@Filter(order=1, urlPatterns="/*")
+@Filter(order = 1, urlPatterns = "/*")
 public class ExecutionTimeFilter implements MiniFilter {
 
-  private static Logger logger = MiniLogger.getLogger(ExecutionTimeFilter.class.getSimpleName());
-  
+  private static final Logger logger = MiniLogger.getLogger(ExecutionTimeFilter.class.getSimpleName());
+
   @Override
   public void doFilter(MiniHttpServletRequest miniRequest, MiniHttpServletResponse miniResponse, FilterChain filterChain) throws IOException, ServletException {
+    
     String requestURI = miniRequest.getRequestURI();
 
-      long startTime = System.currentTimeMillis();
-      
-      logger.info(requestURI + " 요청 시작");
-      
-      filterChain.doFilter(miniRequest, miniResponse);
-      
-      long endTime = System.currentTimeMillis();
-      
-      logger.info(requestURI + " 처리 완료, 실행 시간: " + (endTime - startTime) + "ms");
+    logger.info(requestURI + " 요청 시작");
+    long startTime = System.currentTimeMillis();
+
+    filterChain.doFilter(miniRequest, miniResponse);
+
+    long endTime = System.currentTimeMillis();
+    logger.info(requestURI + " 처리 완료, 실행 시간: " + (endTime - startTime) + "ms");
   }
 }
