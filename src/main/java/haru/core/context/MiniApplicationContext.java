@@ -38,6 +38,7 @@ import haru.annotation.web.Filter;
 import haru.aop.AspectManager;
 import haru.constants.Define;
 import haru.logging.LoggerManager;
+import haru.mvc.FilterRegistry;
 import haru.mybatis.MiniMyBatis;
 import haru.transaction.TransactionalProxyRegister;
 
@@ -52,6 +53,7 @@ public class MiniApplicationContext {
   public void initializeContext(String basePackage) {
     try {
       scanAnnotatedClasses(basePackage);
+      registerFilters();
       initTransactionAndAop();
       initializeBeans();
       injectDependencies();
@@ -67,6 +69,10 @@ public class MiniApplicationContext {
     registerAnnotatedClasses(Controller.class, scanner);
     registerAnnotatedClasses(Aspect.class, scanner);
     registerAnnotatedClasses(Filter.class, scanner);
+  }
+
+  private void registerFilters() {
+    getAnnotatedClasses(Filter.class).forEach(FilterRegistry::register);
   }
 
   private void initTransactionAndAop() throws Exception {
