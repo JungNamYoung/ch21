@@ -9,11 +9,11 @@ import haru.mvc.core.DispatcherServlet;
 import jakarta.servlet.ServletException;
 
 public class MiniFilterChain implements FilterChain {
-  private List<Filter> filters;
+  private List<MiniFilter> filters;
   private int currentPosition = 0;
   private DispatcherServlet dispatcherServlet;
 
-  public MiniFilterChain(List<Filter> filters, DispatcherServlet dispatcherServlet) {
+  public MiniFilterChain(List<MiniFilter> filters, DispatcherServlet dispatcherServlet) {
     this.filters = filters;
     this.dispatcherServlet = dispatcherServlet;
   }
@@ -21,7 +21,7 @@ public class MiniFilterChain implements FilterChain {
   @Override
   public void doFilter(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) throws IOException, ServletException {
     if (currentPosition < filters.size()) {
-      Filter nextFilter = filters.get(currentPosition++);
+      MiniFilter nextFilter = filters.get(currentPosition++);
       nextFilter.doFilter(miniHttpServletRequest, miniHttpServletResponse, this);
     } else {
       dispatcherServlet.service(miniHttpServletRequest, miniHttpServletResponse);

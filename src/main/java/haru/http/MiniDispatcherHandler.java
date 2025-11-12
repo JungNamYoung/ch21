@@ -33,7 +33,7 @@ import haru.http.session.MiniSessionManager;
 import haru.logging.LoggerManager;
 import haru.mvc.FilterRegistry;
 import haru.servlet.MiniServletContext;
-import haru.servlet.filter.Filter;
+import haru.servlet.filter.MiniFilter;
 import haru.servlet.filter.FilterChain;
 import haru.servlet.filter.MiniFilterChain;
 import jakarta.servlet.ServletException;
@@ -81,7 +81,7 @@ public class MiniDispatcherHandler implements HttpHandler {
     
     String uri = miniHttpServletRequest.getRequestURI();
     
-    List<Filter> filters = FilterRegistry.getFiltersFor(uri);
+    List<MiniFilter> filters = FilterRegistry.getFiltersFor(uri);
 
 //    List<Filter> filters = new ArrayList<>();
 //    filters.add(new SnParameterFilter());

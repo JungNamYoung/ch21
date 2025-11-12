@@ -13,7 +13,7 @@ import jakarta.servlet.ServletException;
 
 
 @Filter(order=2, urlPatterns="/api/*")
-public class IdParameterFilter implements haru.servlet.filter.Filter {
+public class IdParameterFilter implements haru.servlet.filter.MiniFilter {
 
   private static final Logger logger = LoggerManager.getLogger(IdParameterFilter.class.getSimpleName());
 

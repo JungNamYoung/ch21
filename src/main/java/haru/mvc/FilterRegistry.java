@@ -11,7 +11,7 @@ public class FilterRegistry {
     if (clazz.isAnnotationPresent(Filter.class)) {
       Filter annotation = clazz.getAnnotation(Filter.class);
       try {
-        haru.servlet.filter.Filter filter = (haru.servlet.filter.Filter) clazz.getDeclaredConstructor().newInstance();
+        haru.servlet.filter.MiniFilter filter = (haru.servlet.filter.MiniFilter) clazz.getDeclaredConstructor().newInstance();
         filters.add(new FilterEntry(annotation.order(), annotation.urlPatterns(), filter));
 //        filters.sort(Comparator.comparingInt(FilterEntry::getOrder));
       } catch (Exception e) {
@@ -20,8 +20,8 @@ public class FilterRegistry {
     }
   }
 
-  public static List<haru.servlet.filter.Filter> getFiltersFor(String requestURI) {
-    List<haru.servlet.filter.Filter> matched = new ArrayList<>();
+  public static List<haru.servlet.filter.MiniFilter> getFiltersFor(String requestURI) {
+    List<haru.servlet.filter.MiniFilter> matched = new ArrayList<>();
     for (FilterEntry entry : filters) {
       for (String pattern : entry.urlPatterns) {
         if (matches(pattern, requestURI)) {
@@ -40,6 +40,6 @@ public class FilterRegistry {
     return uri.equals(pattern);
   }
 
-  private record FilterEntry(int order, String[] urlPatterns, haru.servlet.filter.Filter filter) {
+  private record FilterEntry(int order, String[] urlPatterns, haru.servlet.filter.MiniFilter filter) {
   }
 }

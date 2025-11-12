@@ -6,6 +6,6 @@ import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import jakarta.servlet.ServletException;
 
-public interface Filter {
+public interface MiniFilter {
   void doFilter(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, FilterChain chain) throws IOException, ServletException;
 }

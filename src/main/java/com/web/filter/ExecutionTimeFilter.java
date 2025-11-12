@@ -2,13 +2,15 @@ package com.web.filter;
 
 import java.io.IOException;
 
+import haru.annotation.web.Filter;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.servlet.filter.Filter;
 import haru.servlet.filter.FilterChain;
+import haru.servlet.filter.MiniFilter;
 import jakarta.servlet.ServletException;
 
-public class ExecutionTimeFilter implements Filter {
+@Filter(order=1, urlPatterns="/*")
+public class ExecutionTimeFilter implements MiniFilter {
 
   @Override
   public void doFilter(MiniHttpServletRequest miniRequest, MiniHttpServletResponse miniResponse, FilterChain chain) throws IOException, ServletException {

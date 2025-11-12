@@ -11,7 +11,7 @@ import jakarta.servlet.ServletException;
 import haru.annotation.web.Filter;
 
 @Filter(order=1, urlPatterns="/*")
-public class SnParameterFilter implements haru.servlet.filter.Filter {
+public class SnParameterFilter implements haru.servlet.filter.MiniFilter {
 
   private static final Logger logger = LoggerManager.getLogger(SnParameterFilter.class.getSimpleName());
 
