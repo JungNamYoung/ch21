@@ -6,16 +6,16 @@ import java.util.logging.Logger;
 import haru.annotation.web.Filter;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.logging.LoggerManager;
-//import haru.servlet.filter.Filter;
+import haru.logging.MiniLogger;
 import haru.servlet.filter.FilterChain;
+import haru.servlet.filter.MiniFilter;
 import jakarta.servlet.ServletException;
 
 
 @Filter(order=2, urlPatterns="/api/*")
-public class IdParameterFilter implements haru.servlet.filter.MiniFilter {
+public class IdParameterFilter implements MiniFilter {
 
-  private static final Logger logger = LoggerManager.getLogger(IdParameterFilter.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(IdParameterFilter.class.getSimpleName());
 
   @Override
   public void doFilter(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, FilterChain filterChain) throws IOException, ServletException {

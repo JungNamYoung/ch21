@@ -5,12 +5,12 @@ import java.util.logging.Logger;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.mybatis.SqlSessionContext;
 
 public class SqlSessionTxHandler implements TxHandler {
   private SqlSessionFactory sqlSessionFactory;
-  private static final Logger logger = LoggerManager.getLogger(SqlSessionTxHandler.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(SqlSessionTxHandler.class.getSimpleName());
 
   public SqlSessionTxHandler(SqlSessionFactory sqlSessionFactory) {
     this.sqlSessionFactory = sqlSessionFactory;

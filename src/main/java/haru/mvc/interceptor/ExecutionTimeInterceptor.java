@@ -4,13 +4,13 @@ import java.util.logging.Logger;
 
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 
 public class ExecutionTimeInterceptor implements Interceptor {
 
   private static final String START_TIME = "startTime";
 
-  private static final Logger logger = LoggerManager.getLogger(ExecutionTimeInterceptor.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(ExecutionTimeInterceptor.class.getSimpleName());
 
   @Override
   public void preHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {

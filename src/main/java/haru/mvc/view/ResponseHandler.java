@@ -4,12 +4,12 @@ import java.util.logging.Logger;
 
 import haru.constants.Define;
 import haru.http.MiniHttpServletResponse;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class ResponseHandler {
 
-  private static final Logger logger = LoggerManager.getLogger(ResponseHandler.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(ResponseHandler.class.getSimpleName());
 
   public static void handleNotFound(MiniHttpServletResponse miniHttpServletResponse, String requestUri) {
     try {

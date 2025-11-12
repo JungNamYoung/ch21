@@ -8,13 +8,13 @@ import java.util.logging.Logger;
 
 import net.sf.cglib.proxy.Enhancer;
 import haru.annotation.aop.Transactional;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 
 public class TransactionalProxyRegister {
 
   List<TransactionalMetadata> transactionalMetadataList = new ArrayList<>();
 
-  private static final Logger logger = LoggerManager.getLogger(TransactionalProxyRegister.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(TransactionalProxyRegister.class.getSimpleName());
 
   public void registerTransactionalClasses(Set<Class<?>> serviceClasses) {
     for (Class<?> serviceClass : serviceClasses) {

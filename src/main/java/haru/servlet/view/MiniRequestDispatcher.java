@@ -45,7 +45,7 @@ import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.http.MiniHttpSession;
 import haru.http.wrapper.MiniHttServletRequestWrapper;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.servlet.MiniServletContext;
 import haru.servlet.config.MiniServletConfig;
 import haru.support.IdentifierUtil;
@@ -64,7 +64,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
   private String jspPath;
   private String webInf;
   private MiniServletContext miniServletContext;
-  private static Logger logger = LoggerManager.getLogger(MiniRequestDispatcher.class.getSimpleName());
+  private static Logger logger = MiniLogger.getLogger(MiniRequestDispatcher.class.getSimpleName());
 
   public MiniRequestDispatcher(String webAppRoot, String relativePath) {
     this.webAppRoot = webAppRoot;

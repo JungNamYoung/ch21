@@ -2,14 +2,14 @@ package haru.core.context;
 
 import java.util.logging.Logger;
 
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 
 public class BeanDefinition {
   private final String beanName;
   private final Object targetBean;
   private final Object proxyInstance;
   
-  private static final Logger logger = LoggerManager.getLogger(BeanDefinition.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(BeanDefinition.class.getSimpleName());
 
   public BeanDefinition(String beanName, Object targetBean, Object proxyInstance) {
     this.beanName = beanName;

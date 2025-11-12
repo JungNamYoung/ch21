@@ -23,14 +23,14 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import haru.constants.Define;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 
 public class MiniAnnotationScanner {
 
   private final String basePackageName; // 예 : "app.web"
   private final String baseResourcePath; // 예 : "app/web"
   private final ClassLoader classLoader;
-  private static final Logger logger = LoggerManager.getLogger(MiniAnnotationScanner.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(MiniAnnotationScanner.class.getSimpleName());
 
   private final Map<Class<? extends Annotation>, Set<Class<?>>> cache = new ConcurrentHashMap<>();
 

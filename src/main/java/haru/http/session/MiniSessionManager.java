@@ -11,12 +11,12 @@ import java.util.logging.Logger;
 import haru.constants.Define;
 import haru.http.MiniHttpSession;
 //import haru.config.MiniHttpSession;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import jakarta.servlet.ServletContext;
 
 public class MiniSessionManager {
   private static final Map<String, MiniHttpSession> sessions = new ConcurrentHashMap<>();
-  private static final Logger logger = LoggerManager.getLogger(MiniSessionManager.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(MiniSessionManager.class.getSimpleName());
 
   public static MiniHttpSession createSession(ServletContext context) {
     MiniHttpSession miniHttpSession = new MiniHttpSession(context);

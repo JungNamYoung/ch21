@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import haru.constants.Define;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.mvc.argument.ArgumentResolver;
 import haru.mvc.model.Model;
 import haru.mvc.model.ModelMap;
@@ -28,7 +28,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class HandlerAdapter {
-  private static final Logger logger = LoggerManager.getLogger(HandlerAdapter.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(HandlerAdapter.class.getSimpleName());
   private final ObjectMapper objectMapper;
   private final List<ArgumentResolver> argumentResolvers;
   private final List<BodyWriter> bodyWriters;

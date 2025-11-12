@@ -13,14 +13,14 @@ import haru.annotation.mvc.RequestMapping;
 import haru.annotation.mvc.RequestParam;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpSession;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.mvc.model.Model;
 import haru.mvc.model.ModelMap;
 
 @Controller
 public class UserController {
 
-  private static final Logger logger = LoggerManager.getLogger(UserController.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(UserController.class.getSimpleName());
 
   @Autowired
   public UserService userService;

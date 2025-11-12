@@ -27,12 +27,12 @@ import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class MiniResourceHandler {
 
-  private static final Logger logger = LoggerManager.getLogger(MiniResourceHandler.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(MiniResourceHandler.class.getSimpleName());
 
   public static boolean handle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     String requestUri = miniHttpServletRequest.getRequestURI();

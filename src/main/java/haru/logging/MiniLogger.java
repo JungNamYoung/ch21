@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public class LoggerManager {
+public class MiniLogger {
   private static final String LOG_FORMAT = "[haru][%1$s] %2$tT | %4$s | %5$s | %3$s";
 
   public static Logger getLogger(String name) {

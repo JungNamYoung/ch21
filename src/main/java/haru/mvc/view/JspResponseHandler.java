@@ -9,14 +9,14 @@ import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.servlet.view.MiniRequestDispatcher;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class JspResponseHandler {
 
-  private static final Logger logger = LoggerManager.getLogger(JspResponseHandler.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(JspResponseHandler.class.getSimpleName());
 
   public static boolean handle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
     String requestUri = miniHttpServletRequest.getRequestURI();

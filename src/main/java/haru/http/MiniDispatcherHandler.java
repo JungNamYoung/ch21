@@ -23,14 +23,12 @@ import java.util.logging.Logger;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-//import com.web.filter.IdParameterFilter;
-//import com.web.filter.SnParameterFilter;
 
 import haru.constants.Define;
 import haru.core.MiniDispatcherServlet;
 import haru.core.bootstrap.MiniServletContainer;
 import haru.http.session.MiniSessionManager;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.mvc.FilterRegistry;
 import haru.servlet.MiniServletContext;
 import haru.servlet.filter.MiniFilter;
@@ -44,7 +42,7 @@ public class MiniDispatcherHandler implements HttpHandler {
   MiniServletContext miniServletContext;
   MiniDispatcherServlet miniDispatcherServlet;
 
-  private static final Logger logger = LoggerManager.getLogger(MiniDispatcherHandler.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(MiniDispatcherHandler.class.getSimpleName());
 
   public MiniDispatcherHandler(MiniServletContext miniServletContext, MiniDispatcherServlet miniDispatcherServlet) {
     this.miniServletContext = miniServletContext;

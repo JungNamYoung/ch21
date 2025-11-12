@@ -31,7 +31,7 @@ import haru.core.context.BeanDefinition;
 import haru.core.context.MiniApplicationContext;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import haru.mvc.HandlerAdapter;
@@ -61,7 +61,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private final MiniApplicationContext appContext = new MiniApplicationContext();
   private final List<Interceptor> interceptors = List.of(new ExecutionTimeInterceptor());
   private final HandlerAdapter handlerAdapter;
-  private static final Logger logger = LoggerManager.getLogger(MiniDispatcherServlet.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(MiniDispatcherServlet.class.getSimpleName());
 
   public MiniDispatcherServlet(String basePackage) {
     handlerAdapter = createHandlerAdapter();

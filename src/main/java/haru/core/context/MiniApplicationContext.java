@@ -37,7 +37,7 @@ import haru.annotation.mvc.Controller;
 import haru.annotation.web.Filter;
 import haru.aop.AspectManager;
 import haru.constants.Define;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.mvc.FilterRegistry;
 import haru.mybatis.MiniMyBatis;
 import haru.transaction.TransactionalProxyRegister;
@@ -48,7 +48,7 @@ public class MiniApplicationContext {
   private Map<Class<? extends Annotation>, Set<Class<?>>> annotatedClasses = new HashMap<>();
   private AspectManager aspectManager = new AspectManager();
   MiniMyBatis miniMyBatis = new MiniMyBatis();
-  private static final Logger logger = LoggerManager.getLogger(MiniApplicationContext.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(MiniApplicationContext.class.getSimpleName());
 
   public void initializeContext(String basePackage) {
     try {

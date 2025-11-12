@@ -4,12 +4,12 @@ import java.util.logging.Logger;
 
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 
 @Controller
 public class LoginController {
 
-  private static final Logger logger = LoggerManager.getLogger(LoginController.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(LoginController.class.getSimpleName());
 
   @RequestMapping("/sayHello.do")
   public String sayHello() {

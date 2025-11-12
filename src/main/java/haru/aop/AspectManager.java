@@ -10,14 +10,14 @@ import haru.annotation.aop.After;
 import haru.annotation.aop.Around;
 import haru.annotation.aop.Before;
 import haru.constants.Define;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import net.sf.cglib.proxy.Enhancer;
 
 public class AspectManager {
   
   List<Object> aspectHolderList = new ArrayList<>();
   
-  private static final Logger logger = LoggerManager.getLogger(AspectManager.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(AspectManager.class.getSimpleName());
 
   public List<Object> findBeanAspect(Object bean) {
 

@@ -27,7 +27,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 import haru.servlet.io.MiniServletOutputStream;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.Cookie;
@@ -35,7 +35,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class MiniHttpServletResponse implements HttpServletResponse {
 
-  private static final Logger logger = LoggerManager.getLogger(MiniHttpServletResponse.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(MiniHttpServletResponse.class.getSimpleName());
 
   private final HttpExchange exchange;
   private OutputStream outputStream;

@@ -14,7 +14,7 @@ import haru.annotation.aop.Transactional;
 import haru.annotation.di.Autowired;
 import haru.annotation.di.Repository;
 import haru.annotation.di.Service;
-import haru.logging.LoggerManager;
+import haru.logging.MiniLogger;
 
 @Service("userService")
 //@Repository("userService")
@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
   @Autowired
   SqlSession sqlSessionUser;
 
-  private static final Logger logger = LoggerManager.getLogger(UserServiceImpl.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(UserServiceImpl.class.getSimpleName());
   
   private static String SQL_NAMESPACE = "com.web.service.impl.UserMapper.";
   
