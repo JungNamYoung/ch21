@@ -38,12 +38,13 @@ import haru.mvc.HandlerAdapter;
 import haru.mvc.HandlerMapping;
 import haru.mvc.core.DispatcherServlet;
 import haru.mvc.interceptor.ExecutionTimeInterceptor;
-import haru.mvc.interceptor.Interceptor;
+import haru.mvc.interceptor.MiniInterceptor;
 import haru.mvc.interceptor.InterceptorChain;
 import haru.mvc.view.HtmlResponseHandler;
 import haru.mvc.view.JspResponseHandler;
 import haru.mvc.view.ResponseHandler;
 import haru.servlet.resource.MiniResourceHandler;
+import haru.servlet.resource.WelcomeFileResolver;
 import haru.servlet.security.SecurityFilter;
 import haru.mvc.argument.ArgumentResolver;
 import haru.mvc.argument.CommandObjectArgumentResolver;
@@ -59,7 +60,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
   private final Map<String, HandlerMapping> handlerMappings = new ConcurrentHashMap<>();
   private final MiniApplicationContext appContext = new MiniApplicationContext();
-  private final List<Interceptor> interceptors = List.of(new ExecutionTimeInterceptor());
+  private final List<MiniInterceptor> interceptors = List.of(new ExecutionTimeInterceptor());
   private final HandlerAdapter handlerAdapter;
   private static final Logger logger = MiniLogger.getLogger(MiniDispatcherServlet.class.getSimpleName());
 
@@ -142,15 +143,23 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
   @Override
   public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
-    final String requestUrl = req.getRequestURI();
+    String requestUrl = req.getRequestURI();
+    String welcomeFile = WelcomeFileResolver.resolve(requestUrl);
+    
+    if (welcomeFile != null) {
+      req.setRequestURI(welcomeFile);
+      requestUrl = welcomeFile;
+    }
+
     final String contextPath = MiniServletContainer.getContextPath();
-    logger.info(() -> "requestUrl : " + requestUrl);
+    final String logRequestUrl = requestUrl;
+    logger.info(() -> "requestUrl : " + logRequestUrl);
 
     if (SecurityFilter.isRestricted(requestUrl, res))
       return;
-    
+
     InterceptorChain chain = new InterceptorChain(interceptors);
-    
+
     try {
       chain.preHandle(req, res);
 

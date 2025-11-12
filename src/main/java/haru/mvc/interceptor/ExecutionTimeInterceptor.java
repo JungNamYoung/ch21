@@ -6,7 +6,7 @@ import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.MiniLogger;
 
-public class ExecutionTimeInterceptor implements Interceptor {
+public class ExecutionTimeInterceptor implements MiniInterceptor {
 
   private static final String START_TIME = "startTime";
 

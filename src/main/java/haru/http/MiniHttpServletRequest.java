@@ -58,6 +58,7 @@ public class MiniHttpServletRequest implements HttpServletRequest {
   private final Map<String, String> parameters = new HashMap<>();
   private Map<String, Object> attributes = new HashMap<>();
   private MiniHttpSession session;
+  private String requestUriOverride;
 
   public MiniHttpServletRequest(HttpExchange exchange) {
     this.exchange = exchange;
@@ -89,9 +90,16 @@ public class MiniHttpServletRequest implements HttpServletRequest {
 
   @Override
   public String getRequestURI() {
+    if (requestUriOverride != null) {
+      return requestUriOverride;
+    }
     return exchange.getRequestURI().getPath();
   }
 
+  public void setRequestURI(String requestUri) {
+    this.requestUriOverride = requestUri;
+   }
+  
   @Override
   public String getMethod() {
     return exchange.getRequestMethod();
@@ -535,7 +543,7 @@ public class MiniHttpServletRequest implements HttpServletRequest {
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   public void setSession(MiniHttpSession session) {
     this.session = session;
   }

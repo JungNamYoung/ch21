@@ -1,0 +1,1 @@
+WELCOME-FILES=index.html;index.jsp;index.htm;default.html

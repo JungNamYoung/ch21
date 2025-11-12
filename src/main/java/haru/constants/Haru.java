@@ -11,4 +11,5 @@ public class Haru {
   public static final String ROOT_PACKAGE = "haru";
   public static final int SESSION_ACTIVE_SECOND = 1800;
   public static final String CONFIG_HARU = "haru/appconfig/haru.txt";
+  public static final String CONFIG_SERVLET = "haru/appconfig/servlet.txt";
 }
