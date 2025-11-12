@@ -121,7 +121,7 @@ public class UtilExt {
     }
 
     try {
-      Object v = tokenEx != null ? tokenEx.get(Haru.ROOT_PATH) : null;
+      Object v = tokenEx != null ? tokenEx.get(Haru.DOC_BASE) : null;
       if (v != null) {
         String cfg = String.valueOf(v).trim();
         if (!cfg.isEmpty()) {

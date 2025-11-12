@@ -1,4 +1,4 @@
-ROOT_PATH=src/main/webapp
-BASE_PACKAGE=com.web
-PORT = 8580
-CONTEXT_PATH = /haru
+
+app.base.package=com.web
+server.port = 8580
+server.context.path= /haru

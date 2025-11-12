@@ -30,7 +30,7 @@ public class LineEx {
   }
 
   public static void main(String[] args) {
-    String src = "ROOT_PATH=src/main/webapp\nSCAN_PACKAGE=com.national";
+    String src = "servlet.doc.base=src/main/webapp\nSCAN_PACKAGE=com.national";
     ArrayList<String> list = toLines(src);
     System.out.println(list);
   }

@@ -1,1 +1,2 @@
-WELCOME-FILES=index.html;index.jsp;index.htm;default.html
+servlet.doc.base=src/main/webapp
+servlet.welcome.files=index.html;index.jsp;index.htm;default.html

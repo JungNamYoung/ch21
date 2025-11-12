@@ -34,7 +34,7 @@ public final class WelcomeFileResolver {
 //    List<String> files = LineEx.toEffectiveLines(text).stream().map(String::trim).filter(line -> !line.isEmpty()).collect(Collectors.toList());
       TokenEx tokenEx = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_SERVLET));
       
-      List<String> files = parseFiles(tokenEx.get("WELCOME-FILES"));
+      List<String> files = parseFiles(tokenEx.get("servlet.welcome.files"));
       if (files.isEmpty()) {
         return DEFAULT_WELCOME_FILES;
       }
