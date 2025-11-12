@@ -34,6 +34,7 @@ import haru.annotation.di.Repository;
 import haru.annotation.di.Resource;
 import haru.annotation.di.Service;
 import haru.annotation.mvc.Controller;
+import haru.annotation.web.Filter;
 import haru.aop.AspectManager;
 import haru.constants.Define;
 import haru.logging.LoggerManager;
@@ -65,6 +66,7 @@ public class MiniApplicationContext {
     registerAnnotatedClasses(Repository.class, scanner);
     registerAnnotatedClasses(Controller.class, scanner);
     registerAnnotatedClasses(Aspect.class, scanner);
+    registerAnnotatedClasses(Filter.class, scanner);
   }
 
   private void initTransactionAndAop() throws Exception {

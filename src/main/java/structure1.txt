@@ -1,0 +1,43 @@
+
+ 폴더와 파일 모두 보기       : tree /f /a > structure.txt 전체 계층 확인용
+ 
+ 폴더만 보기               :  tree /a > structure.txt   책/문서용 구조도
+ 
+ ascii 대신 그래픽 선으로 표시: tree                 콘솔 보기용
+
+\---haru
+    +---annotation
+    |   +---aop
+    |   +---di
+    |   +---jdbc
+    |   \---mvc
+    +---aop
+    +---compile
+    +---constants
+    +---core
+    |   +---bootstrap
+    |   \---context
+    +---http
+    |   +---session
+    |   \---wrapper
+    +---logging
+    +---mvc
+    |   +---argument
+    |   +---core
+    |   +---interceptor
+    |   +---model
+    |   +---result
+    |   \---view
+    +---mybatis
+    +---reflection
+    |   +---delete
+    |   \---temporary
+    +---servlet
+    |   +---config
+    |   +---filter
+    |   +---io
+    |   +---resource
+    |   +---security
+    |   \---view
+    +---support
+    \---transaction

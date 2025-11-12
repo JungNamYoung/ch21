@@ -17,25 +17,25 @@
 package haru.http;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+//import com.web.filter.IdParameterFilter;
+//import com.web.filter.SnParameterFilter;
 
 import haru.constants.Define;
 import haru.core.MiniDispatcherServlet;
 import haru.core.bootstrap.MiniServletContainer;
 import haru.http.session.MiniSessionManager;
 import haru.logging.LoggerManager;
+import haru.mvc.FilterRegistry;
 import haru.servlet.MiniServletContext;
 import haru.servlet.filter.Filter;
 import haru.servlet.filter.FilterChain;
-import haru.servlet.filter.IdParameterFilter;
 import haru.servlet.filter.MiniFilterChain;
-import haru.servlet.filter.SnParameterFilter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -78,10 +78,14 @@ public class MiniDispatcherHandler implements HttpHandler {
     MiniHttpServletResponse miniHttpServletResponse = new MiniHttpServletResponse(exchange);
 
     miniHttpServletRequest.setSession(miniHttpSession);
+    
+    String uri = miniHttpServletRequest.getRequestURI();
+    
+    List<Filter> filters = FilterRegistry.getFiltersFor(uri);
 
-    List<Filter> filters = new ArrayList<>();
-    filters.add(new SnParameterFilter());
-    filters.add(new IdParameterFilter());
+//    List<Filter> filters = new ArrayList<>();
+//    filters.add(new SnParameterFilter());
+//    filters.add(new IdParameterFilter());
 //    filters.add(new ExecutionTimeFilter());
 
     FilterChain filterChain = new MiniFilterChain(filters, miniDispatcherServlet);
