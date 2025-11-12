@@ -83,11 +83,6 @@ public class MiniDispatcherHandler implements HttpHandler {
     
     List<MiniFilter> filters = FilterRegistry.getFiltersFor(uri);
 
-//    List<Filter> filters = new ArrayList<>();
-//    filters.add(new SnParameterFilter());
-//    filters.add(new IdParameterFilter());
-//    filters.add(new ExecutionTimeFilter());
-
     FilterChain filterChain = new MiniFilterChain(filters, miniDispatcherServlet);
 
     try {

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import haru.annotation.web.Filter;
+import haru.core.bootstrap.MiniServletContainer;
 
 public class FilterRegistry {
   private static final List<FilterEntry> filters = new ArrayList<>();
@@ -27,24 +27,13 @@ public class FilterRegistry {
     List<haru.servlet.filter.MiniFilter> matched = new ArrayList<>();
     for (FilterEntry entry : filters) {
       for (String pattern : entry.urlPatterns) {
-//        if (matches(pattern, requestURI)) {
-        if(matchesAny(pattern, requestURI, "haru")) {
+        if(matchesAny(pattern, requestURI, MiniServletContainer.getContextPath())) {
           matched.add(entry.filter);
         }
       }
     }
     return Collections.unmodifiableList(matched);
   }
-
-//  private static boolean matches(String pattern, String uri) {
-//    if (pattern.equals("/*"))
-//      return true;
-//    if (pattern.endsWith("/*")) {
-//      String str = pattern.substring(0, pattern.length() - 2);
-//      return uri.startsWith(pattern.substring(0, pattern.length() - 2));
-//    }
-//    return uri.equals(pattern);
-//  }
 
   private record FilterEntry(int order, String[] urlPatterns, haru.servlet.filter.MiniFilter filter) {
   }
