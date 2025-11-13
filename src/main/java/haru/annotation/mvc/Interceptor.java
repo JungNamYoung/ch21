@@ -6,8 +6,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Interceptor {
   int order() default 0;
-
   String[] includePatterns() default "/*";
-
   String[] excludePatterns() default {};
 }

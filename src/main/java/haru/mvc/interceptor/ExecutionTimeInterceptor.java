@@ -13,20 +13,20 @@ public class ExecutionTimeInterceptor implements MiniInterceptor {
   private static final Logger logger = MiniLogger.getLogger(ExecutionTimeInterceptor.class.getSimpleName());
 
   @Override
-  public void preHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
+  public void preHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     long startTime = System.currentTimeMillis();
-    miniHttpServletRequest.setAttribute(START_TIME, startTime);
-    logger.info("[interceptor] " + miniHttpServletRequest.getRequestURI());
+    req.setAttribute(START_TIME, startTime);
+    logger.info("[interceptor] " + req.getRequestURI());
   }
 
   @Override
-  public void postHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
-    long startTime = (Long) miniHttpServletRequest.getAttribute(START_TIME);
+  public void postHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
+    long startTime = (Long) req.getAttribute(START_TIME);
     long endTime = System.currentTimeMillis();
-    logger.info("[interceptor] " + miniHttpServletRequest.getRequestURI() + ", " + (endTime - startTime) + "ms");
+    logger.info("[interceptor] " + req.getRequestURI() + ", " + (endTime - startTime) + "ms");
   }
 
   @Override
-  public void afterCompletion(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
+  public void afterCompletion(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
   }
 }

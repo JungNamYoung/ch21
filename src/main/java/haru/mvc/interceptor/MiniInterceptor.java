@@ -4,7 +4,7 @@ import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 
 public interface MiniInterceptor {
-  void preHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse);
-  void postHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse);
-  void afterCompletion(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse);
+  void preHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp);
+  void postHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse resp);
+  void afterCompletion(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse resp);
 }

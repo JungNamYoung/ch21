@@ -12,21 +12,21 @@ public class InterceptorChain {
     this.interceptors = interceptors;
   }
 
-  public void preHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
+  public void preHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     for (MiniInterceptor interceptor : interceptors) {
-      interceptor.preHandle(miniHttpServletRequest, miniHttpServletResponse);
+      interceptor.preHandle(req, resp);
     }
   }
 
-  public void postHandle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
+  public void postHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     for (MiniInterceptor interceptor : interceptors) {
-      interceptor.postHandle(miniHttpServletRequest, miniHttpServletResponse);
+      interceptor.postHandle(req, resp);
     }
   }
 
-  public void afterCompletion(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
+  public void afterCompletion(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     for (MiniInterceptor interceptor : interceptors) {
-      interceptor.afterCompletion(miniHttpServletRequest, miniHttpServletResponse);
+      interceptor.afterCompletion(req, resp);
     }
   }
 }
