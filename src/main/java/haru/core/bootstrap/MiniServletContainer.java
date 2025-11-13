@@ -27,7 +27,7 @@ import haru.annotation.mvc.Interceptor;
 import haru.constants.Define;
 import haru.constants.Haru;
 import haru.core.MiniDispatcherServlet;
-import haru.core.context.BeanDefinition;
+import haru.core.context.BeanHolder;
 import haru.core.context.MiniApplicationContext;
 import haru.http.MiniDispatcherHandler;
 import haru.mvc.interceptor.HandlerInterceptor;
@@ -65,14 +65,14 @@ public class MiniServletContainer {
   private InterceptorRegistry createInterceptorRegistry(MiniApplicationContext ctx, String contextPath) {
     InterceptorRegistry registry = new InterceptorRegistry(contextPath);
 
-    for (BeanDefinition beanDefinition : ctx.getBeans()) {
-      Class<?> beanType = beanDefinition.getTargetBean().getClass();
+    for (BeanHolder beanHolder : ctx.getBeans()) {
+      Class<?> beanType = beanHolder.getTargetBean().getClass();
       if (!beanType.isAnnotationPresent(Interceptor.class))
         continue;
       if (!HandlerInterceptor.class.isAssignableFrom(beanType)) {
         throw new IllegalStateException("@Interceptor는 HandlerInterceptor만 대상입니다: " + beanType.getName());
       }
-      Object bean = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
+      Object bean = beanHolder.getProxyInstance() != null ? beanHolder.getProxyInstance() : beanHolder.getTargetBean();
       Interceptor meta = beanType.getAnnotation(Interceptor.class);
       registry.register((HandlerInterceptor) bean, meta.order(), meta.includePatterns(), meta.excludePatterns());
     }

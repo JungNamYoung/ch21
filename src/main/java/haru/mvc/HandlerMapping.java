@@ -18,18 +18,18 @@ package haru.mvc;
 
 import java.lang.reflect.Method;
 
-import haru.core.context.BeanDefinition;
+import haru.core.context.BeanHolder;
 
 public class HandlerMapping {
   private String requestPpath;
   private Method method;
   private Object aop;
-  private BeanDefinition beanDefinition;
+  private BeanHolder beanHolder;
 
-  public HandlerMapping(String pathRequest, Method method, BeanDefinition beanDefinition) {
+  public HandlerMapping(String pathRequest, Method method, BeanHolder beanHolder) {
     this.requestPpath = pathRequest;
     this.method = method;
-    this.beanDefinition = beanDefinition;
+    this.beanHolder = beanHolder;
   }
 
   public String getPathRequest() {
@@ -44,8 +44,8 @@ public class HandlerMapping {
     return method;
   }
 
-  public BeanDefinition getBeanDefinition() {
-    return beanDefinition;
+  public BeanHolder getBeanDefinition() {
+    return beanHolder;
   }
 
 }

@@ -30,7 +30,7 @@ import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
 import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
-import haru.core.context.BeanDefinition;
+import haru.core.context.BeanHolder;
 import haru.core.context.MiniApplicationContext;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
@@ -92,7 +92,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   }
 
   private void registerHandlerMappings() {
-    for (BeanDefinition beanDef : appContext.getBeans()) {
+    for (BeanHolder beanDef : appContext.getBeans()) {
       Class<?> type = beanDef.getTargetBean().getClass();
       if (type.isAnnotationPresent(Controller.class)) {
         registerControllerMethods(type, beanDef);
@@ -100,7 +100,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     }
   }
 
-  private void registerControllerMethods(Class<?> type, BeanDefinition beanDef) {
+  private void registerControllerMethods(Class<?> type, BeanHolder beanDef) {
     for (Method method : type.getDeclaredMethods()) {
       if (!method.isAnnotationPresent(RequestMapping.class))
         continue;

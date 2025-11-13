@@ -4,14 +4,14 @@ import java.util.logging.Logger;
 
 import haru.logging.MiniLogger;
 
-public class BeanDefinition {
+public class BeanHolder {
   private final String beanName;
   private final Object targetBean;
   private final Object proxyInstance;
   
-  private static final Logger logger = MiniLogger.getLogger(BeanDefinition.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(BeanHolder.class.getSimpleName());
 
-  public BeanDefinition(String beanName, Object targetBean, Object proxyInstance) {
+  public BeanHolder(String beanName, Object targetBean, Object proxyInstance) {
     this.beanName = beanName;
     this.targetBean = targetBean;
     this.proxyInstance = proxyInstance;

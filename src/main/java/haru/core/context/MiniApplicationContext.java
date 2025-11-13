@@ -44,7 +44,7 @@ import haru.mybatis.MiniMyBatis;
 import haru.transaction.TransactionalProxyRegister;
 
 public class MiniApplicationContext {
-  private List<BeanDefinition> beanDefinitions = new ArrayList<>();
+  private List<BeanHolder> beanHolders = new ArrayList<>();
   private TransactionalProxyRegister transactionalProxyRegister = new TransactionalProxyRegister();
   private Map<Class<? extends Annotation>, Set<Class<?>>> annotatedClasses = new HashMap<>();
   private AspectManager aspectManager = new AspectManager();
@@ -95,15 +95,15 @@ public class MiniApplicationContext {
     registerBeans(beanContainer, getAnnotatedClasses(Interceptor.class));
 
     for (Object bean : beanContainer) {
-      BeanDefinition beanDefinition = createInfoBeanWithProxy(bean);
-      beanDefinitions.add(beanDefinition);
+      BeanHolder beanHolder = createInfoBeanWithProxy(bean);
+      beanHolders.add(beanHolder);
     }
   }
 
-  private BeanDefinition createInfoBeanWithProxy(Object bean) throws Exception {
+  private BeanHolder createInfoBeanWithProxy(Object bean) throws Exception {
     String beanName = resolveBeanName(bean.getClass());
     Object proxyInstance = createProxyIfNeeded(bean);
-    return new BeanDefinition(beanName, bean, proxyInstance);
+    return new BeanHolder(beanName, bean, proxyInstance);
   }
 
   private Object createProxyIfNeeded(Object bean) throws Exception {
@@ -187,9 +187,9 @@ public class MiniApplicationContext {
 
   private void injectDependencies() throws Exception {
 
-    for (BeanDefinition beanDefinition : beanDefinitions) {
+    for (BeanHolder beanHolder : beanHolders) {
 
-      Object bean = beanDefinition.getTargetBean();
+      Object bean = beanHolder.getTargetBean();
 
       Field[] fields = bean.getClass().getDeclaredFields();
 
@@ -206,8 +206,8 @@ public class MiniApplicationContext {
   }
 
   private void injectAutowiredDependency(Object bean, Field field) {
-    BeanDefinition beanDefinition = findBeanByType(field.getType());
-    assignDependency(bean, field, beanDefinition);
+    BeanHolder beanHolder = findBeanByType(field.getType());
+    assignDependency(bean, field, beanHolder);
   }
 
   void injectSqlSession(Object bean, Field field) {
@@ -230,16 +230,16 @@ public class MiniApplicationContext {
     Resource resource = field.getAnnotation(Resource.class);
     String resourceName = resource.name();
 
-    BeanDefinition beanDefinition = !resourceName.isEmpty() ? findBean(resourceName) : findBeanByType(field.getType());
-    assignDependency(bean, field, beanDefinition);
+    BeanHolder beanHolder = !resourceName.isEmpty() ? findBean(resourceName) : findBeanByType(field.getType());
+    assignDependency(bean, field, beanHolder);
   }
 
-  private void assignDependency(Object bean, Field field, BeanDefinition beanDefinition) {
-    if (beanDefinition == null) {
+  private void assignDependency(Object bean, Field field, BeanHolder beanHolder) {
+    if (beanHolder == null) {
       throw new RuntimeException("빈 주입 실패: 빈을 찾을 수 없습니다.");
     }
 
-    Object dependency = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
+    Object dependency = beanHolder.getProxyInstance() != null ? beanHolder.getProxyInstance() : beanHolder.getTargetBean();
 
     field.setAccessible(true);
 
@@ -265,8 +265,8 @@ public class MiniApplicationContext {
     return annotatedClasses.getOrDefault(annotation, Collections.emptySet());
   }
 
-  public List<BeanDefinition> getBeans() {
-    return beanDefinitions;
+  public List<BeanHolder> getBeans() {
+    return beanHolders;
   }
 
   public boolean isInitialized() {
@@ -274,30 +274,30 @@ public class MiniApplicationContext {
   }
 
   public <T> T getBean(Class<T> type) {
-    BeanDefinition beanDefinition = findBeanByType(type);
-    if (beanDefinition == null) {
+    BeanHolder beanHolder = findBeanByType(type);
+    if (beanHolder == null) {
       throw new IllegalArgumentException("빈을 찾을 수 없습니다: " + type.getName());
     }
 
-    Object candidate = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
+    Object candidate = beanHolder.getProxyInstance() != null ? beanHolder.getProxyInstance() : beanHolder.getTargetBean();
 
     return type.cast(candidate);
   }
 
-  public BeanDefinition findBean(String beanName) {
-    for (BeanDefinition beanDefinition : beanDefinitions) {
-      if (beanDefinition.getBeanName().equals(beanName))
-        return beanDefinition;
+  public BeanHolder findBean(String beanName) {
+    for (BeanHolder beanHolder : beanHolders) {
+      if (beanHolder.getBeanName().equals(beanName))
+        return beanHolder;
     }
 
     return null;
   }
 
-  private BeanDefinition findBeanByType(Class<?> type) {
-    for (BeanDefinition beanDefinition : beanDefinitions) {
-      Object candidate = beanDefinition.getTargetBean();
+  private BeanHolder findBeanByType(Class<?> type) {
+    for (BeanHolder beanHolder : beanHolders) {
+      Object candidate = beanHolder.getTargetBean();
       if (type.isAssignableFrom(candidate.getClass())) {
-        return beanDefinition;
+        return beanHolder;
       }
     }
 
