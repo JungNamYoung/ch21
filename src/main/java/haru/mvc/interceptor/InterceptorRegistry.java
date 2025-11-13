@@ -1,9 +1,9 @@
 package haru.mvc.interceptor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class InterceptorRegistry {
   private final List<InterceptorRegistration> registrations = new ArrayList<>();
@@ -20,7 +20,38 @@ public final class InterceptorRegistry {
 
   public List<HandlerInterceptor> resolveChain(String requestURI) {
     final String path = normalizePath(requestURI, contextPath);
-    return registrations.stream().filter(r -> matchesAny(r.includes, path) && !matchesAny(r.excludes, path)).map(r -> r.interceptor).collect(Collectors.toList());
+
+    List<HandlerInterceptor> result = new ArrayList<>();
+
+    for (InterceptorRegistration reg : registrations) {
+      boolean includeMatched = false;
+      boolean excludeMatched = false;
+
+      for (String inc : reg.includes) {
+        if (matchesAny(Collections.singletonList(inc), path)) {
+          includeMatched = true;
+          break;
+        }
+      }
+
+      if (!includeMatched) {
+        continue;
+      }
+
+      for (String exc : reg.excludes) {
+        if (matchesAny(Collections.singletonList(exc), path)) {
+          excludeMatched = true;
+          break;
+        }
+      }
+
+      if (excludeMatched) {
+        continue;
+      }
+
+      result.add(reg.interceptor);
+    }
+    return result;
   }
 
   private static boolean matchesAny(List<String> patterns, String path) {
