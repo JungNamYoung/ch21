@@ -14,8 +14,23 @@ public final class InterceptorRegistry {
   }
 
   public void register(HandlerInterceptor itc, int order, String[] includes, String[] excludes) {
+
     registrations.add(new InterceptorRegistration(itc, order, includes, excludes));
-    registrations.sort(Comparator.comparingInt(r -> r.order));
+
+    Comparator<InterceptorRegistration> comparator = new Comparator<InterceptorRegistration>() {
+      @Override
+      public int compare(InterceptorRegistration r1, InterceptorRegistration r2) {
+        if (r1.order < r2.order) {
+          return -1;
+        } else if (r1.order > r2.order) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    };
+
+    registrations.sort(comparator);
   }
 
   public List<HandlerInterceptor> resolveChain(String requestURI) {
