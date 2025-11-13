@@ -28,7 +28,6 @@ import haru.constants.Define;
 import haru.constants.Haru;
 import haru.core.MiniDispatcherServlet;
 import haru.core.context.BeanDefinition;
-import haru.core.context.MiniAnnotationScanner;
 import haru.core.context.MiniApplicationContext;
 import haru.http.MiniDispatcherHandler;
 import haru.mvc.interceptor.HandlerInterceptor;

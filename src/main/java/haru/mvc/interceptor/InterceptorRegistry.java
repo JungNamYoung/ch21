@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import haru.support.PathPatternUtils;
 import haru.support.PathUtils;
 
 public final class InterceptorRegistry {
@@ -75,47 +76,11 @@ public final class InterceptorRegistry {
     for (String raw : patterns) {
       if (raw == null || raw.isBlank())
         continue;
-      final String pat = ensureLeadingSlashForPathPattern(raw.trim());
-      if (matches(pat, path))
+      final String pat = PathPatternUtils.ensureLeadingSlashForPathPattern(raw.trim());
+      if (PathPatternUtils.matches(pat, path))
         return true;
     }
     return false;
   }
 
-  static boolean matches(String pattern, String path) {
-    if ("/*".equals(pattern))
-      return true;
-    if (!pattern.contains("*"))
-      return path.equals(pattern);
-    if (pattern.startsWith("*.")) {
-      String ext = pattern.substring(1);
-      return path.endsWith(ext);
-    }
-    if (pattern.endsWith("/*")) {
-      String prefix = pattern.substring(0, pattern.length() - 2);
-      return path.equals(prefix) || path.startsWith(prefix + "/");
-    }
-    return path.equals(pattern);
-  }
-
-//  static String normalizePath(String requestURI, String contextPath) {
-//    String uri = requestURI;
-//    int q = uri.indexOf('?');
-//    if (q >= 0)
-//      uri = uri.substring(0, q);
-//    if (!contextPath.isEmpty() && uri.startsWith(contextPath)) {
-//      uri = uri.substring(contextPath.length());
-//    }
-//    if (uri.isEmpty())
-//      uri = "/";
-//    return uri.replaceAll("/{2,}", "/");
-//  }
-
-  static String ensureLeadingSlashForPathPattern(String p) {
-    if (p.startsWith("*."))
-      return p;
-    if (!p.startsWith("/"))
-      return "/" + p;
-    return p;
-  }
 }

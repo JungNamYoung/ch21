@@ -7,6 +7,7 @@ import java.util.List;
 
 import haru.annotation.web.Filter;
 import haru.core.bootstrap.MiniServletContainer;
+import haru.support.PathPatternUtils;
 import haru.support.PathUtils;
 
 public class FilterRegistry {
@@ -48,58 +49,11 @@ public class FilterRegistry {
     for (String raw : urlPatterns.split("[,\\s]+")) {
       if (raw.isEmpty())
         continue;
-      String pattern = ensureLeadingSlashForPathPattern(raw.trim());
-      if (matches(pattern, path))
+      String pattern = PathPatternUtils.ensureLeadingSlashForPathPattern(raw.trim());
+      if (PathPatternUtils.matches(pattern, path))
         return true;
     }
     return false;
   }
 
-//  private static String normalizePath(String requestURI, String contextPath) {
-//    String uri = requestURI;
-//    int q = uri.indexOf('?');
-//    if (q >= 0)
-//      uri = uri.substring(0, q);
-//
-//    if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
-//      uri = uri.substring(contextPath.length());
-//    }
-//
-//    if (uri.isEmpty())
-//      uri = "/";
-//
-//    uri = uri.replaceAll("/{2,}", "/");
-//    return uri;
-//  }
-
-  private static String ensureLeadingSlashForPathPattern(String p) {
-    if (p.startsWith("*."))
-      return p;
-    if (!p.startsWith("/"))
-      return "/" + p;
-    return p;
-  }
-
-  private static boolean matches(String pattern, String path) {
-    if ("/*".equals(pattern))
-      return true;
-
-    if (!pattern.contains("*")) {
-      return path.equals(pattern);
-    }
-
-    if (pattern.startsWith("*.")) {
-      String ext = pattern.substring(1);
-      return path.endsWith(ext);
-    }
-
-    if (pattern.endsWith("/*")) {
-      String prefix = pattern.substring(0, pattern.length() - 2);
-      if (prefix.isEmpty())
-        return true;
-
-      return path.equals(prefix) || path.startsWith(prefix + "/");
-    }
-    return path.equals(pattern);
-  }
 }
