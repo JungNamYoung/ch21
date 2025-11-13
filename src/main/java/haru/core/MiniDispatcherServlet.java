@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
 import haru.constants.Define;
@@ -32,29 +34,29 @@ import haru.core.context.MiniApplicationContext;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.MiniLogger;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import haru.mvc.HandlerAdapter;
 import haru.mvc.HandlerMapping;
+import haru.mvc.argument.ArgumentResolver;
+import haru.mvc.argument.CommandObjectArgumentResolver;
+import haru.mvc.argument.ModelArgumentResolver;
+import haru.mvc.argument.RequestParamArgumentResolver;
+import haru.mvc.argument.ServletArgumentResolver;
 import haru.mvc.core.DispatcherServlet;
 import haru.mvc.interceptor.ExecutionTimeInterceptor;
-import haru.mvc.interceptor.MiniInterceptor;
 import haru.mvc.interceptor.InterceptorChain;
+import haru.mvc.interceptor.InterceptorExecutor;
+import haru.mvc.interceptor.InterceptorRegistry;
+import haru.mvc.interceptor.MiniInterceptor;
+import haru.mvc.result.BodyWriter;
+import haru.mvc.result.BytesBodyWriter;
+import haru.mvc.result.JsonBodyWriter;
+import haru.mvc.result.TextBodyWriter;
 import haru.mvc.view.HtmlResponseHandler;
 import haru.mvc.view.JspResponseHandler;
 import haru.mvc.view.ResponseHandler;
 import haru.servlet.resource.MiniResourceHandler;
 import haru.servlet.resource.WelcomeFileResolver;
 import haru.servlet.security.SecurityFilter;
-import haru.mvc.argument.ArgumentResolver;
-import haru.mvc.argument.CommandObjectArgumentResolver;
-import haru.mvc.argument.ModelArgumentResolver;
-import haru.mvc.argument.RequestParamArgumentResolver;
-import haru.mvc.argument.ServletArgumentResolver;
-import haru.mvc.result.BodyWriter;
-import haru.mvc.result.BytesBodyWriter;
-import haru.mvc.result.JsonBodyWriter;
-import haru.mvc.result.TextBodyWriter;
 
 public class MiniDispatcherServlet implements DispatcherServlet {
 
@@ -64,7 +66,12 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private final HandlerAdapter handlerAdapter;
   private static final Logger logger = MiniLogger.getLogger(MiniDispatcherServlet.class.getSimpleName());
 
-  public MiniDispatcherServlet(String basePackage) {
+  private final InterceptorRegistry interceptorRegistry;
+  private final String contextPath;
+
+  public MiniDispatcherServlet(String basePackage, InterceptorRegistry registry, String contextPath) {
+    this.interceptorRegistry = registry;
+    this.contextPath = contextPath;
     handlerAdapter = createHandlerAdapter();
     try {
       logger.info(() -> "basePackage : " + basePackage);
@@ -145,7 +152,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
     String requestUrl = req.getRequestURI();
     String welcomeFile = WelcomeFileResolver.resolve(requestUrl);
-    
+
     if (welcomeFile != null) {
       req.setRequestURI(welcomeFile);
       requestUrl = welcomeFile;
@@ -177,6 +184,33 @@ public class MiniDispatcherServlet implements DispatcherServlet {
       handlerAdapter.handle(mapping, req, res);
     } finally {
       chain.postHandle(req, res);
+    }
+  }
+
+  public void serviceExt(MiniHttpServletRequest req, MiniHttpServletResponse res) throws Exception {
+    var chain = interceptorRegistry.resolveChain(req.getRequestURI());
+    var executor = new InterceptorExecutor(chain);
+
+    Object handler = null;
+    Object modelAndView = null;
+
+    if (!executor.applyPreHandle(req, res, handler)) {
+      return;
+    }
+
+    Exception ex = null;
+    try {
+      handler = resolveHandler(req);
+      modelAndView = invokeHandler(handler, req, res);
+
+      executor.applyPostHandle(req, res, handler, modelAndView);
+
+      render(modelAndView, req, res);
+    } catch (Exception e) {
+      ex = e;
+      throw e;
+    } finally {
+      executor.triggerAfterCompletion(req, res, handler, ex);
     }
   }
 

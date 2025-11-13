@@ -23,10 +23,15 @@ import java.nio.file.Paths;
 
 import com.sun.net.httpserver.HttpServer;
 
+import haru.annotation.mvc.Interceptor;
 import haru.constants.Define;
 import haru.constants.Haru;
 import haru.core.MiniDispatcherServlet;
+import haru.core.context.MiniAnnotationScanner;
+import haru.core.context.MiniApplicationContext;
 import haru.http.MiniDispatcherHandler;
+import haru.mvc.interceptor.HandlerInterceptor;
+import haru.mvc.interceptor.InterceptorRegistry;
 import haru.servlet.MiniServletContext;
 import haru.support.TokenEx;
 import haru.support.UtilExt;
@@ -35,9 +40,9 @@ import jakarta.servlet.ServletException;
 public class MiniServletContainer {
 
   private static MiniServletContext miniServletContext;
-
   static String contextPath;
-  
+  private InterceptorRegistry interceptorRegistry;
+
   public static MiniServletContext getMiniWebApplicationContext() {
     return miniServletContext;
   }
@@ -56,6 +61,19 @@ public class MiniServletContainer {
     String filePath = miniServletContext.getRealPath(Define.STR_BLANK) + requestedResource;
 
     return filePath;
+  }
+
+  private void initInterceptors(MiniApplicationContext ctx, String contextPath) {
+    this.interceptorRegistry = new InterceptorRegistry(contextPath);
+
+    for (Class<?> clazz : MiniAnnotationScanner.findTypesAnnotatedWith(Interceptor.class)) {
+      if (!HandlerInterceptor.class.isAssignableFrom(clazz)) {
+        throw new IllegalStateException("@Interceptor는 HandlerInterceptor만 대상입니다: " + clazz.getName());
+      }
+      Interceptor meta = clazz.getAnnotation(Interceptor.class);
+      HandlerInterceptor bean = (HandlerInterceptor) ctx.getBean(clazz);
+      interceptorRegistry.register(bean, meta.order(), meta.includePatterns(), meta.excludePatterns());
+    }
   }
 
   public static void main(String[] args) throws IOException, ServletException {

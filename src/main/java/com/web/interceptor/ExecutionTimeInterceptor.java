@@ -1,10 +1,11 @@
-package haru.mvc.interceptor;
+package com.web.interceptor;
 
 import java.util.logging.Logger;
 
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.MiniLogger;
+import haru.mvc.interceptor.MiniInterceptor;
 
 public class ExecutionTimeInterceptor implements MiniInterceptor {
 
@@ -24,9 +25,5 @@ public class ExecutionTimeInterceptor implements MiniInterceptor {
     long startTime = (Long) req.getAttribute(START_TIME);
     long endTime = System.currentTimeMillis();
     logger.info("[interceptor] " + req.getRequestURI() + ", " + (endTime - startTime) + "ms");
-  }
-
-  @Override
-  public void afterCompletion(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
   }
 }

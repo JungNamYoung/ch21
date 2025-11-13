@@ -43,7 +43,7 @@ public class MiniAnnotationScanner {
     this.classLoader = Thread.currentThread().getContextClassLoader();
   }
 
-  public Set<Class<?>> findTypesAnnotatedWith(Class<? extends Annotation> annotation) {
+  static public Set<Class<?>> findTypesAnnotatedWith(Class<? extends Annotation> annotation) {
     Set<Class<?>> cached = cache.get(annotation);
     if (cached != null)
       return cached;
