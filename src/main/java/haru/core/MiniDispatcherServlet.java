@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.web.interceptor.ExecutionTimeInterceptor;
 
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
@@ -42,7 +43,7 @@ import haru.mvc.argument.ModelArgumentResolver;
 import haru.mvc.argument.RequestParamArgumentResolver;
 import haru.mvc.argument.ServletArgumentResolver;
 import haru.mvc.core.DispatcherServlet;
-import haru.mvc.interceptor.ExecutionTimeInterceptor;
+import haru.mvc.interceptor.HandlerInterceptor;
 import haru.mvc.interceptor.InterceptorChain;
 import haru.mvc.interceptor.InterceptorExecutor;
 import haru.mvc.interceptor.InterceptorRegistry;
@@ -61,7 +62,7 @@ import haru.servlet.security.SecurityFilter;
 public class MiniDispatcherServlet implements DispatcherServlet {
 
   private final Map<String, HandlerMapping> handlerMappings = new ConcurrentHashMap<>();
-  private final MiniApplicationContext appContext = new MiniApplicationContext();
+  private final MiniApplicationContext appContext;
   private final List<MiniInterceptor> interceptors = List.of(new ExecutionTimeInterceptor());
   private final HandlerAdapter handlerAdapter;
   private static final Logger logger = MiniLogger.getLogger(MiniDispatcherServlet.class.getSimpleName());
@@ -69,13 +70,21 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private final InterceptorRegistry interceptorRegistry;
   private final String contextPath;
 
-  public MiniDispatcherServlet(String basePackage, InterceptorRegistry registry, String contextPath) {
-    this.interceptorRegistry = registry;
-    this.contextPath = contextPath;
+  public MiniDispatcherServlet(String basePackage) {
+    this(basePackage, new MiniApplicationContext(), null, MiniServletContainer.getContextPath());
+  }
+
+  public MiniDispatcherServlet(String basePackage, MiniApplicationContext context, InterceptorRegistry registry, String contextPath) {
+    this.appContext = context != null ? context : new MiniApplicationContext();
+    String resolvedContextPath = contextPath != null ? contextPath : MiniServletContainer.getContextPath();
+    this.contextPath = resolvedContextPath != null ? resolvedContextPath : Define.SLASH;
+    this.interceptorRegistry = registry != null ? registry : new InterceptorRegistry(this.contextPath);
     handlerAdapter = createHandlerAdapter();
     try {
       logger.info(() -> "basePackage : " + basePackage);
-      appContext.initializeContext(basePackage);
+      if (basePackage != null && !appContext.isInitialized()) {
+        appContext.initializeContext(basePackage);
+      }
       registerHandlerMappings();
     } catch (Exception e) {
       throw new RuntimeException("컨트롤러 등록 실패", e);
@@ -147,9 +156,107 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private HandlerMapping findHandlerMapping(String path) {
     return handlerMappings.get(path);
   }
+//
+//  @Override
+//  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
+//    String requestUrl = req.getRequestURI();
+//    String welcomeFile = WelcomeFileResolver.resolve(requestUrl);
+//
+//    if (welcomeFile != null) {
+//      req.setRequestURI(welcomeFile);
+//      requestUrl = welcomeFile;
+//    }
+//
+//    final String contextPath = MiniServletContainer.getContextPath();
+//    final String logRequestUrl = requestUrl;
+//    logger.info(() -> "requestUrl : " + logRequestUrl);
+//
+//    if (SecurityFilter.isRestricted(requestUrl, res))
+//      return;
+//
+//    InterceptorChain chain = new InterceptorChain(interceptors);
+//
+//    try {
+//      chain.preHandle(req, res);
+//
+//      if (handleByStaticHandlers(req, res))
+//        return;
+//
+//      String requestUri = resolveRequestUri(requestUrl, contextPath);
+//      requestUri = normalizePath(requestUri);
+//
+//      HandlerMapping mapping = findHandlerMapping(requestUri);
+//      if (mapping == null) {
+//        ResponseHandler.handleNotFound(res, requestUri);
+//        return;
+//      }
+//      handlerAdapter.handle(mapping, req, res);
+//    } finally {
+//      chain.postHandle(req, res);
+//    }
+//  }
 
-  @Override
-  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
+  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res){
+    List<HandlerInterceptor> interceptorChain = interceptorRegistry.resolveChain(req.getRequestURI());
+    InterceptorExecutor executor = new InterceptorExecutor(interceptorChain);
+
+    Object handler = null;
+    Object modelAndView = null;
+
+    String requestUrl = prepareRequest(req);
+    if (SecurityFilter.isRestricted(requestUrl, res))
+      return;
+
+//    InterceptorChain legacyChain = new InterceptorChain(interceptors);
+    Exception ex = null;
+    boolean interceptorPreHandled = false;
+    try {
+//      legacyChain.preHandle(req, res);
+
+      HandlerMapping mapping = resolveHandler(requestUrl, req, res);
+      if (mapping == null) {
+        return;
+      }
+
+      handler = mapping;
+
+      interceptorPreHandled = executor.applyPreHandle(req, res, handler);
+      if (!interceptorPreHandled) {
+        return;
+      }
+
+      modelAndView = invokeHandler(handler, req, res);
+
+      executor.applyPostHandle(req, res, handler, modelAndView);
+
+      render(modelAndView, req, res);
+    } catch (Exception e) {
+      ex = e;
+//      throw e;
+    } finally {
+      if (interceptorPreHandled) {
+        executor.triggerAfterCompletion(req, res, handler, ex);
+      }
+//      legacyChain.postHandle(req, res);
+    }
+  }
+
+  private HandlerMapping resolveHandler(String requestUrl, MiniHttpServletRequest req, MiniHttpServletResponse res) {
+    if (handleByStaticHandlers(req, res))
+      return null;
+
+    String requestUri = resolveRequestUri(requestUrl, contextPath);
+    requestUri = normalizePath(requestUri);
+
+    HandlerMapping mapping = findHandlerMapping(requestUri);
+    if (mapping == null) {
+      ResponseHandler.handleNotFound(res, requestUri);
+      return null;
+    }
+    return mapping;
+  }
+
+  private String prepareRequest(MiniHttpServletRequest req) {
     String requestUrl = req.getRequestURI();
     String welcomeFile = WelcomeFileResolver.resolve(requestUrl);
 
@@ -158,60 +265,21 @@ public class MiniDispatcherServlet implements DispatcherServlet {
       requestUrl = welcomeFile;
     }
 
-    final String contextPath = MiniServletContainer.getContextPath();
     final String logRequestUrl = requestUrl;
     logger.info(() -> "requestUrl : " + logRequestUrl);
-
-    if (SecurityFilter.isRestricted(requestUrl, res))
-      return;
-
-    InterceptorChain chain = new InterceptorChain(interceptors);
-
-    try {
-      chain.preHandle(req, res);
-
-      if (handleByStaticHandlers(req, res))
-        return;
-
-      String requestUri = resolveRequestUri(requestUrl, contextPath);
-      requestUri = normalizePath(requestUri);
-
-      HandlerMapping mapping = findHandlerMapping(requestUri);
-      if (mapping == null) {
-        ResponseHandler.handleNotFound(res, requestUri);
-        return;
-      }
-      handlerAdapter.handle(mapping, req, res);
-    } finally {
-      chain.postHandle(req, res);
-    }
+    return requestUrl;
   }
 
-  public void serviceExt(MiniHttpServletRequest req, MiniHttpServletResponse res) throws Exception {
-    var chain = interceptorRegistry.resolveChain(req.getRequestURI());
-    var executor = new InterceptorExecutor(chain);
-
-    Object handler = null;
-    Object modelAndView = null;
-
-    if (!executor.applyPreHandle(req, res, handler)) {
-      return;
+  private Object invokeHandler(Object handler, MiniHttpServletRequest req, MiniHttpServletResponse res) {
+    if (!(handler instanceof HandlerMapping)) {
+      throw new IllegalArgumentException("지원하지 않는 handler 타입 : " + handler);
     }
+    HandlerMapping mapping = (HandlerMapping) handler;
+    handlerAdapter.handle(mapping, req, res);
+    return null;
+  }
 
-    Exception ex = null;
-    try {
-      handler = resolveHandler(req);
-      modelAndView = invokeHandler(handler, req, res);
-
-      executor.applyPostHandle(req, res, handler, modelAndView);
-
-      render(modelAndView, req, res);
-    } catch (Exception e) {
-      ex = e;
-      throw e;
-    } finally {
-      executor.triggerAfterCompletion(req, res, handler, ex);
-    }
+  private void render(Object modelAndView, MiniHttpServletRequest req, MiniHttpServletResponse res) {
   }
 
   private HandlerAdapter createHandlerAdapter() {

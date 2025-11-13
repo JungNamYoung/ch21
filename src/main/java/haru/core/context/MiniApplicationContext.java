@@ -34,6 +34,7 @@ import haru.annotation.di.Repository;
 import haru.annotation.di.Resource;
 import haru.annotation.di.Service;
 import haru.annotation.mvc.Controller;
+import haru.annotation.mvc.Interceptor;
 import haru.annotation.web.Filter;
 import haru.aop.AspectManager;
 import haru.constants.Define;
@@ -49,6 +50,7 @@ public class MiniApplicationContext {
   private AspectManager aspectManager = new AspectManager();
   MiniMyBatis miniMyBatis = new MiniMyBatis();
   private static final Logger logger = MiniLogger.getLogger(MiniApplicationContext.class.getSimpleName());
+  private boolean initialized;
 
   public void initializeContext(String basePackage) {
     try {
@@ -57,6 +59,7 @@ public class MiniApplicationContext {
       initTransactionAndAop();
       initializeBeans();
       injectDependencies();
+      initialized = true;
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -69,6 +72,7 @@ public class MiniApplicationContext {
     registerAnnotatedClasses(Controller.class, scanner);
     registerAnnotatedClasses(Aspect.class, scanner);
     registerAnnotatedClasses(Filter.class, scanner);
+    registerAnnotatedClasses(Interceptor.class, scanner);
   }
 
   private void registerFilters() {
@@ -88,6 +92,7 @@ public class MiniApplicationContext {
     registerBeans(beanContainer, getAnnotatedClasses(Controller.class));
     registerBeans(beanContainer, getAnnotatedClasses(Service.class));
     registerBeans(beanContainer, getAnnotatedClasses(Repository.class));
+    registerBeans(beanContainer, getAnnotatedClasses(Interceptor.class));
 
     for (Object bean : beanContainer) {
       BeanDefinition beanDefinition = createInfoBeanWithProxy(bean);
@@ -138,6 +143,8 @@ public class MiniApplicationContext {
         msg = msg + "Service - ";
       } else if (tClass.isAnnotationPresent(Repository.class)) {
         msg = msg + "Repository - ";
+      } else if (tClass.isAnnotationPresent(Interceptor.class)) {
+        msg = msg + "Interceptor - ";
       } else {
         throw new RuntimeException(Define.NOT_APPLICABLE);
       }
@@ -166,6 +173,11 @@ public class MiniApplicationContext {
     }
 
     if (clazz.isAnnotationPresent(Controller.class)) {
+      String simpleName = clazz.getSimpleName();
+      return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
+    }
+
+    if (clazz.isAnnotationPresent(Interceptor.class)) {
       String simpleName = clazz.getSimpleName();
       return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
     }
@@ -255,6 +267,21 @@ public class MiniApplicationContext {
 
   public List<BeanDefinition> getBeans() {
     return beanDefinitions;
+  }
+
+  public boolean isInitialized() {
+    return initialized;
+  }
+
+  public <T> T getBean(Class<T> type) {
+    BeanDefinition beanDefinition = findBeanByType(type);
+    if (beanDefinition == null) {
+      throw new IllegalArgumentException("빈을 찾을 수 없습니다: " + type.getName());
+    }
+
+    Object candidate = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
+
+    return type.cast(candidate);
   }
 
   public BeanDefinition findBean(String beanName) {

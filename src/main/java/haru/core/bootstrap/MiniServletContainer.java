@@ -27,6 +27,7 @@ import haru.annotation.mvc.Interceptor;
 import haru.constants.Define;
 import haru.constants.Haru;
 import haru.core.MiniDispatcherServlet;
+import haru.core.context.BeanDefinition;
 import haru.core.context.MiniAnnotationScanner;
 import haru.core.context.MiniApplicationContext;
 import haru.http.MiniDispatcherHandler;
@@ -41,7 +42,6 @@ public class MiniServletContainer {
 
   private static MiniServletContext miniServletContext;
   static String contextPath;
-  private InterceptorRegistry interceptorRegistry;
 
   public static MiniServletContext getMiniWebApplicationContext() {
     return miniServletContext;
@@ -63,17 +63,22 @@ public class MiniServletContainer {
     return filePath;
   }
 
-  private void initInterceptors(MiniApplicationContext ctx, String contextPath) {
-    this.interceptorRegistry = new InterceptorRegistry(contextPath);
+  private InterceptorRegistry createInterceptorRegistry(MiniApplicationContext ctx, String contextPath) {
+    InterceptorRegistry registry = new InterceptorRegistry(contextPath);
 
-    for (Class<?> clazz : MiniAnnotationScanner.findTypesAnnotatedWith(Interceptor.class)) {
-      if (!HandlerInterceptor.class.isAssignableFrom(clazz)) {
-        throw new IllegalStateException("@Interceptor는 HandlerInterceptor만 대상입니다: " + clazz.getName());
+    for (BeanDefinition beanDefinition : ctx.getBeans()) {
+      Class<?> beanType = beanDefinition.getTargetBean().getClass();
+      if (!beanType.isAnnotationPresent(Interceptor.class))
+        continue;
+      if (!HandlerInterceptor.class.isAssignableFrom(beanType)) {
+        throw new IllegalStateException("@Interceptor는 HandlerInterceptor만 대상입니다: " + beanType.getName());
       }
-      Interceptor meta = clazz.getAnnotation(Interceptor.class);
-      HandlerInterceptor bean = (HandlerInterceptor) ctx.getBean(clazz);
-      interceptorRegistry.register(bean, meta.order(), meta.includePatterns(), meta.excludePatterns());
+      Object bean = beanDefinition.getProxyInstance() != null ? beanDefinition.getProxyInstance() : beanDefinition.getTargetBean();
+      Interceptor meta = beanType.getAnnotation(Interceptor.class);
+      registry.register((HandlerInterceptor) bean, meta.order(), meta.includePatterns(), meta.excludePatterns());
     }
+
+    return registry;
   }
 
   public static void main(String[] args) throws IOException, ServletException {
@@ -101,7 +106,13 @@ public class MiniServletContainer {
 
     miniServletContext = new MiniServletContext(webAppRoot);
 
-    MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(tokenHaru.get(Haru.KEY_BASE_PACKAGE).toString());
+    MiniServletContainer container = new MiniServletContainer();
+    String basePackage = tokenHaru.get(Haru.KEY_BASE_PACKAGE).toString();
+    MiniApplicationContext appContext = new MiniApplicationContext();
+    appContext.initializeContext(basePackage);
+    InterceptorRegistry interceptorRegistry = container.createInterceptorRegistry(appContext, contextPath);
+
+    MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(basePackage, appContext, interceptorRegistry, contextPath);
 
     server.createContext(contextPath, new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
 
