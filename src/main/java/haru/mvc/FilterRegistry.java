@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import haru.annotation.web.Filter;
 import haru.core.bootstrap.MiniServletContainer;
+import haru.support.PathUtils;
 
 public class FilterRegistry {
   private static final List<FilterEntry> filters = new ArrayList<>();
@@ -41,7 +43,7 @@ public class FilterRegistry {
   public static boolean matchesAny(String urlPatterns, String requestURI, String contextPath) {
     if (urlPatterns == null || urlPatterns.isEmpty())
       return false;
-    String path = normalizePath(requestURI, contextPath);
+    String path = PathUtils.normalizeRequestPath(requestURI, contextPath);
 
     for (String raw : urlPatterns.split("[,\\s]+")) {
       if (raw.isEmpty())
@@ -53,22 +55,22 @@ public class FilterRegistry {
     return false;
   }
 
-  private static String normalizePath(String requestURI, String contextPath) {
-    String uri = requestURI;
-    int q = uri.indexOf('?');
-    if (q >= 0)
-      uri = uri.substring(0, q);
-
-    if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
-      uri = uri.substring(contextPath.length());
-    }
-
-    if (uri.isEmpty())
-      uri = "/";
-
-    uri = uri.replaceAll("/{2,}", "/");
-    return uri;
-  }
+//  private static String normalizePath(String requestURI, String contextPath) {
+//    String uri = requestURI;
+//    int q = uri.indexOf('?');
+//    if (q >= 0)
+//      uri = uri.substring(0, q);
+//
+//    if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
+//      uri = uri.substring(contextPath.length());
+//    }
+//
+//    if (uri.isEmpty())
+//      uri = "/";
+//
+//    uri = uri.replaceAll("/{2,}", "/");
+//    return uri;
+//  }
 
   private static String ensureLeadingSlashForPathPattern(String p) {
     if (p.startsWith("*."))

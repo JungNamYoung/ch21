@@ -44,7 +44,6 @@ import haru.mvc.argument.RequestParamArgumentResolver;
 import haru.mvc.argument.ServletArgumentResolver;
 import haru.mvc.core.DispatcherServlet;
 import haru.mvc.interceptor.HandlerInterceptor;
-import haru.mvc.interceptor.InterceptorChain;
 import haru.mvc.interceptor.InterceptorExecutor;
 import haru.mvc.interceptor.InterceptorRegistry;
 import haru.mvc.interceptor.MiniInterceptor;
@@ -58,6 +57,7 @@ import haru.mvc.view.ResponseHandler;
 import haru.servlet.resource.MiniResourceHandler;
 import haru.servlet.resource.WelcomeFileResolver;
 import haru.servlet.security.SecurityFilter;
+import haru.support.PathUtils;
 
 public class MiniDispatcherServlet implements DispatcherServlet {
 
@@ -107,7 +107,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
       RequestMapping rm = method.getAnnotation(RequestMapping.class);
       for (String raw : rm.value()) {
-        String path = normalizePath(raw);
+        String path = PathUtils.normalizeMappingPath(raw);
         HandlerMapping mapping = new HandlerMapping(path, method, beanDef);
 
         HandlerMapping prev = handlerMappings.putIfAbsent(path, mapping);
@@ -120,14 +120,14 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     }
   }
 
-  private String normalizePath(String path) {
-    if (path == null || path.isEmpty())
-      return "/";
-    String p = path.startsWith(Define.SLASH) ? path : Define.SLASH + path;
-    if (p.length() > 1 && p.endsWith(Define.SLASH))
-      p = p.substring(0, p.length() - 1);
-    return p;
-  }
+//  private String normalizePath(String path) {
+//    if (path == null || path.isEmpty())
+//      return "/";
+//    String p = path.startsWith(Define.SLASH) ? path : Define.SLASH + path;
+//    if (p.length() > 1 && p.endsWith(Define.SLASH))
+//      p = p.substring(0, p.length() - 1);
+//    return p;
+//  }
 
   private String resolveRequestUri(String requestUrl, String contextPath) {
     if (!Define.SLASH.equals(contextPath) && requestUrl.startsWith(contextPath)) {
@@ -246,7 +246,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
       return null;
 
     String requestUri = resolveRequestUri(requestUrl, contextPath);
-    requestUri = normalizePath(requestUri);
+    requestUri = PathUtils.normalizeMappingPath(requestUri);
 
     HandlerMapping mapping = findHandlerMapping(requestUri);
     if (mapping == null) {
