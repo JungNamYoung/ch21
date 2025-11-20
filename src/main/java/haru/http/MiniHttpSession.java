@@ -34,8 +34,7 @@ public class MiniHttpSession implements HttpSession {
   private int maxSecondActive = Haru.SESSION_ACTIVE_SECOND;
 
   public MiniHttpSession(ServletContext context) {
-//		this.id = UUID.randomUUID().toString();
-    this.id = "kitten-" + System.currentTimeMillis();
+    this.id = "haru-" + System.currentTimeMillis();
     this.context = context;
     this.creationTime = System.currentTimeMillis();
     this.lastAccessedTime = this.creationTime;

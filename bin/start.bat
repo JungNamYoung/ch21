@@ -15,5 +15,5 @@ echo JAVA_OPTS : %JAVA_OPTS%
 set JAVA_EXE="%APP_HOME%.\sw\openjdk-23.0.2\bin\java.exe"
 echo JAVA_EXE : %JAVA_EXE%
 
-%JAVA_EXE% %JAVA_OPTS% -cp %CP% haru.kitten.MiniServletContainer
+%JAVA_EXE% %JAVA_OPTS% -cp %CP% haru.core.bootstrap.MiniServletContainer
 echo.  
