@@ -110,36 +110,6 @@ public class MiniHttpSession implements HttpSession {
     return 0;
   }
 
-//	@Override
-//	public HttpSessionContext getSessionContext() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
-//	@Override
-//	public Object getValue(String name) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public String[] getValueNames() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public void putValue(String name, Object value) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void removeValue(String name) {
-//		// TODO Auto-generated method stub
-//
-//	}
-
   @Override
   public boolean isNew() {
     // TODO Auto-generated method stub

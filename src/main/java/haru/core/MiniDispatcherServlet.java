@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.web.interceptor.ExecutionTimeInterceptor;
 
 import haru.annotation.mvc.Controller;
 import haru.annotation.mvc.RequestMapping;
@@ -46,7 +45,6 @@ import haru.mvc.core.DispatcherServlet;
 import haru.mvc.interceptor.HandlerInterceptor;
 import haru.mvc.interceptor.InterceptorExecutor;
 import haru.mvc.interceptor.InterceptorRegistry;
-import haru.mvc.interceptor.MiniInterceptor;
 import haru.mvc.result.BodyWriter;
 import haru.mvc.result.BytesBodyWriter;
 import haru.mvc.result.JsonBodyWriter;
@@ -63,7 +61,6 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
   private final Map<String, HandlerMapping> handlerMappings = new ConcurrentHashMap<>();
   private final MiniApplicationContext appContext;
-  private final List<MiniInterceptor> interceptors = List.of(new ExecutionTimeInterceptor());
   private final HandlerAdapter handlerAdapter;
   private static final Logger logger = MiniLogger.getLogger(MiniDispatcherServlet.class.getSimpleName());
 
@@ -120,15 +117,6 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     }
   }
 
-//  private String normalizePath(String path) {
-//    if (path == null || path.isEmpty())
-//      return "/";
-//    String p = path.startsWith(Define.SLASH) ? path : Define.SLASH + path;
-//    if (p.length() > 1 && p.endsWith(Define.SLASH))
-//      p = p.substring(0, p.length() - 1);
-//    return p;
-//  }
-
   private String resolveRequestUri(String requestUrl, String contextPath) {
     if (!Define.SLASH.equals(contextPath) && requestUrl.startsWith(contextPath)) {
       return requestUrl.substring(contextPath.length());
@@ -156,47 +144,8 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private HandlerMapping findHandlerMapping(String path) {
     return handlerMappings.get(path);
   }
-//
-//  @Override
-//  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
-//    String requestUrl = req.getRequestURI();
-//    String welcomeFile = WelcomeFileResolver.resolve(requestUrl);
-//
-//    if (welcomeFile != null) {
-//      req.setRequestURI(welcomeFile);
-//      requestUrl = welcomeFile;
-//    }
-//
-//    final String contextPath = MiniServletContainer.getContextPath();
-//    final String logRequestUrl = requestUrl;
-//    logger.info(() -> "requestUrl : " + logRequestUrl);
-//
-//    if (SecurityFilter.isRestricted(requestUrl, res))
-//      return;
-//
-//    InterceptorChain chain = new InterceptorChain(interceptors);
-//
-//    try {
-//      chain.preHandle(req, res);
-//
-//      if (handleByStaticHandlers(req, res))
-//        return;
-//
-//      String requestUri = resolveRequestUri(requestUrl, contextPath);
-//      requestUri = normalizePath(requestUri);
-//
-//      HandlerMapping mapping = findHandlerMapping(requestUri);
-//      if (mapping == null) {
-//        ResponseHandler.handleNotFound(res, requestUri);
-//        return;
-//      }
-//      handlerAdapter.handle(mapping, req, res);
-//    } finally {
-//      chain.postHandle(req, res);
-//    }
-//  }
 
-  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res){
+  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
     List<HandlerInterceptor> interceptorChain = interceptorRegistry.resolveChain(req.getRequestURI());
     InterceptorExecutor executor = new InterceptorExecutor(interceptorChain);
 
@@ -207,12 +156,9 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     if (SecurityFilter.isRestricted(requestUrl, res))
       return;
 
-//    InterceptorChain legacyChain = new InterceptorChain(interceptors);
     Exception ex = null;
     boolean interceptorPreHandled = false;
     try {
-//      legacyChain.preHandle(req, res);
-
       HandlerMapping mapping = resolveHandler(requestUrl, req, res);
       if (mapping == null) {
         return;
@@ -232,12 +178,10 @@ public class MiniDispatcherServlet implements DispatcherServlet {
       render(modelAndView, req, res);
     } catch (Exception e) {
       ex = e;
-//      throw e;
     } finally {
       if (interceptorPreHandled) {
         executor.triggerAfterCompletion(req, res, handler, ex);
       }
-//      legacyChain.postHandle(req, res);
     }
   }
 

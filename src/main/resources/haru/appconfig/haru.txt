@@ -1,4 +1,3 @@
-
 app.base.package=com.web
 server.port = 8580
 server.context.path= /haru
