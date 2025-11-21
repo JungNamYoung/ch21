@@ -11,8 +11,7 @@ import haru.servlet.filter.FilterChain;
 import haru.servlet.filter.MiniFilter;
 import jakarta.servlet.ServletException;
 
-
-@Filter(order=2, urlPatterns="/api/*")
+@Filter(order = 2, urlPatterns = "/api/*")
 public class IdParameterFilter implements MiniFilter {
 
   private static final Logger logger = MiniLogger.getLogger(IdParameterFilter.class.getSimpleName());
