@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import net.sf.cglib.proxy.Enhancer;
 import haru.annotation.aop.Transactional;
 import haru.logging.MiniLogger;
+import haru.support.CglibProxyFactory;
 
 public class TransactionalProxyRegister {
 
@@ -52,17 +53,14 @@ public class TransactionalProxyRegister {
   }
 
   public Object createProxyInstance(Object bean, TxHandler txHandler) {
-
-    Enhancer enhancer = new Enhancer();
-    enhancer.setSuperclass(bean.getClass());
+    TxMethod interceptor = null;
     try {
-      enhancer.setCallback(new TxMethod(bean, txHandler));
+      interceptor = new TxMethod(bean, txHandler);
     } catch (Exception ex) {
       ex.printStackTrace();
+      throw new RuntimeException("TxMethod 생성 중 예외 발생", ex);
     }
 
-    Object result = enhancer.create();
-
-    return result;
+    return CglibProxyFactory.createProxy(bean, interceptor);
   }
 }

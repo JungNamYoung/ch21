@@ -11,12 +11,13 @@ import haru.annotation.aop.Around;
 import haru.annotation.aop.Before;
 import haru.constants.Define;
 import haru.logging.MiniLogger;
+import haru.support.CglibProxyFactory;
 import net.sf.cglib.proxy.Enhancer;
 
 public class AspectManager {
-  
+
   List<Object> aspectHolderList = new ArrayList<>();
-  
+
   private static final Logger logger = MiniLogger.getLogger(AspectManager.class.getSimpleName());
 
   public List<Object> findBeanAspect(Object bean) {
@@ -63,13 +64,13 @@ public class AspectManager {
   }
 
   public void registerAspectBeans(Set<Class<?>> aspectClasses) {
-    
+
     for (Class<?> aspectClass : aspectClasses) {
 
       Object aspectInstance = null;
 
       try {
-        aspectInstance = aspectClass.getDeclaredConstructor().newInstance();       
+        aspectInstance = aspectClass.getDeclaredConstructor().newInstance();
         aspectHolderList.add(aspectInstance);
 
       } catch (Exception ex) {
@@ -81,11 +82,7 @@ public class AspectManager {
   }
 
   public Object makeProxyInstance(Object originalBean, List<Object> aspectBeans) {
-    Enhancer enhancer = new Enhancer();
-    enhancer.setSuperclass(originalBean.getClass());
-    enhancer.setCallback(new AopMethod(originalBean, aspectBeans));
-
-    Object result = enhancer.create();
-    return result;
+    AopMethod interceptor = new AopMethod(originalBean, aspectBeans);
+    return CglibProxyFactory.createProxy(originalBean, interceptor);
   }
 }

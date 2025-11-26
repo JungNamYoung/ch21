@@ -1,4 +1,4 @@
-package com.web.log;
+package com.web.aop;
 
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
@@ -16,16 +16,16 @@ public class TimeCheck {
   
   @Before("com.web.controller.JobController.*")
   public void logBefore(Method method, Object target, Object[] args) {
-    logger.info("[time-check] Before");
+    logger.info("Before");
   }
 
   @After("com.web.controller.JobController.*")
   public void logAfter(Method method, Object target, Object[] args) {
-    logger.info("[time-check] After");
+    logger.info("After");
   }
 
   @Around("com.web.controller.JobController.*")
   public void logAround(Method method, Object target, Object[] args) {
-    logger.info("[time-check] Around");
+    logger.info("Around");
   }
 }

@@ -1,4 +1,4 @@
-package com.web.log;
+package com.web.aop;
 
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
@@ -10,22 +10,22 @@ import haru.annotation.aop.Before;
 import haru.logging.MiniLogger;
 
 @Aspect
-public class Session {
+public class SessionCheck {
   
-  private static final Logger logger = MiniLogger.getLogger(Session.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(SessionCheck.class.getSimpleName());
   
   @Before("com.web.controller.LoginController.*")
   public void logBefore(Method method, Object target, Object[] args) {
-    logger.info("[session] Before");
+    logger.info("Before");
   }
 
   @After("com.web.controller.LoginController.*")
   public void logAfter(Method method, Object target, Object[] args) {
-    logger.info("[session] After");
+    logger.info("After");
   }
 
   @Around("com.web.controller.LoginController.*")
   public void logAround(Method method, Object target, Object[] args) {
-    logger.info("[session] Around");
+    logger.info("Around");
   }
 }

@@ -1,4 +1,4 @@
-package com.web.log;
+package com.web.aop;
 
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
@@ -15,16 +15,16 @@ public class UserCheck {
 
   @Before("com.web.controller.UserController.*")
   public void logBefore(Method method, Object target, Object[] args) {
-    logger.info("[aspect] log - Before");
+    logger.info("Before");
   }
 
   @After("com.web.controller.UserController.*")
   public void logAfter(Method method, Object target, Object[] args) {
-    logger.info("[aspect] log - After");
+    logger.info("After");
   }
 
   @Around("com.web.controller.UserController.*")
   public void logAround(Method method, Object target, Object[] args) {
-    logger.info("[aspect] log - Around");
+    logger.info("Around");
   }
 }
