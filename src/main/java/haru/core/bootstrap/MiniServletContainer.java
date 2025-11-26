@@ -96,12 +96,14 @@ public class MiniServletContainer {
 
     HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
-    System.out.printf("%n%n%nMiniServletContainer started on port: %d with context-path: %s%n", port, contextPath);
-    System.out.println("user.dir : " + Paths.get("").toAbsolutePath());
+    System.out.println("\nMiniServletContainer started");
+    System.out.printf("-port: %d%n", port);
+    System.out.printf("-context.path: %s%n", contextPath);
+    System.out.println("-user.dir: " + Paths.get("").toAbsolutePath());
 
     String webAppRoot = UtilExt.resolveWebRoot(tokenServlet);
 
-    System.out.println("webAppRoot : " + webAppRoot);
+    System.out.printf("-web.app.root: %s%n%n", webAppRoot);
 
     miniServletContext = new MiniServletContext(webAppRoot);
 
@@ -109,6 +111,7 @@ public class MiniServletContainer {
     String basePackage = tokenHaru.get(Haru.KEY_BASE_PACKAGE).toString();
     MiniApplicationContext appContext = new MiniApplicationContext();
     appContext.initializeContext(basePackage);
+    
     InterceptorRegistry interceptorRegistry = container.createInterceptorRegistry(appContext, contextPath);
 
     MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(basePackage, appContext, interceptorRegistry, contextPath);
