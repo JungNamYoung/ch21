@@ -12,7 +12,6 @@ import com.web.vo.UserVo;
 
 import haru.annotation.aop.Transactional;
 import haru.annotation.di.Autowired;
-import haru.annotation.di.Repository;
 import haru.annotation.di.Service;
 import haru.logging.MiniLogger;
 
@@ -42,9 +41,13 @@ public class UserServiceImpl implements UserService {
   
   @Transactional(transactionManager = "txUser")
   public int changeUser(UserCol userCol) {
+    
     logger.info("changeUser()");
+    
     int result = sqlSessionUser.insert(SQL_NAMESPACE + "insertUser", userCol);
+    
     result = sqlSessionUser.update(SQL_NAMESPACE + "updateUser", userCol);
+    
     return result;
   }
 

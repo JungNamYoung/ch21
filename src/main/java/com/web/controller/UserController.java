@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.web.service.UserService;
+import com.web.vo.UserCol;
 import com.web.vo.UserVo;
 
 import haru.annotation.di.Autowired;
@@ -31,9 +32,7 @@ public class UserController {
   @RequestMapping({"/selectUser.do", "/selectUserExt.do"})
   public String selectUser(Model model, MiniHttpSession session, MiniHttpServletRequest request) {
 
-    logger.info("selectUser()");
-    
-    logger.info("id : #1 : " + session.getId());
+    logger.info("id : " + session.getId());
     
     List<UserVo> result = userServiceExt.selectUserList(null);
 
@@ -46,7 +45,16 @@ public class UserController {
   @RequestMapping("/changeUser.do")
   public String changeUser(ModelMap modelMap) {
     
-    userServiceExt.changeUser(null);
+    UserCol userCol = new UserCol();
+    
+    userCol.setColId("choi202");
+    userCol.setColName("최은지");
+    userCol.setColDescription("사용자5");
+    userCol.setColUseYn("N");
+    userCol.setColRegUser("system");
+    
+    userServiceExt.changeUser(userCol);
+    
     modelMap.addAttribute("url", "www.naver.com");
     
     return "web/chat";

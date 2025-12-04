@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import net.sf.cglib.proxy.Enhancer;
 import haru.annotation.aop.Transactional;
 import haru.logging.MiniLogger;
 import haru.support.CglibProxyFactory;

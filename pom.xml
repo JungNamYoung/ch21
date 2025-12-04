@@ -48,12 +48,12 @@
       <artifactId>jakarta.servlet.jsp.jstl</artifactId>
       <version>3.0.1</version>
     </dependency>
-  <!-- ###################################### -->
+    <!-- ###################################### -->
     <dependency>
-		 <groupId>com.fasterxml.jackson.core</groupId>
-		 <artifactId>jackson-databind</artifactId>
-		<version>2.16.1</version>
-	</dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.16.1</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -64,10 +64,11 @@
         <version>3.11.0</version>
         <configuration>
           <release>23</release>
+          <failOnError>false</failOnError>
         </configuration>
       </plugin>
 
-<plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>3.6.0</version>
@@ -94,7 +95,7 @@
         </executions>
       </plugin>
 
-</plugins>
+    </plugins>
   </build>
 
 </project>

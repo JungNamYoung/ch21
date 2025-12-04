@@ -3,7 +3,6 @@ package haru.mybatis;
 import org.apache.ibatis.session.SqlSession;
 
 public final class SqlSessionContext {
-
   private static final ThreadLocal<SqlSession> SQL_SESSION_HOLDER = new ThreadLocal<>();
 
   private SqlSessionContext() {

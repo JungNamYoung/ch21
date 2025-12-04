@@ -12,7 +12,6 @@ import haru.annotation.aop.Before;
 import haru.constants.Define;
 import haru.logging.MiniLogger;
 import haru.support.CglibProxyFactory;
-import net.sf.cglib.proxy.Enhancer;
 
 public class AspectManager {
 
