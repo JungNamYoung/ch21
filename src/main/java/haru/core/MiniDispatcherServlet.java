@@ -78,7 +78,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     this.interceptorRegistry = registry != null ? registry : new InterceptorRegistry(this.contextPath);
     handlerAdapter = createHandlerAdapter();
     try {
-      logger.info(() -> "basePackage : " + basePackage);
+      logger.info(() -> "[basePackage] " + basePackage);
       if (basePackage != null && !appContext.isInitialized()) {
         appContext.initializeContext(basePackage);
       }
@@ -111,7 +111,8 @@ public class MiniDispatcherServlet implements DispatcherServlet {
         if (prev != null) {
           logger.warning(() -> String.format("[Duplicate Mapping] %s => %s::%s (existing: %s::%s)", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName(), prev.getBeanDefinition().getTargetBean().getClass().getSimpleName(), prev.getMethod().getName()));
         } else {
-          logger.info(() -> String.format("[RequestMapping] %s - %s::%s", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName()));
+          //logger.info(() -> String.format("[RequestMapping] %s - %s::%s", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName()));
+          logger.info(() -> String.format("[RequestMapping] %s", path));
         }
       }
     }

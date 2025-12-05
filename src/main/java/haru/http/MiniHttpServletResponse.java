@@ -111,7 +111,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
           exchange.sendResponseHeaders(statusCode, 0);
         }
 
-        logger.info("send - Response - Headers");
+        logger.info("send : Response - Headers");
 
         headersSent = true;
       } catch (IOException ex) {

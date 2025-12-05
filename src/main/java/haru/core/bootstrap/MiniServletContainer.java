@@ -120,6 +120,5 @@ public class MiniServletContainer {
 
     server.setExecutor(null);
     server.start();
-
   }
 }

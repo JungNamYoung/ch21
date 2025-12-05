@@ -23,7 +23,7 @@ public class MiniSessionManager {
 
     sessions.put(miniHttpSession.getId(), miniHttpSession);
 
-    logger.info("session - create - " + miniHttpSession.getId());
+    logger.info("[session] create : " + miniHttpSession.getId());
 
     return miniHttpSession;
   }

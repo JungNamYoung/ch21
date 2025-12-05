@@ -77,12 +77,14 @@ public class MiniRequestDispatcher implements RequestDispatcher {
   public void compileAndExecute(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, Map<String, Object> param) throws ServletException, IOException {
 
     String jspPath = webAppRoot + relativePath;
-    Path jspFilePath = Paths.get(jspPath);
+    //Path jspFilePath = Paths.get(jspPath);
+    Path jspFilePath = Paths.get(webAppRoot + relativePath);
 
-    logger.info("jspPath : " + jspPath);
+//    logger.info("jspPath : " + jspPath);
 //    logger.info("webAppRoot : " + webAppRoot);
 
     File outputDir = new File(webInf + "/output/compiledJspServlets");
+    
     if (!outputDir.exists()) {
       outputDir.mkdirs();
     }
@@ -252,7 +254,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
       jspCompiler.setFailOnError(true);
       jspCompiler.setTrimSpaces(TrimSpacesOption.TRUE);
       jspCompiler.execute();
-      logger.info("[변환] JSP to Servlet - " + file.getName());
+//      logger.info("[변환] JSP to Servlet - " + file.getName());
     } catch (Exception ex) {
       ex.printStackTrace();
     }
