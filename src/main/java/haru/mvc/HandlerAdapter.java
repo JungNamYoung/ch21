@@ -48,7 +48,7 @@ public class HandlerAdapter {
       Object[] args = resolveMethodArguments(method, req, res, model);
 
       Object ret = method.invoke(controller, args);
-      MiniResponse response = adaptReturnValue(ret, model);
+      MiniResponse response = adaptReturnValue(ret, model, req);
 
       writeResponse(response, req, res);
     } catch (InvocationTargetException ite) {
@@ -86,16 +86,44 @@ public class HandlerAdapter {
     return args;
   }
 
-  private MiniResponse adaptReturnValue(Object ret, Model model) {
+  private MiniResponse adaptReturnValue(Object ret, Model model, MiniHttpServletRequest req) {
     if (ret == null) {
       Object json = model.getAttribute(Define.JSON);
       return (json != null) ? new JsonResult(json) : new NoContentResult();
     }
     if (ret instanceof MiniResponse mr)
       return mr;
-    if (ret instanceof String viewName)
+    if (ret instanceof String viewName) {
+      if (viewName.startsWith("redirect:")) {
+        String location = viewName.substring("redirect:".length());
+        location = resolveRedirectLocation(location, req.getContextPath());
+        return new RedirectResult(location);
+      }
       return new ViewResult(viewName, model);
+    }
     return new JsonResult(ret);
+  }
+
+  private String resolveRedirectLocation(String location, String contextPath) {
+    String normalized = location.strip();
+    String lower = normalized.toLowerCase();
+    if (lower.startsWith(Define.HTTP)) {
+      return normalized;
+    }
+
+    if (!contextPath.equals(Define.SLASH)) {
+      if (normalized.startsWith(Define.SLASH)) {
+        if (!normalized.startsWith(contextPath)) {
+          normalized = contextPath + normalized;
+        }
+      } else {
+        normalized = contextPath + Define.SLASH + normalized;
+      }
+    } else if (!normalized.startsWith(Define.SLASH)) {
+      normalized = Define.SLASH + normalized;
+    }
+
+    return normalized;
   }
 
   private void writeResponse(MiniResponse mr, MiniHttpServletRequest req, MiniHttpServletResponse res) throws IOException {
