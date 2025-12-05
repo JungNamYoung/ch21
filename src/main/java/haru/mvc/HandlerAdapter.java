@@ -145,7 +145,8 @@ public class HandlerAdapter {
       }
     } else if (mr instanceof RedirectResult rr) {
       if (!res.isCommitted()) {
-        res.setHeader("Location", rr.location());
+        res.setStatus(rr.status());
+        res.sendRedirect(rr.location());
       }
     } else if (mr instanceof JsonResult jr) {
       writeBody(jr.body(), contentType, res);

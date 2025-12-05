@@ -179,8 +179,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
   @Override
   public boolean isCommitted() {
-    // TODO Auto-generated method stub
-    return false;
+    return headersSent;
   }
 
   @Override
@@ -209,8 +208,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
   @Override
   public boolean containsHeader(String name) {
-    // TODO Auto-generated method stub
-    return false;
+    return exchange.getResponseHeaders().containsKey(name);
   }
 
   @Override
@@ -236,8 +234,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
   @Override
   public String encodeRedirectURL(String url) {
-    // TODO Auto-generated method stub
-    return null;
+    return encodeURL(url);
   }
 
   @Override
@@ -254,8 +251,18 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
   @Override
   public void sendRedirect(String location) throws IOException {
-    // TODO Auto-generated method stub
+    checkSendHeader();
 
+    String target = encodeRedirectURL(location);
+    if (target == null) {
+      target = location;
+    }
+
+    if (statusCode < 300 || statusCode >= 400) {
+      statusCode = HttpServletResponse.SC_FOUND;
+    }
+    setHeader("Location", target);
+    sendHeaders();
   }
 
   @Override
@@ -303,8 +310,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
 
   @Override
   public int getStatus() {
-    // TODO Auto-generated method stub
-    return 0;
+    return statusCode;
   }
 
   @Override
