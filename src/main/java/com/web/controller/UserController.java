@@ -25,38 +25,38 @@ public class UserController {
 
   @Autowired
   public UserService userService;
-  
-  @Resource(name="userService")
+
+  @Resource(name = "userService")
   public UserService userServiceExt;
 
-  @RequestMapping({"/selectUser.do", "/selectUserExt.do"})
+  @RequestMapping({ "/selectUser.do", "/selectUserExt.do" })
   public String selectUser(Model model, MiniHttpSession session, MiniHttpServletRequest request) {
 
     logger.info("id : " + session.getId());
-    
+
     List<UserVo> result = userServiceExt.selectUserList(null);
 
     model.addAttribute("author", "david");
     model.addAttribute("results", result);
-    
+
     return "web/user";
   }
 
   @RequestMapping("/changeUser.do")
   public String changeUser(ModelMap modelMap) {
-    
+
     UserCol userCol = new UserCol();
-    
+
     userCol.setColId("choi202");
     userCol.setColName("최은지");
     userCol.setColDescription("사용자5");
     userCol.setColUseYn("N");
     userCol.setColRegUser("system");
-    
+
     userServiceExt.changeUser(userCol);
-    
+
     modelMap.addAttribute("url", "www.naver.com");
-    
+
     return "web/chat";
   }
 
@@ -66,5 +66,10 @@ public class UserController {
     logger.info("실행함 : chat.do : " + siteUrl);
 
     return "web/chat";
+  }
+
+  @RequestMapping("/index.do")
+  public String index() {
+    return "/index";
   }
 }
