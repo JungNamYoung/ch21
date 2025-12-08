@@ -57,7 +57,7 @@ public class HandlerAdapter {
       handleException(ex, res);
     } finally {
       try {
-        if (!res.isCommitted())
+//        if (!res.isCommitted())
           res.flushBuffer();
       } catch (Exception ignore) {
       }
