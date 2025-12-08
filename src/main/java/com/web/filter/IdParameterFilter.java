@@ -17,12 +17,12 @@ public class IdParameterFilter implements MiniFilter {
   private static final Logger logger = MiniLogger.getLogger(IdParameterFilter.class.getSimpleName());
 
   @Override
-  public void doFilter(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse, FilterChain filterChain) throws IOException, ServletException {
+  public void doFilter(MiniHttpServletRequest req, MiniHttpServletResponse resp, FilterChain filterChain) throws IOException, ServletException {
 
-    String id = miniHttpServletRequest.getParameter("id");
+    String id = req.getParameter("id");
 
     logger.info("[filter] #id - " + id);
 
-    filterChain.doFilter(miniHttpServletRequest, miniHttpServletResponse);
+    filterChain.doFilter(req, resp);
   }
 }

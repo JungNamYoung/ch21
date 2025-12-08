@@ -19,12 +19,12 @@ public class MiniFilterChain implements FilterChain {
   }
 
   @Override
-  public void doFilter(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) throws IOException, ServletException {
+  public void doFilter(MiniHttpServletRequest req, MiniHttpServletResponse resp) throws IOException, ServletException {
     if (currentPosition < filters.size()) {
       MiniFilter nextFilter = filters.get(currentPosition++);
-      nextFilter.doFilter(miniHttpServletRequest, miniHttpServletResponse, this);
+      nextFilter.doFilter(req, resp, this);
     } else {
-      dispatcherServlet.service(miniHttpServletRequest, miniHttpServletResponse);
+      dispatcherServlet.service(req, resp);
     }
   }
 }

@@ -140,7 +140,6 @@ public class MiniHttpServletResponse implements HttpServletResponse {
   @Override
   public void setCharacterEncoding(String charset) {
     // TODO Auto-generated method stub
-
   }
 
   @Override

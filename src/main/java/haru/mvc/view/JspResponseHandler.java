@@ -18,8 +18,8 @@ public class JspResponseHandler {
 
   private static final Logger logger = MiniLogger.getLogger(JspResponseHandler.class.getSimpleName());
 
-  public static boolean handle(MiniHttpServletRequest miniHttpServletRequest, MiniHttpServletResponse miniHttpServletResponse) {
-    String requestUri = miniHttpServletRequest.getRequestURI();
+  public static boolean handle(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
+    String requestUri = req.getRequestURI();
 
     if (!requestUri.endsWith(Define.EXT_JSP)) {
       return false;
@@ -40,14 +40,14 @@ public class JspResponseHandler {
 
     try {
       
-      RequestDispatcher requestDispatcher = miniHttpServletRequest.getRequestDispatcher(relativePath);
+      RequestDispatcher requestDispatcher = req.getRequestDispatcher(relativePath);
       MiniRequestDispatcher miniRequestDispatcher = (MiniRequestDispatcher) requestDispatcher;
       Map<String, Object> model = new HashMap<>();
-      miniHttpServletResponse.setStatus(HttpServletResponse.SC_OK);
+      resp.setStatus(HttpServletResponse.SC_OK);
       
-      miniRequestDispatcher.compileAndExecute(miniHttpServletRequest, miniHttpServletResponse, model);
+      miniRequestDispatcher.compileAndExecute(req, resp, model);
       
-      miniHttpServletResponse.flushBuffer();
+      resp.flushBuffer();
       
     } catch (Exception ex) {
       ex.printStackTrace();

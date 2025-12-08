@@ -25,20 +25,20 @@ import haru.support.FileEx;
 
 public class HtmlResponseHandler {
 
-  public static boolean handle(String requestUrl, MiniHttpServletResponse miniHttpServletResponse) {
+  public static boolean handle(String requestUrl, MiniHttpServletResponse resp) {
 
     if (requestUrl.endsWith(Define.EXT_HTML) || requestUrl.endsWith(Define.EXT_HTM)) {
       try {
-        miniHttpServletResponse.setContentType(Define.TEXT_HTML);
+        resp.setContentType(Define.TEXT_HTML);
 
         String filePath = MiniServletContainer.getRealPath(requestUrl);
 
         List<String> list = FileEx.readEx(filePath, false);
 
         for (String str : list)
-          miniHttpServletResponse.getWriter().write(str);
+          resp.getWriter().write(str);
 
-        miniHttpServletResponse.flushBuffer();
+        resp.flushBuffer();
 
       } catch (Exception ex) {
         ex.printStackTrace();

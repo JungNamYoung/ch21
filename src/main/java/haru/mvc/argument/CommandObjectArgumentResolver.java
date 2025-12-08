@@ -17,7 +17,7 @@ public class CommandObjectArgumentResolver implements ArgumentResolver {
   }
 
   @Override
-  public Object resolve(Parameter p, MiniHttpServletRequest req, MiniHttpServletResponse res, Model model) throws Exception {
+  public Object resolve(Parameter p, MiniHttpServletRequest req, MiniHttpServletResponse resp, Model model) throws Exception {
     Class<?> t = p.getType();
     Object target = t.getDeclaredConstructor().newInstance();
 

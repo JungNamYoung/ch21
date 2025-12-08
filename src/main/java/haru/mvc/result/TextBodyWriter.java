@@ -11,8 +11,8 @@ public class TextBodyWriter implements BodyWriter {
   }
 
   @Override
-  public void write(Object body, String contentType, MiniHttpServletResponse res) throws IOException {
-    res.setContentType(contentType);
-    res.getWriter().write(body == null ? "" : body.toString());
+  public void write(Object body, String contentType, MiniHttpServletResponse resp) throws IOException {
+    resp.setContentType(contentType);
+    resp.getWriter().write(body == null ? "" : body.toString());
   }
 }

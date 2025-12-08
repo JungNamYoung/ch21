@@ -16,7 +16,7 @@ public class RequestParamArgumentResolver implements ArgumentResolver {
   }
 
   @Override
-  public Object resolve(Parameter p, MiniHttpServletRequest req, MiniHttpServletResponse res, Model model) {
+  public Object resolve(Parameter p, MiniHttpServletRequest req, MiniHttpServletResponse resp, Model model) {
     RequestParam ann = p.getAnnotation(RequestParam.class);
     String name = ann.value();
     if (name == null || name.isEmpty())

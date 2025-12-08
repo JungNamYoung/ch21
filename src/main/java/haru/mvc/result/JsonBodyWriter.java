@@ -20,8 +20,8 @@ public class JsonBodyWriter implements BodyWriter {
   }
 
   @Override
-  public void write(Object body, String contentType, MiniHttpServletResponse res) throws IOException {
-    res.setContentType(contentType);
-    res.getWriter().write(objectMapper.writeValueAsString(body));
+  public void write(Object body, String contentType, MiniHttpServletResponse resp) throws IOException {
+    resp.setContentType(contentType);
+    resp.getWriter().write(objectMapper.writeValueAsString(body));
   }
 }

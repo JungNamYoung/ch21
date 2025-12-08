@@ -125,17 +125,17 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return requestUrl;
   }
 
-  private boolean handleByStaticHandlers(MiniHttpServletRequest req, MiniHttpServletResponse res) {
+  private boolean handleByStaticHandlers(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     String url = req.getRequestURI();
-    if (HtmlResponseHandler.handle(url, res)) {
+    if (HtmlResponseHandler.handle(url, resp)) {
       logger.info("HtmlResponseHandler.handle()");
       return true;
     }
-    if (JspResponseHandler.handle(req, res)) {
+    if (JspResponseHandler.handle(req, resp)) {
       logger.info("JspResponseHandler.handle()");
       return true;
     }
-    if (MiniResourceHandler.handle(req, res)) {
+    if (MiniResourceHandler.handle(req, resp)) {
       logger.info("MiniResourceHandler.handle()");
       return true;
     }
@@ -146,7 +146,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return handlerMappings.get(path);
   }
 
-  public void service(MiniHttpServletRequest req, MiniHttpServletResponse res) {
+  public void service(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     List<HandlerInterceptor> interceptorChain = interceptorRegistry.resolveChain(req.getRequestURI());
     InterceptorExecutor executor = new InterceptorExecutor(interceptorChain);
 
@@ -154,40 +154,40 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     Object modelAndView = null;
 
     String requestUrl = prepareRequest(req);
-    if (SecurityFilter.isRestricted(requestUrl, res))
+    if (SecurityFilter.isRestricted(requestUrl, resp))
       return;
 
     Exception ex = null;
     boolean interceptorPreHandled = false;
     try {
-      HandlerMapping mapping = resolveHandler(requestUrl, req, res);
+      HandlerMapping mapping = resolveHandler(requestUrl, req, resp);
       if (mapping == null) {
         return;
       }
 
       handler = mapping;
 
-      interceptorPreHandled = executor.applyPreHandle(req, res, handler);
+      interceptorPreHandled = executor.applyPreHandle(req, resp, handler);
       if (!interceptorPreHandled) {
         return;
       }
 
-      modelAndView = invokeHandler(handler, req, res);
+      modelAndView = invokeHandler(handler, req, resp);
 
-      executor.applyPostHandle(req, res, handler, modelAndView);
+      executor.applyPostHandle(req, resp, handler, modelAndView);
 
-      render(modelAndView, req, res);
+      render(modelAndView, req, resp);
     } catch (Exception e) {
       ex = e;
     } finally {
       if (interceptorPreHandled) {
-        executor.triggerAfterCompletion(req, res, handler, ex);
+        executor.triggerAfterCompletion(req, resp, handler, ex);
       }
     }
   }
 
-  private HandlerMapping resolveHandler(String requestUrl, MiniHttpServletRequest req, MiniHttpServletResponse res) {
-    if (handleByStaticHandlers(req, res))
+  private HandlerMapping resolveHandler(String requestUrl, MiniHttpServletRequest req, MiniHttpServletResponse resp) {
+    if (handleByStaticHandlers(req, resp))
       return null;
 
     String requestUri = resolveRequestUri(requestUrl, contextPath);
@@ -195,7 +195,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
     HandlerMapping mapping = findHandlerMapping(requestUri);
     if (mapping == null) {
-      ResponseHandler.handleNotFound(res, requestUri);
+      ResponseHandler.handleNotFound(resp, requestUri);
       return null;
     }
     return mapping;
@@ -215,16 +215,16 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return requestUrl;
   }
 
-  private Object invokeHandler(Object handler, MiniHttpServletRequest req, MiniHttpServletResponse res) {
+  private Object invokeHandler(Object handler, MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     if (!(handler instanceof HandlerMapping)) {
       throw new IllegalArgumentException("지원하지 않는 handler 타입 : " + handler);
     }
     HandlerMapping mapping = (HandlerMapping) handler;
-    handlerAdapter.handle(mapping, req, res);
+    handlerAdapter.handle(mapping, req, resp);
     return null;
   }
 
-  private void render(Object modelAndView, MiniHttpServletRequest req, MiniHttpServletResponse res) {
+  private void render(Object modelAndView, MiniHttpServletRequest req, MiniHttpServletResponse resp) {
   }
 
   private HandlerAdapter createHandlerAdapter() {

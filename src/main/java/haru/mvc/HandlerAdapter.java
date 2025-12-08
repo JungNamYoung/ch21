@@ -39,32 +39,32 @@ public class HandlerAdapter {
     this.bodyWriters = bodyWriters;
   }
 
-  public void handle(HandlerMapping mapping, MiniHttpServletRequest req, MiniHttpServletResponse res) {
+  public void handle(HandlerMapping mapping, MiniHttpServletRequest req, MiniHttpServletResponse resp) {
     Model model = new ModelMap();
     try {
       Object controller = mapping.getBeanDefinition().getProxyInstance() != null ? mapping.getBeanDefinition().getProxyInstance() : mapping.getBeanDefinition().getTargetBean();
 
       Method method = mapping.getMethod();
-      Object[] args = resolveMethodArguments(method, req, res, model);
+      Object[] args = resolveMethodArguments(method, req, resp, model);
 
       Object ret = method.invoke(controller, args);
       MiniResponse response = adaptReturnValue(ret, model, req);
 
-      writeResponse(response, req, res);
+      writeResponse(response, req, resp);
     } catch (InvocationTargetException ite) {
-      handleException(ite.getTargetException(), res);
+      handleException(ite.getTargetException(), resp);
     } catch (Exception ex) {
-      handleException(ex, res);
+      handleException(ex, resp);
     } finally {
       try {
-//        if (!res.isCommitted())
-          res.flushBuffer();
+        if (!resp.isCommitted())
+          resp.flushBuffer();
       } catch (Exception ignore) {
       }
     }
   }
 
-  private Object[] resolveMethodArguments(Method method, MiniHttpServletRequest req, MiniHttpServletResponse res, Model model) {
+  private Object[] resolveMethodArguments(Method method, MiniHttpServletRequest req, MiniHttpServletResponse resp, Model model) {
     Parameter[] params = method.getParameters();
     Object[] args = new Object[params.length];
     for (int i = 0; i < params.length; i++) {
@@ -72,7 +72,7 @@ public class HandlerAdapter {
       for (ArgumentResolver r : argumentResolvers) {
         if (r.supports(params[i])) {
           try {
-            args[i] = r.resolve(params[i], req, res, model);
+            args[i] = r.resolve(params[i], req, resp, model);
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -126,11 +126,11 @@ public class HandlerAdapter {
     return normalized;
   }
 
-  private void writeResponse(MiniResponse mr, MiniHttpServletRequest req, MiniHttpServletResponse res) throws IOException {
-    res.setStatus(mr.status());
+  private void writeResponse(MiniResponse mr, MiniHttpServletRequest req, MiniHttpServletResponse resp) throws IOException {
+    resp.setStatus(mr.status());
     String contentType = null;
     for (var e : mr.headers().entrySet()) {
-      res.setHeader(e.getKey(), e.getValue());
+      resp.setHeader(e.getKey(), e.getValue());
       if ("Content-Type".equalsIgnoreCase(e.getKey())) {
         contentType = e.getValue();
       }
@@ -139,59 +139,59 @@ public class HandlerAdapter {
     if (mr instanceof ViewResult vr) {
       String jspPath = Define.WEB_INF_EX + "jsp/" + vr.viewName() + Define.EXT_JSP;
       try {
-        ((MiniRequestDispatcher) req.getRequestDispatcher(jspPath)).compileAndExecute(req, res, vr.model().getAttributes());
+        ((MiniRequestDispatcher) req.getRequestDispatcher(jspPath)).compileAndExecute(req, resp, vr.model().getAttributes());
       } catch (ServletException | IOException e) {
         throw new RuntimeException("Failed to render view: " + vr.viewName(), e);
       }
     } else if (mr instanceof RedirectResult rr) {
-      if (!res.isCommitted()) {
-        res.setStatus(rr.status());
-        res.sendRedirect(rr.location());
+      if (!resp.isCommitted()) {
+        resp.setStatus(rr.status());
+        resp.sendRedirect(rr.location());
       }
     } else if (mr instanceof JsonResult jr) {
-      writeBody(jr.body(), contentType, res);
+      writeBody(jr.body(), contentType, resp);
     } else if (mr instanceof TextResult tr) {
-      writeBody(tr.body(), contentType, res);
+      writeBody(tr.body(), contentType, resp);
     } else if (mr instanceof NoContentResult) {
       // nothing to write
     }
   }
 
-  private void writeBody(Object body, String contentType, MiniHttpServletResponse res) throws IOException {
+  private void writeBody(Object body, String contentType, MiniHttpServletResponse resp) throws IOException {
     for (BodyWriter writer : bodyWriters) {
       if (writer.supports(body, contentType)) {
-        writer.write(body, contentType, res);
+        writer.write(body, contentType, resp);
         return;
       }
     }
 
     if (contentType == null || contentType.isBlank()) {
       if (body instanceof String strBody) {
-        res.setContentType("text/plain; charset=UTF-8");
-        res.getWriter().write(strBody);
+        resp.setContentType("text/plain; charset=UTF-8");
+        resp.getWriter().write(strBody);
       } else {
-        res.setContentType("application/json; charset=UTF-8");
-        res.getWriter().write(objectMapper.writeValueAsString(body));
+        resp.setContentType("application/json; charset=UTF-8");
+        resp.getWriter().write(objectMapper.writeValueAsString(body));
       }
       return;
     }
 
-    res.setContentType(contentType);
-    res.getWriter().write(body.toString());
+    resp.setContentType(contentType);
+    resp.getWriter().write(body.toString());
   }
 
-  private void writeText(String body, MiniHttpServletResponse res) throws IOException {
-    res.setContentType("text/plain; charset=UTF-8");
-    res.getWriter().write(body);
+  private void writeText(String body, MiniHttpServletResponse resp) throws IOException {
+    resp.setContentType("text/plain; charset=UTF-8");
+    resp.getWriter().write(body);
   }
 
-  private void handleException(Throwable ex, MiniHttpServletResponse res) {
+  private void handleException(Throwable ex, MiniHttpServletResponse resp) {
     logger.severe(() -> "Handller error: " + ex.getMessage());
-    if (!res.isCommitted()) {
-      res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    if (!resp.isCommitted()) {
+      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       try {
-        res.setContentType("application/json; charset=UTF-8");
-        res.getWriter().write("{\"error\":\"internal_server_error\"}");
+        resp.setContentType("application/json; charset=UTF-8");
+        resp.getWriter().write("{\"error\":\"internal_server_error\"}");
       } catch (Exception ext) {
       }
     }
