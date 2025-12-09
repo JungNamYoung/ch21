@@ -41,6 +41,8 @@ public class HandlerAdapter {
 
   public void handle(HandlerMapping mapping, MiniHttpServletRequest request, MiniHttpServletResponse response) {
     Model model = new ModelMap();
+    boolean shouldFlush = true;
+    MiniResponse miniResponse = null;
     try {
       Object controller = mapping.getBeanDefinition().getProxyInstance() != null ? mapping.getBeanDefinition().getProxyInstance() : mapping.getBeanDefinition().getTargetBean();
 
@@ -48,17 +50,21 @@ public class HandlerAdapter {
       Object[] args = resolveMethodArguments(method, request, response, model);
 
       Object ret = method.invoke(controller, args);
-      MiniResponse miniResponse = adaptReturnValue(ret, model, request);
+      miniResponse = adaptReturnValue(ret, model, request);
 
       writeResponse(miniResponse, request, response);
+      if (miniResponse instanceof RedirectResult) {
+        shouldFlush = false;
+      }
     } catch (InvocationTargetException ite) {
       handleException(ite.getTargetException(), response);
     } catch (Exception ex) {
       handleException(ex, response);
     } finally {
       try {
-        if (!response.isCommitted())
+        if (shouldFlush) {
           response.flushBuffer();
+        }
       } catch (Exception ignore) {
       }
     }
