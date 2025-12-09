@@ -9,7 +9,7 @@ import haru.mvc.model.Model;
 public interface ArgumentResolver{
  boolean supports(Parameter parameter);
  Object resolve(Parameter parameter,
-  MiniHttpServletRequest req,
+  MiniHttpServletRequest request,
   MiniHttpServletResponse res,
  Model model) throws Exception;
 }

@@ -6,5 +6,5 @@ import haru.http.MiniHttpServletResponse;
 
 public interface BodyWriter {
   boolean supports(Object body, String contentType);
-  void write(Object body, String contentType, MiniHttpServletResponse resp) throws IOException;
+  void write(Object body, String contentType, MiniHttpServletResponse response) throws IOException;
 }

@@ -15,14 +15,14 @@ public class ServletArgumentResolver implements ArgumentResolver {
   }
 
   @Override
-  public Object resolve(Parameter p, MiniHttpServletRequest req, MiniHttpServletResponse resp, Model model) {
+  public Object resolve(Parameter p, MiniHttpServletRequest request, MiniHttpServletResponse response, Model model) {
     Class<?> t = p.getType();
     if (t.equals(MiniHttpServletRequest.class))
-      return req;
+      return request;
     if (t.equals(MiniHttpServletResponse.class))
-      return resp;
+      return response;
     if (t.equals(MiniHttpSession.class))
-      return req.getSession();
+      return request.getSession();
     throw new IllegalStateException("Unsupported servlet arg: " + t);
   }
 }

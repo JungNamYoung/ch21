@@ -125,17 +125,17 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return requestUrl;
   }
 
-  private boolean handleByStaticHandlers(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
-    String url = req.getRequestURI();
-    if (HtmlResponseHandler.handle(url, resp)) {
+  private boolean handleByStaticHandlers(MiniHttpServletRequest request, MiniHttpServletResponse response) {
+    String url = request.getRequestURI();
+    if (HtmlResponseHandler.handle(url, response)) {
       logger.info("HtmlResponseHandler.handle()");
       return true;
     }
-    if (JspResponseHandler.handle(req, resp)) {
+    if (JspResponseHandler.handle(request, response)) {
       logger.info("JspResponseHandler.handle()");
       return true;
     }
-    if (MiniResourceHandler.handle(req, resp)) {
+    if (MiniResourceHandler.handle(request, response)) {
       logger.info("MiniResourceHandler.handle()");
       return true;
     }
@@ -146,48 +146,48 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return handlerMappings.get(path);
   }
 
-  public void service(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
-    List<HandlerInterceptor> interceptorChain = interceptorRegistry.resolveChain(req.getRequestURI());
+  public void service(MiniHttpServletRequest request, MiniHttpServletResponse response) {
+    List<HandlerInterceptor> interceptorChain = interceptorRegistry.resolveChain(request.getRequestURI());
     InterceptorExecutor executor = new InterceptorExecutor(interceptorChain);
 
     Object handler = null;
     Object modelAndView = null;
 
-    String requestUrl = prepareRequest(req);
-    if (SecurityFilter.isRestricted(requestUrl, resp))
+    String requestUrl = prepareRequest(request);
+    if (SecurityFilter.isRestricted(requestUrl, response))
       return;
 
     Exception ex = null;
     boolean interceptorPreHandled = false;
     try {
-      HandlerMapping mapping = resolveHandler(requestUrl, req, resp);
+      HandlerMapping mapping = resolveHandler(requestUrl, request, response);
       if (mapping == null) {
         return;
       }
 
       handler = mapping;
 
-      interceptorPreHandled = executor.applyPreHandle(req, resp, handler);
+      interceptorPreHandled = executor.applyPreHandle(request, response, handler);
       if (!interceptorPreHandled) {
         return;
       }
 
-      modelAndView = invokeHandler(handler, req, resp);
+      modelAndView = invokeHandler(handler, request, response);
 
-      executor.applyPostHandle(req, resp, handler, modelAndView);
+      executor.applyPostHandle(request, response, handler, modelAndView);
 
-      render(modelAndView, req, resp);
+      render(modelAndView, request, response);
     } catch (Exception e) {
       ex = e;
     } finally {
       if (interceptorPreHandled) {
-        executor.triggerAfterCompletion(req, resp, handler, ex);
+        executor.triggerAfterCompletion(request, response, handler, ex);
       }
     }
   }
 
-  private HandlerMapping resolveHandler(String requestUrl, MiniHttpServletRequest req, MiniHttpServletResponse resp) {
-    if (handleByStaticHandlers(req, resp))
+  private HandlerMapping resolveHandler(String requestUrl, MiniHttpServletRequest request, MiniHttpServletResponse response) {
+    if (handleByStaticHandlers(request, response))
       return null;
 
     String requestUri = resolveRequestUri(requestUrl, contextPath);
@@ -195,18 +195,18 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
     HandlerMapping mapping = findHandlerMapping(requestUri);
     if (mapping == null) {
-      ResponseHandler.handleNotFound(resp, requestUri);
+      ResponseHandler.handleNotFound(response, requestUri);
       return null;
     }
     return mapping;
   }
 
-  private String prepareRequest(MiniHttpServletRequest req) {
-    String requestUrl = req.getRequestURI();
+  private String prepareRequest(MiniHttpServletRequest request) {
+    String requestUrl = request.getRequestURI();
     String welcomeFile = WelcomeFileResolver.resolve(requestUrl);
 
     if (welcomeFile != null) {
-      req.setRequestURI(welcomeFile);
+      request.setRequestURI(welcomeFile);
       requestUrl = welcomeFile;
     }
 
@@ -215,16 +215,16 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return requestUrl;
   }
 
-  private Object invokeHandler(Object handler, MiniHttpServletRequest req, MiniHttpServletResponse resp) {
+  private Object invokeHandler(Object handler, MiniHttpServletRequest request, MiniHttpServletResponse response) {
     if (!(handler instanceof HandlerMapping)) {
       throw new IllegalArgumentException("지원하지 않는 handler 타입 : " + handler);
     }
     HandlerMapping mapping = (HandlerMapping) handler;
-    handlerAdapter.handle(mapping, req, resp);
+    handlerAdapter.handle(mapping, request, response);
     return null;
   }
 
-  private void render(Object modelAndView, MiniHttpServletRequest req, MiniHttpServletResponse resp) {
+  private void render(Object modelAndView, MiniHttpServletRequest request, MiniHttpServletResponse response) {
   }
 
   private HandlerAdapter createHandlerAdapter() {

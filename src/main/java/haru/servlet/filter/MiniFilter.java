@@ -7,5 +7,5 @@ import haru.http.MiniHttpServletResponse;
 import jakarta.servlet.ServletException;
 
 public interface MiniFilter {
-  void doFilter(MiniHttpServletRequest req, MiniHttpServletResponse resp, FilterChain chain) throws IOException, ServletException;
+  void doFilter(MiniHttpServletRequest request, MiniHttpServletResponse response, FilterChain chain) throws IOException, ServletException;
 }

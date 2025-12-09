@@ -73,7 +73,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     miniServletContext = MiniServletContainer.getMiniWebApplicationContext();
   }
 
-  public void compileAndExecute(MiniHttpServletRequest req, MiniHttpServletResponse resp, Map<String, Object> param) throws ServletException, IOException {
+  public void compileAndExecute(MiniHttpServletRequest request, MiniHttpServletResponse response, Map<String, Object> param) throws ServletException, IOException {
 
     String jspPath = webAppRoot + relativePath;
     Path jspFilePath = Paths.get(webAppRoot + relativePath);
@@ -108,10 +108,10 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
     String classPath = webInf + "/output/compiledJspServlets";
 
-    executeServlet(classPath, req, resp, packagePath + "." + servletClassName, param);
+    executeServlet(classPath, request, response, packagePath + "." + servletClassName, param);
   }
 
-  private void executeServlet(String classPath, MiniHttpServletRequest req, MiniHttpServletResponse resp, String servletClassName, Map<String, Object> param) throws ServletException, IOException {
+  private void executeServlet(String classPath, MiniHttpServletRequest request, MiniHttpServletResponse response, String servletClassName, Map<String, Object> param) throws ServletException, IOException {
     try {
       File file = new File(classPath);
       URI uri = file.toURI();
@@ -126,7 +126,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
 
       MiniHttpSession miniHttpSession = new MiniHttpSession(miniServletContext);
 
-      MiniHttServletRequestWrapper miniHttpServletRequestWrapper = new MiniHttServletRequestWrapper(req, miniServletContext, miniHttpSession);
+      MiniHttServletRequestWrapper miniHttpServletRequestWrapper = new MiniHttServletRequestWrapper(request, miniServletContext, miniHttpSession);
 
       MiniServletConfig miniServletConfig = new MiniServletConfig(miniServletContext);
 
@@ -139,7 +139,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
       Method jspServiceMethod = servletClass.getDeclaredMethod("_jspService", HttpServletRequest.class, HttpServletResponse.class);
       jspServiceMethod.setAccessible(true);
 
-      jspServiceMethod.invoke(jspServletInstance, miniHttpServletRequestWrapper, resp);
+      jspServiceMethod.invoke(jspServletInstance, miniHttpServletRequestWrapper, response);
 
     } catch (Exception e) {
       throw new ServletException("Error executing compiled JSP servlet.", e);

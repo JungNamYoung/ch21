@@ -19,15 +19,15 @@ public class LoggingInterceptor implements HandlerInterceptor {
   long t0;
   
   @Override
-  public boolean preHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object h) {
+  public boolean preHandle(MiniHttpServletRequest request, MiniHttpServletResponse response, Object h) {
     t0 = System.nanoTime();
-    logger.info("[REQ] " + req.getMethod() + " " + req.getRequestURI());
+    logger.info("[REQ] " + request.getMethod() + " " + request.getRequestURI());
     return true;
   }
 
   @Override
-  public void afterCompletion(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object h, Exception ex) {
+  public void afterCompletion(MiniHttpServletRequest request, MiniHttpServletResponse response, Object h, Exception ex) {
     long ms = (System.nanoTime() - t0) / 1_000_000;
-    logger.info("[RES] " + resp.getStatus() + " (" + ms + "ms)");
+    logger.info("[RES] " + response.getStatus() + " (" + ms + "ms)");
   }
 }

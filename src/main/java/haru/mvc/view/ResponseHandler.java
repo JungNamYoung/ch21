@@ -11,11 +11,11 @@ public class ResponseHandler {
 
   private static final Logger logger = MiniLogger.getLogger(ResponseHandler.class.getSimpleName());
 
-  public static void handleNotFound(MiniHttpServletResponse resp, String requestUri) {
+  public static void handleNotFound(MiniHttpServletResponse response, String requestUri) {
     try {
-      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-      resp.getWriter().write(Define.NOT_FOUND_404);
-      resp.flushBuffer();
+      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      response.getWriter().write(Define.NOT_FOUND_404);
+      response.flushBuffer();
     } catch (Exception ex) {
       ex.printStackTrace();
     }

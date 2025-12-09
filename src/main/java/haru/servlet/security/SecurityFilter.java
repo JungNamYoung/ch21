@@ -8,13 +8,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class SecurityFilter {
 
-  public static boolean isRestricted(String requestUrl, MiniHttpServletResponse resp) {
+  public static boolean isRestricted(String requestUrl, MiniHttpServletResponse response) {
 
     if (requestUrl.contains(Define.WEB_INF_EX)) {
       try {
-        resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        resp.getWriter().write("403 Forbidden: Access to WEB-INF is not allowed.");
-        resp.flushBuffer();
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.getWriter().write("403 Forbidden: Access to WEB-INF is not allowed.");
+        response.flushBuffer();
       } catch (IOException ex) {
         ex.printStackTrace();
       }

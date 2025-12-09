@@ -14,11 +14,11 @@ public final class InterceptorExecutor {
     this.chain = chain == null ? List.of() : List.copyOf(chain);
   }
 
-  public boolean applyPreHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object handler) throws Exception {
+  public boolean applyPreHandle(MiniHttpServletRequest request, MiniHttpServletResponse response, Object handler) throws Exception {
     for (int i = 0; i < chain.size(); i++) {
-      if (!chain.get(i).preHandle(req, resp, handler)) {
+      if (!chain.get(i).preHandle(request, response, handler)) {
         lastPreHandledIndex = i - 1;
-        triggerAfterCompletion(req, resp, handler, null);
+        triggerAfterCompletion(request, response, handler, null);
         return false;
       }
       lastPreHandledIndex = i;
@@ -26,16 +26,16 @@ public final class InterceptorExecutor {
     return true;
   }
 
-  public void applyPostHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object handler, Object modelAndView) throws Exception {
+  public void applyPostHandle(MiniHttpServletRequest request, MiniHttpServletResponse response, Object handler, Object modelAndView) throws Exception {
     for (int i = lastPreHandledIndex; i >= 0; i--) {
-      chain.get(i).postHandle(req, resp, handler, modelAndView);
+      chain.get(i).postHandle(request, response, handler, modelAndView);
     }
   }
 
-  public void triggerAfterCompletion(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object handler, Exception ex) {
+  public void triggerAfterCompletion(MiniHttpServletRequest request, MiniHttpServletResponse response, Object handler, Exception ex) {
     for (int i = lastPreHandledIndex; i >= 0; i--) {
       try {
-        chain.get(i).afterCompletion(req, resp, handler, ex);
+        chain.get(i).afterCompletion(request, response, handler, ex);
       } catch (Exception ignore) {
       }
     }

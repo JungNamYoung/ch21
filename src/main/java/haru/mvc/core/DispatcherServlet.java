@@ -20,5 +20,5 @@ import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 
 public interface DispatcherServlet {
-  public void service(MiniHttpServletRequest req, MiniHttpServletResponse resp);
+  public void service(MiniHttpServletRequest request, MiniHttpServletResponse response);
 }

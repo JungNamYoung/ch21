@@ -17,12 +17,12 @@ public class SnParameterFilter implements MiniFilter {
   private static final Logger logger = MiniLogger.getLogger(SnParameterFilter.class.getSimpleName());
 
   @Override
-  public void doFilter(MiniHttpServletRequest req, MiniHttpServletResponse resp, FilterChain filterChain) throws IOException, ServletException {
+  public void doFilter(MiniHttpServletRequest request, MiniHttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-    String sn = req.getParameter("sn");
+    String sn = request.getParameter("sn");
 
     logger.info("[filter] #sn - " + sn);
 
-    filterChain.doFilter(req, resp);
+    filterChain.doFilter(request, response);
   }
 }

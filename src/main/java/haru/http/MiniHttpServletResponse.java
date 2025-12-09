@@ -104,6 +104,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
     if (!headersSent) {
       try {
         exchange.getResponseHeaders().set(Define.CONTENT_TYPE, contentType);
+        
         if (contentLengthSet) {
           exchange.sendResponseHeaders(statusCode, contentLength);
         } else {
@@ -179,6 +180,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
   @Override
   public boolean isCommitted() {
     return headersSent;
+//    return false;
   }
 
   @Override

@@ -11,11 +11,11 @@ public class BytesBodyWriter implements BodyWriter {
   }
 
   @Override
-  public void write(Object body, String contentType, MiniHttpServletResponse resp) throws IOException {
+  public void write(Object body, String contentType, MiniHttpServletResponse response) throws IOException {
     if (contentType == null || contentType.isBlank()) {
       contentType = "application/octet-stream";
     }
-    resp.setContentType(contentType);
-    resp.getOutputStream().write((byte[]) body);
+    response.setContentType(contentType);
+    response.getOutputStream().write((byte[]) body);
   }
 }

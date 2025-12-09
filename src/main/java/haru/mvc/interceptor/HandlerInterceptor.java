@@ -5,13 +5,13 @@ import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 
 public interface HandlerInterceptor {
-  default boolean preHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object handler) throws Exception {
+  default boolean preHandle(MiniHttpServletRequest request, MiniHttpServletResponse response, Object handler) throws Exception {
     return true;
   }
 
-  default void postHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object handler, Object modelAndView) throws Exception {
+  default void postHandle(MiniHttpServletRequest request, MiniHttpServletResponse response, Object handler, Object modelAndView) throws Exception {
   }
 
-  default void afterCompletion(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object handler, Exception ex) throws Exception {
+  default void afterCompletion(MiniHttpServletRequest request, MiniHttpServletResponse response, Object handler, Exception ex) throws Exception {
   }
 }

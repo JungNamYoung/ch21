@@ -42,14 +42,14 @@ public class LoggerDuplicateDemo {
     System.out.println("===요청을 3번 보냄===");
     for (int i = 1; i <= 3; i++) {
       IdParameterFilter filter = new IdParameterFilter();
-      filter.doFilter("req" + i);
+      filter.doFilter("request" + i);
     }
 
     System.out.println("\n===static logger 사용===");
     
     for (int i = 1; i <= 3; i++) {
       StaticFilter staticFilter = new StaticFilter();
-      staticFilter.doFilter("req" + i);
+      staticFilter.doFilter("request" + i);
     }
   }
 }

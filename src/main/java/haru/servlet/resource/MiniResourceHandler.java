@@ -34,8 +34,8 @@ public class MiniResourceHandler {
 
   private static final Logger logger = MiniLogger.getLogger(MiniResourceHandler.class.getSimpleName());
 
-  public static boolean handle(MiniHttpServletRequest req, MiniHttpServletResponse resp) {
-    String requestUri = req.getRequestURI();
+  public static boolean handle(MiniHttpServletRequest request, MiniHttpServletResponse response) {
+    String requestUri = request.getRequestURI();
     if (requestUri.endsWith(Define.EXT_JSP)) {
       return false;
     }
@@ -48,13 +48,13 @@ public class MiniResourceHandler {
       return false;
     }
 
-    String mimeType = req.getServletContext().getMimeType(file.getName());
+    String mimeType = request.getServletContext().getMimeType(file.getName());
     if (mimeType == null) {
       mimeType = getContentType(file.getName());
     }
-    resp.setContentType(mimeType);
+    response.setContentType(mimeType);
 
-    String rangeHeader = req.getHeader("Range");
+    String rangeHeader = request.getHeader("Range");
     if (rangeHeader != null) {
       long fileLength = file.length();
       long start = 0;
@@ -77,15 +77,15 @@ public class MiniResourceHandler {
 
       long contentLength = end - start + 1;
 
-      resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-      resp.setHeader("Accept-Ranges", Define.BYTES);
-      resp.setContentLengthLong(contentLength);
-      resp.setHeader("Content-Range", "bytes " + start + Define.DASH + end + Define.SLASH + fileLength);
-      resp.setHeader(Define.CONNECTION, "keep-alive");
-      resp.setHeader("keep-Alive", "timeout=20");
-      resp.sendHeaders();
+      response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+      response.setHeader("Accept-Ranges", Define.BYTES);
+      response.setContentLengthLong(contentLength);
+      response.setHeader("Content-Range", "bytes " + start + Define.DASH + end + Define.SLASH + fileLength);
+      response.setHeader(Define.CONNECTION, "keep-alive");
+      response.setHeader("keep-Alive", "timeout=20");
+      response.sendHeaders();
 
-      try (RandomAccessFile raf = new RandomAccessFile(file, "r"); OutputStream os = resp.getOutputStream()) {
+      try (RandomAccessFile raf = new RandomAccessFile(file, "r"); OutputStream os = response.getOutputStream()) {
         raf.seek(start);
         byte[] buffer = new byte[8192];
         long remaining = contentLength;
@@ -117,10 +117,10 @@ public class MiniResourceHandler {
       }
 
     } else {
-      resp.setContentLengthLong(file.length());
-      resp.sendHeaders();
+      response.setContentLengthLong(file.length());
+      response.sendHeaders();
 
-      try (FileInputStream fis = new FileInputStream(file); OutputStream os = resp.getOutputStream()) {
+      try (FileInputStream fis = new FileInputStream(file); OutputStream os = response.getOutputStream()) {
         byte[] buffer = new byte[8192];
         int bytesRead;
         while ((bytesRead = fis.read(buffer)) != -1) {

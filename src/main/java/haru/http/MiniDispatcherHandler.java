@@ -72,19 +72,19 @@ public class MiniDispatcherHandler implements HttpHandler {
       exchange.getResponseHeaders().set(Define.SET_COOKIE, Define.JSESSIONID + miniHttpSession.getId() + "; Path=/; HttpOnly");
     }
 
-    MiniHttpServletRequest miniHttpServletRequest = new MiniHttpServletRequest(exchange);
-    MiniHttpServletResponse miniHttpServletResponse = new MiniHttpServletResponse(exchange);
+    MiniHttpServletRequest request = new MiniHttpServletRequest(exchange);
+    MiniHttpServletResponse response = new MiniHttpServletResponse(exchange);
 
-    miniHttpServletRequest.setSession(miniHttpSession);
+    request.setSession(miniHttpSession);
     
-    String uri = miniHttpServletRequest.getRequestURI();
+    String uri = request.getRequestURI();
     
     List<MiniFilter> filters = FilterRegistry.getFiltersFor(uri);
 
     FilterChain filterChain = new MiniFilterChain(filters, miniDispatcherServlet);
 
     try {
-      filterChain.doFilter(miniHttpServletRequest, miniHttpServletResponse);
+      filterChain.doFilter(request, response);
     } catch (ServletException e) {
       e.printStackTrace();
     }

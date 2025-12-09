@@ -16,12 +16,12 @@ public class RequestParamArgumentResolver implements ArgumentResolver {
   }
 
   @Override
-  public Object resolve(Parameter p, MiniHttpServletRequest req, MiniHttpServletResponse resp, Model model) {
+  public Object resolve(Parameter p, MiniHttpServletRequest request, MiniHttpServletResponse response, Model model) {
     RequestParam ann = p.getAnnotation(RequestParam.class);
     String name = ann.value();
     if (name == null || name.isEmpty())
       name = p.getName();
-    String raw = req.getParameter(name);
+    String raw = request.getParameter(name);
 
     if (raw == null && ann.required()) {
       throw new IllegalArgumentException("Required request parameter '" + name + "' is missing");

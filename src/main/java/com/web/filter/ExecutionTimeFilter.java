@@ -17,14 +17,14 @@ public class ExecutionTimeFilter implements MiniFilter {
   private static final Logger logger = MiniLogger.getLogger(ExecutionTimeFilter.class.getSimpleName());
 
   @Override
-  public void doFilter(MiniHttpServletRequest req, MiniHttpServletResponse resp, FilterChain filterChain) throws IOException, ServletException {
+  public void doFilter(MiniHttpServletRequest request, MiniHttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
     
-    String requestURI = req.getRequestURI();
+    String requestURI = request.getRequestURI();
 
     logger.info(requestURI + " 요청 시작");
     long startTime = System.currentTimeMillis();
 
-    filterChain.doFilter(req, resp);
+    filterChain.doFilter(request, response);
 
     long endTime = System.currentTimeMillis();
     logger.info(requestURI + " 처리 완료, 실행 시간: " + (endTime - startTime) + "ms");

@@ -7,5 +7,5 @@ import haru.http.MiniHttpServletResponse;
 import jakarta.servlet.ServletException;
 
 public interface DispatcherServletBase {
-  public void service(MiniHttpServletRequest req, MiniHttpServletResponse resp) throws ServletException, IOException;
+  public void service(MiniHttpServletRequest request, MiniHttpServletResponse response) throws ServletException, IOException;
 }

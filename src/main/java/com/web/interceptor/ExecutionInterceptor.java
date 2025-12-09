@@ -19,18 +19,18 @@ public class ExecutionInterceptor implements HandlerInterceptor {
   private static final Logger logger = MiniLogger.getLogger(ExecutionInterceptor.class.getSimpleName());
 
   @Override
-  public boolean preHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object h) {
+  public boolean preHandle(MiniHttpServletRequest request, MiniHttpServletResponse response, Object h) {
     long startTime = System.currentTimeMillis();
-    req.setAttribute(START_TIME, startTime);
-    logger.info("[interceptor] " + req.getRequestURI());
+    request.setAttribute(START_TIME, startTime);
+    logger.info("[interceptor] " + request.getRequestURI());
     
     return true;
   }
 
   @Override
-  public void afterCompletion(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object h, Exception ex) {
-    long startTime = (Long) req.getAttribute(START_TIME);
+  public void afterCompletion(MiniHttpServletRequest request, MiniHttpServletResponse response, Object h, Exception ex) {
+    long startTime = (Long) request.getAttribute(START_TIME);
     long endTime = System.currentTimeMillis();
-    logger.info("[interceptor] " + req.getRequestURI() + ", " + (endTime - startTime) + "ms");
+    logger.info("[interceptor] " + request.getRequestURI() + ", " + (endTime - startTime) + "ms");
   }
 }

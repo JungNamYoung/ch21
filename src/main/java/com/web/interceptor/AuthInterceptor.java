@@ -12,10 +12,10 @@ import haru.http.MiniHttpServletResponse;
 )
 public class AuthInterceptor implements HandlerInterceptor {
   @Override
-  public boolean preHandle(MiniHttpServletRequest req, MiniHttpServletResponse resp, Object handler) throws Exception {
-    if (req.getSession(false) == null || req.getSession(false).getAttribute("user") == null) {
-      resp.setStatus(401);
-      resp.getWriter().write("{\"ok\":false, \"error\":\"unauthorized\"}");
+  public boolean preHandle(MiniHttpServletRequest request, MiniHttpServletResponse response, Object handler) throws Exception {
+    if (request.getSession(false) == null || request.getSession(false).getAttribute("user") == null) {
+      response.setStatus(401);
+      response.getWriter().write("{\"ok\":false, \"error\":\"unauthorized\"}");
       return false;
     }
     return true;

@@ -13,7 +13,7 @@ public class ModelArgumentResolver implements ArgumentResolver {
   }
 
   @Override
-  public Object resolve(Parameter parameter, MiniHttpServletRequest req, MiniHttpServletResponse resp, Model model) {
+  public Object resolve(Parameter parameter, MiniHttpServletRequest request, MiniHttpServletResponse response, Model model) {
     return model;
   }
 }

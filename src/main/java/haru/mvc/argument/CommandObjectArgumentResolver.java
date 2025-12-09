@@ -17,14 +17,14 @@ public class CommandObjectArgumentResolver implements ArgumentResolver {
   }
 
   @Override
-  public Object resolve(Parameter p, MiniHttpServletRequest req, MiniHttpServletResponse resp, Model model) throws Exception {
+  public Object resolve(Parameter p, MiniHttpServletRequest request, MiniHttpServletResponse response, Model model) throws Exception {
     Class<?> t = p.getType();
     Object target = t.getDeclaredConstructor().newInstance();
 
     for (Field f : t.getDeclaredFields()) {
       f.setAccessible(true);
       String name = f.getName();
-      String raw = req.getParameter(name);
+      String raw = request.getParameter(name);
       if (raw != null) {
         Object v = TypeConverter.convert(raw, f.getType());
         f.set(target, v);
