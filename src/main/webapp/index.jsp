@@ -7,7 +7,7 @@
 <title>welcome page</title>
 </head>
 <body>
-  <h1>index3.jsp</h1>
+  <h1>redirect page</h1>
   <c:redirect url = "/selectUser.do"/>  
 </body>
 </html>
