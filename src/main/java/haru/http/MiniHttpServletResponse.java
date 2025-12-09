@@ -84,7 +84,8 @@ public class MiniHttpServletResponse implements HttpServletResponse {
       if (writer != null) {
         writer.flush();
         writer.close();
-      } else if (outputStream != null) {
+      } else {
+        initOutputStream();
         outputStream.flush();
         outputStream.close();
       }
@@ -104,7 +105,7 @@ public class MiniHttpServletResponse implements HttpServletResponse {
     if (!headersSent) {
       try {
         exchange.getResponseHeaders().set(Define.CONTENT_TYPE, contentType);
-        
+
         if (contentLengthSet) {
           exchange.sendResponseHeaders(statusCode, contentLength);
         } else {
@@ -263,7 +264,9 @@ public class MiniHttpServletResponse implements HttpServletResponse {
       statusCode = HttpServletResponse.SC_FOUND;
     }
     setHeader("Location", target);
+    setContentLengthLong(0);
     sendHeaders();
+    flushBuffer();
   }
 
   @Override
