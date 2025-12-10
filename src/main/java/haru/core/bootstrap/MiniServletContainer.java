@@ -94,7 +94,7 @@ public class MiniServletContainer {
       contextPath = Define.SLASH + contextPath;
     }
 
-    HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+    HttpServer httServer = HttpServer.create(new InetSocketAddress(port), 0);
 
     System.out.println("\nMiniServletContainer started");
     System.out.printf("-port: %d%n", port);
@@ -116,9 +116,9 @@ public class MiniServletContainer {
 
     MiniDispatcherServlet miniDispatcherServlet = new MiniDispatcherServlet(basePackage, appContext, interceptorRegistry, contextPath);
 
-    server.createContext(contextPath, new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
+    httServer.createContext(contextPath, new MiniDispatcherHandler(miniServletContext, miniDispatcherServlet));
 
-    server.setExecutor(null);
-    server.start();
+    httServer.setExecutor(null);
+    httServer.start();
   }
 }
