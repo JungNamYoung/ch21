@@ -1,53 +1,63 @@
 package haru.compile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
+import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 
-import haru.constants.Define;
+import haru.logging.MiniLogger;
 
-public class DynamicCompiler {
-  public void make(String str) {
-    String className = "HelloWorld";
-    StringBuilder stringBuilder = new StringBuilder();
-
-    stringBuilder.append("public class HelloWorld {" + Define.ENTER_EX);
-    stringBuilder.append("  public void greet() {" + Define.ENTER_EX);
-    stringBuilder.append("    System.out.println(\"Hello, " + str + "\");" + Define.ENTER_EX);
-    stringBuilder.append("  }" + Define.ENTER_EX);
-    stringBuilder.append("}" + Define.ENTER_EX);
-    String sourceCode = stringBuilder.toString();
-
-    System.out.println(sourceCode);
+public class DynamicCompiler implements Compiler {
+  
+  private static final Logger logger = MiniLogger.getLogger(DynamicCompiler.class.getSimpleName()); 
+  
+  public void compileJavaFile(String filePath, String outputDir, String classPath) {
 
     JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
-    StandardJavaFileManager standardJavaFileManager = javaCompiler.getStandardFileManager(null, null, null);
-    MemoryJavaFileManager memoryJavaFileManager = new MemoryJavaFileManager(standardJavaFileManager);
-
-    JavaFileObject javaFileObject = new MemoryJavaFileObject(className, sourceCode);
-    List<JavaFileObject> compilationUnits = Arrays.asList(javaFileObject);
-
-    JavaCompiler.CompilationTask compilationTask = javaCompiler.getTask(null, memoryJavaFileManager, null, null, null, compilationUnits);
-
-    if (!compilationTask.call()) {
-      throw new RuntimeException("Compilation failed");
+    if (javaCompiler == null) {
+      throw new IllegalStateException("시스템 Java 컴파일러를 사용할 수 없습니다. JDK로 실행 중인지 확인하세요.");
     }
-
-    MemoryClassLoader memoryClassLoader = new MemoryClassLoader(memoryJavaFileManager.getCompiledClasses());
 
     try {
-      Class<?> compiledClass = memoryClassLoader.loadClass(className);
+      
+      File sourceFile = new File(filePath);
+      File outputDirectory = new File(outputDir);
+      
+      if (!outputDirectory.exists()) {
+        outputDirectory.mkdirs();
+      }
 
-      Object instance = compiledClass.getDeclaredConstructor().newInstance();
+      StandardJavaFileManager fileManager = javaCompiler.getStandardFileManager(null, null, null);
+      // 클래스 출력 위치 설정 (-d)
+      fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(outputDirectory));
 
-      compiledClass.getMethod("greet").invoke(instance);
-    } catch (Exception ex) {
-      ex.printStackTrace();
+      Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(sourceFile));
+      // 컴파일 옵션에 classpath 명시
+      List<String> options = Arrays.asList("-classpath", classPath);
+
+      JavaCompiler.CompilationTask task = javaCompiler.getTask(null, fileManager, null, options, null, compilationUnits);
+
+      boolean success = task.call();
+      fileManager.close();
+
+      if (!success) {
+        throw new RuntimeException("컴파일에 실패했습니다.");
+      }
+
+      logger.info("소스 컴파일 성공 : " + outputDir + "에 .class이 저장됨");
+
+    } catch (IOException e) {
+      throw new RuntimeException("입출력 오류: " + e.getMessage(), e);
+    } catch (Exception e) {
+      throw new RuntimeException("클래스 로딩 오류: " + e.getMessage(), e);
     }
-
   }
 }

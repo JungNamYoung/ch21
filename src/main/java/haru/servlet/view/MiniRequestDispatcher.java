@@ -39,6 +39,8 @@ import javax.tools.ToolProvider;
 import org.apache.jasper.JspC;
 import org.apache.jasper.TrimSpacesOption;
 
+import haru.compile.Compiler;
+import haru.compile.DynamicCompiler;
 import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
 import haru.http.MiniHttpServletRequest;
@@ -88,9 +90,9 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     String jspFileName = relPath.getFileName().toString();
     String servletClassName = IdentifierUtil.makeJavaIdentifier(jspFileName.replace(Define.EXT_JSP, "")) + "_jsp";
 
-    String classpath = System.getProperty("java.class.path");
-    if (classpath == null || classpath.isBlank()) {
-      classpath = ".";
+    String classPath = System.getProperty("java.class.path");
+    if (classPath == null || classPath.isBlank()) {
+      classPath = ".";
     }
 
     String packagePath = "org.apache.jsp";
@@ -101,19 +103,21 @@ public class MiniRequestDispatcher implements RequestDispatcher {
       }
     }
 
-    compileJspToServlet(jspFilePath.toString(), outputDir.getAbsolutePath(), packagePath, classpath);
+    compileJspToServlet(jspFilePath.toString(), outputDir.getAbsolutePath(), packagePath, classPath);
 
     Path javaFile = Paths.get(outputDir.getAbsolutePath(), packagePath.replace('.', '/'), servletClassName + ".java");
-    compileJavaFile(javaFile, classpath);
+//    compileJavaFile(javaFile, classPath);
+    Compiler compiler = new DynamicCompiler(); 
+    compiler.compileJavaFile(javaFile.toString(), outputDir.getAbsolutePath(), classPath);
 
-    String classPath = webInf + "/output/compiledJspServlets";
-
-    executeServlet(classPath, request, response, packagePath + "." + servletClassName, param);
+    //String classPathEx = webInf + "/output/compiledJspServlets";
+    //executeServlet(classPathEx, request, response, packagePath + "." + servletClassName, param);
+    executeServlet(outputDir.getAbsolutePath(), request, response, packagePath + "." + servletClassName, param);
   }
 
-  private void executeServlet(String classPath, MiniHttpServletRequest request, MiniHttpServletResponse response, String servletClassName, Map<String, Object> param) throws ServletException, IOException {
+  private void executeServlet(String outputDir, MiniHttpServletRequest request, MiniHttpServletResponse response, String servletClassName, Map<String, Object> param) throws ServletException, IOException {
     try {
-      File file = new File(classPath);
+      File file = new File(outputDir);
       URI uri = file.toURI();
       URL url = uri.toURL();
 
@@ -185,13 +189,13 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     return result;
   }
 
-  private void compileJavaFile(Path javaFilePath, String classpath) {
-    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-    if (compiler == null) {
+  private void compileJavaFile(Path javaFilePath, String classPath) {
+    JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
+    if (javaCompiler == null) {
       throw new RuntimeException("No Java compiler available. Ensure you are running with a JDK.");
     }
 
-    int result = compiler.run(null, null, null, "-classpath", classpath, javaFilePath.toString());
+    int result = javaCompiler.run(null, null, null, "-classpath", classPath, javaFilePath.toString());
 
     if (result != 0) {
       throw new RuntimeException("Compilation failed  for : " + javaFilePath);
@@ -237,7 +241,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     throw new UnsupportedOperationException("include는 지원하지 않습니다.");
   }
 
-  private void compileJspToServlet(String jspFilePath, String outputDir, String packagePath, String classpath) {
+  private void compileJspToServlet(String jspFilePath, String outputDir, String packagePath, String classPath) {
 
     logger.info("jspFilePath : " + jspFilePath);
     logger.info("outputDir : " + outputDir);
@@ -250,7 +254,7 @@ public class MiniRequestDispatcher implements RequestDispatcher {
       jspCompiler.setJspFiles(file.getName());
       jspCompiler.setOutputDir(outputDir);
       jspCompiler.setPackage(packagePath);
-      jspCompiler.setClassPath(classpath);
+      jspCompiler.setClassPath(classPath);
       jspCompiler.setFailOnError(true);
       jspCompiler.setTrimSpaces(TrimSpacesOption.TRUE);
       jspCompiler.execute();

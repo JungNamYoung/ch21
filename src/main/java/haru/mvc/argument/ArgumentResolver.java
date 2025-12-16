@@ -10,6 +10,6 @@ public interface ArgumentResolver{
  boolean supports(Parameter parameter);
  Object resolve(Parameter parameter,
   MiniHttpServletRequest request,
-  MiniHttpServletResponse res,
+  MiniHttpServletResponse response,
  Model model) throws Exception;
 }
