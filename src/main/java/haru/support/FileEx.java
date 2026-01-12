@@ -93,11 +93,8 @@ public class FileEx {
     try {
 
 //			Name name = new Name(filePath);
-
 //			LOGGER.info("write , path : " + filePath);
-
 //			BufferedWriter bw = new BufferedWriter(new FileWriter(name.dir + name.fileName + ".out" + name.ext, false));
-
 //			bw.write(str);
 //			bw.close();
     } catch (Exception ex) {
@@ -112,7 +109,6 @@ public class FileEx {
     if (Files.exists(path)) {
       return true;
     }
-
 //		if (Files.isDirectory(path)) {
 //			return true;
 //		}

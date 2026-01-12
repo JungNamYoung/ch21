@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.ibatis.session.SqlSession;
-//import org.mybatis.haru.SqlSessionTemplate;
 
 import com.web.service.UserService;
 import com.web.vo.UserCol;
@@ -16,7 +15,6 @@ import haru.annotation.di.Service;
 import haru.logging.MiniLogger;
 
 @Service("userService")
-//@Repository("userService")
 public class UserServiceImpl implements UserService {
 
   @Autowired
@@ -42,8 +40,8 @@ public class UserServiceImpl implements UserService {
   @Transactional(transactionManager = "txUser")
   public int changeUser(UserCol userCol) {
     
-    logger.info("changeUser()");
-    
+    logger.info("changeUser()");    
+        
     int result = sqlSessionUser.insert(SQL_NAMESPACE + "insertUser", userCol);
     
     result = sqlSessionUser.update(SQL_NAMESPACE + "updateUser", userCol);

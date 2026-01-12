@@ -12,7 +12,7 @@ import haru.constants.Haru;
 import haru.core.bootstrap.MiniServletContainer;
 import haru.logging.MiniLogger;
 import haru.support.LineEx;
-import haru.support.TokenEx;
+import haru.support.PropertyConfig;
 import haru.support.UtilExt;
 
 public final class WelcomeFileResolver {
@@ -32,9 +32,9 @@ public final class WelcomeFileResolver {
       }
       
 //    List<String> files = LineEx.toEffectiveLines(text).stream().map(String::trim).filter(line -> !line.isEmpty()).collect(Collectors.toList());
-      TokenEx tokenEx = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_SERVLET));
+      PropertyConfig property = new PropertyConfig(UtilExt.loadTextSmart(Haru.CONFIG_SERVLET));
       
-      List<String> files = parseFiles(tokenEx.get("servlet.welcome.files"));
+      List<String> files = parseFiles(property.get("servlet.welcome.files"));
       if (files.isEmpty()) {
         return DEFAULT_WELCOME_FILES;
       }

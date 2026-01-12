@@ -32,8 +32,8 @@ import haru.logging.MiniLogger;
 import haru.mvc.FilterRegistry;
 import haru.servlet.MiniServletContext;
 import haru.servlet.filter.MiniFilter;
-import haru.servlet.filter.FilterChain;
 import haru.servlet.filter.MiniFilterChain;
+import haru.servlet.filter.MiniFilterPipeline;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -81,7 +81,7 @@ public class MiniDispatcherHandler implements HttpHandler {
     
     List<MiniFilter> filters = FilterRegistry.getFiltersFor(uri);
 
-    FilterChain filterChain = new MiniFilterChain(filters, miniDispatcherServlet);
+    MiniFilterChain filterChain = new MiniFilterPipeline(filters, miniDispatcherServlet);
 
     try {
       filterChain.doFilter(request, response);

@@ -1,4 +1,4 @@
-package haru.compile;
+package haru.compile.java;
 
 import java.io.File;
 import java.io.IOException;

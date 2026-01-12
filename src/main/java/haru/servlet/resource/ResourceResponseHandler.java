@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import haru.constants.Define;
@@ -28,25 +29,66 @@ import haru.core.bootstrap.MiniServletContainer;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.MiniLogger;
+import haru.mvc.view.StaticHandler;
+import haru.support.RequestPathUtils;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class MiniResourceHandler {
+public class ResourceResponseHandler implements StaticHandler {
 
-  private static final Logger logger = MiniLogger.getLogger(MiniResourceHandler.class.getSimpleName());
+  private static final Logger logger = MiniLogger.getLogger(ResourceResponseHandler.class.getSimpleName());
 
-  public static boolean handle(MiniHttpServletRequest request, MiniHttpServletResponse response) {
-    String requestUri = request.getRequestURI();
-    if (requestUri.endsWith(Define.EXT_JSP)) {
+  // “정적 파일”로 인정할 확장자만 허용합니다.
+  // 필요에 따라 계속 추가하면 됩니다.
+  private static final Set<String> STATIC_EXTS = Set.of("css", "js", "html", "htm", "png", "jpg", "jpeg", "gif", "svg", "webp", "ico", "json", "txt", "xml", "woff", "woff2", "ttf", "otf", "mp4", "webm", "mp3", "wav", "pdf");
+
+  @Override
+  public boolean supports(MiniHttpServletRequest request) {
+
+    String uri = RequestPathUtils.normalizePathOnly(request.getRequestURI());
+
+    // 확장자가 없는 경로는 정적 파일로 보지 않습니다.
+    String ext = RequestPathUtils.getExtensionLower(uri);
+    if (ext == null || !STATIC_EXTS.contains(ext)) {
       return false;
     }
+
+    // 실제 파일이 존재하는지로 최종 판정합니다.
+    String filePath = MiniServletContainer.getRealPath(uri);
+    File file = new File(filePath);
+    return file.exists() && file.isFile();
+  }
+
+//  // URI에서 path만 안정적으로 쓰기 위해 최소한의 정규화입니다.
+//  // (getRequestURI()가 path만 준다는 전제라도, ;jsessionid 같은 케이스를 방어합니다.)
+//  private String normalizePathOnly(String requestUri) {
+//    if (requestUri == null)
+//      return "";
+//
+//    int semicolon = requestUri.indexOf(';');
+//    if (semicolon >= 0) {
+//      requestUri = requestUri.substring(0, semicolon);
+//    }
+//    return requestUri;
+//  }
+//
+//  // 마지막 '.' 이후를 확장자로 보고 소문자로 반환합니다.
+//  // "/a/b.min.js" -> "js"
+//  // "/a/b" -> null
+//  private String getExtensionLower(String path) {
+//    int slash = path.lastIndexOf('/');
+//    int dot = path.lastIndexOf('.');
+//    if (dot < 0 || dot < slash) {
+//      return null;
+//    }
+//    return path.substring(dot + 1).toLowerCase(Locale.ROOT);
+//  }
+
+  @Override
+  public void handle(MiniHttpServletRequest request, MiniHttpServletResponse response) throws Exception {
+    String requestUri = request.getRequestURI();
 
     String filePath = MiniServletContainer.getRealPath(requestUri);
-
     File file = new File(filePath);
-
-    if (!file.exists() || file.isDirectory()) {
-      return false;
-    }
 
     String mimeType = request.getServletContext().getMimeType(file.getName());
     if (mimeType == null) {
@@ -131,7 +173,6 @@ public class MiniResourceHandler {
         ex.printStackTrace();
       }
     }
-    return true;
   }
 
   private static String getContentType(String filePath) {

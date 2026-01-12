@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.lang.model.SourceVersion;
@@ -39,8 +40,10 @@ import javax.tools.ToolProvider;
 import org.apache.jasper.JspC;
 import org.apache.jasper.TrimSpacesOption;
 
-import haru.compile.Compiler;
-import haru.compile.DynamicCompiler;
+import haru.compile.java.Compiler;
+import haru.compile.java.DynamicCompiler;
+import haru.compile.jsp.CompiledJsp;
+import haru.compile.jsp.JspPrecompiler;
 import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
 import haru.http.MiniHttpServletRequest;
@@ -51,6 +54,7 @@ import haru.logging.MiniLogger;
 import haru.servlet.MiniServletContext;
 import haru.servlet.config.MiniServletConfig;
 import haru.support.IdentifierUtil;
+import haru.support.JasperGeneratedNameResolver;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -65,54 +69,18 @@ public class MiniRequestDispatcher implements RequestDispatcher {
   private String relativePath;
   private String webInf;
   private MiniServletContext miniServletContext;
+  private static final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
+
   private static Logger logger = MiniLogger.getLogger(MiniRequestDispatcher.class.getSimpleName());
 
+  private static record CacheEntry(long lastModified, CompiledJsp compiled) {}
+  
   public MiniRequestDispatcher(String webAppRoot, String relativePath) {
     this.webAppRoot = webAppRoot;
     this.webInf = webAppRoot + Define.WEB_INF;
     this.relativePath = relativePath;
 
     miniServletContext = MiniServletContainer.getMiniWebApplicationContext();
-  }
-
-  public void compileAndExecute(MiniHttpServletRequest request, MiniHttpServletResponse response, Map<String, Object> param) throws ServletException, IOException {
-
-    String jspPath = webAppRoot + relativePath;
-    Path jspFilePath = Paths.get(webAppRoot + relativePath);
-    File outputDir = new File(webInf + "/output/compiledJspServlets");
-
-    if (!outputDir.exists()) {
-      outputDir.mkdirs();
-    }
-
-    String jspRelative = relativePath.startsWith(Define.SLASH) ? relativePath.substring(1) : relativePath;
-    Path relPath = Paths.get(jspRelative).normalize();
-    String jspFileName = relPath.getFileName().toString();
-    String servletClassName = IdentifierUtil.makeJavaIdentifier(jspFileName.replace(Define.EXT_JSP, "")) + "_jsp";
-
-    String classPath = System.getProperty("java.class.path");
-    if (classPath == null || classPath.isBlank()) {
-      classPath = ".";
-    }
-
-    String packagePath = "org.apache.jsp";
-    Path parent = relPath.getParent();
-    if (parent != null) {
-      for (Path segment : parent) {
-        packagePath += "." + IdentifierUtil.makeJavaIdentifier(segment.toString());
-      }
-    }
-
-    compileJspToServlet(jspFilePath.toString(), outputDir.getAbsolutePath(), packagePath, classPath);
-
-    Path javaFile = Paths.get(outputDir.getAbsolutePath(), packagePath.replace('.', '/'), servletClassName + ".java");
-//    compileJavaFile(javaFile, classPath);
-    Compiler compiler = new DynamicCompiler(); 
-    compiler.compileJavaFile(javaFile.toString(), outputDir.getAbsolutePath(), classPath);
-
-    //String classPathEx = webInf + "/output/compiledJspServlets";
-    //executeServlet(classPathEx, request, response, packagePath + "." + servletClassName, param);
-    executeServlet(outputDir.getAbsolutePath(), request, response, packagePath + "." + servletClassName, param);
   }
 
   private void executeServlet(String outputDir, MiniHttpServletRequest request, MiniHttpServletResponse response, String servletClassName, Map<String, Object> param) throws ServletException, IOException {
@@ -148,6 +116,74 @@ public class MiniRequestDispatcher implements RequestDispatcher {
     } catch (Exception e) {
       throw new ServletException("Error executing compiled JSP servlet.", e);
     }
+  }
+
+  public CompiledJsp compile() throws ServletException, IOException {
+
+    Path jspFilePath = Paths.get(webAppRoot + relativePath);
+    File outputDirFile = new File(webInf + "/output/compiledJspServlets");
+    if (!outputDirFile.exists()) {
+      outputDirFile.mkdirs();
+    }
+
+    String jspRelative = relativePath.startsWith(Define.SLASH) ? relativePath.substring(1) : relativePath;
+    Path relPath = Paths.get(jspRelative).normalize();
+
+    String classPath = System.getProperty("java.class.path");
+
+    // packagePath 계산 로직
+    String packagePath = "org.apache.jsp";
+    Path parent = relPath.getParent();
+    if (parent != null) {
+      for (Path segment : parent) {
+        String safeSegment = IdentifierUtil.makeJavaIdentifier(segment.toString());
+        packagePath += "." + safeSegment;
+      }
+    }
+
+    // Jasper가 JSP -> .java 생성
+    new JspPrecompiler().compile(jspFilePath.toString(), outputDirFile.getAbsolutePath(), packagePath, classPath);
+
+    String servletClassName = JasperGeneratedNameResolver.resolveServletClassName(jspFilePath.toString(), outputDirFile.getPath(), packagePath);
+
+    logger.info("generated servlet className : " + servletClassName);
+    
+    // .java -> .class 컴파일
+    Path javaFile = Paths.get(outputDirFile.getAbsolutePath(), packagePath.replace('.', '/'), servletClassName + ".java");
+
+    Compiler compiler = new DynamicCompiler();
+    compiler.compileJavaFile(javaFile.toString(), outputDirFile.getAbsolutePath(), classPath);
+
+    String fqcn = packagePath + "." + servletClassName;
+    return new CompiledJsp(outputDirFile.getAbsolutePath(), fqcn, System.currentTimeMillis());
+  }
+
+  public void execute(CompiledJsp compiled, MiniHttpServletRequest request, MiniHttpServletResponse response, Map<String, Object> param) throws ServletException, IOException {
+
+    executeServlet(compiled.outputDir(), request, response, compiled.fullyQualifiedClass(), param);
+  }
+
+  public void render(MiniHttpServletRequest request, MiniHttpServletResponse response, Map<String, Object> param) throws ServletException, IOException {
+
+    CompiledJsp compiled = compileWithCache();
+    
+    execute(compiled, request, response, param);
+  }
+
+  public CompiledJsp compileWithCache() throws ServletException, IOException {
+    Path jspFilePath = Paths.get(webAppRoot + relativePath);
+    String key = jspFilePath.toString();
+    long lm = jspFilePath.toFile().lastModified();
+
+    CacheEntry cached = cache.get(key);
+    
+    if (cached != null && cached.lastModified == lm) {
+      return cached.compiled;
+    }
+
+    CompiledJsp compiled = compile();
+    cache.put(key, new CacheEntry(lm, compiled));
+    return compiled;
   }
 
   private String extractAttributeValue(String directive, String attributeName) {
@@ -258,7 +294,6 @@ public class MiniRequestDispatcher implements RequestDispatcher {
       jspCompiler.setFailOnError(true);
       jspCompiler.setTrimSpaces(TrimSpacesOption.TRUE);
       jspCompiler.execute();
-//      logger.info("[변환] JSP to Servlet - " + file.getName());
     } catch (Exception ex) {
       ex.printStackTrace();
     }

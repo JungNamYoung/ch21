@@ -2,35 +2,6 @@ package com.web.vo;
 
 public class UserCol {
 
-//  private int page = 1; // 현재 페이지
-//  private int size = 10; // 페이지당 보여줄 개수
-//
-//  public int getPage() {
-//    return page;
-//  }
-//
-//  public void setPage(int page) {
-//    this.page = page;
-//  }
-//
-//  public int getSize() {
-//    return size;
-//  }
-//
-//  public void setSize(int size) {
-//    this.size = size;
-//  }
-//
-//  public int getOffset() {
-//    return (page - 1) * size;
-//  }
-//
-//  public UserCol() {
-//  }
-//
-//  public UserCol(UserCmd userCmd) {
-//  }
-
   private String colSn;
   private String colId;
   private String colName;

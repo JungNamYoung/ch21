@@ -53,8 +53,6 @@ public class MiniSessionManager {
 
   public static void checkCleanUpSessions() {
 
-//		logger.info("period - checkCleanUpSessions()");
-
     Iterator<Entry<String, MiniHttpSession>> iterator = sessions.entrySet().iterator();
     while (iterator.hasNext()) {
       Entry<String, MiniHttpSession> entry = iterator.next();

@@ -14,13 +14,13 @@ import haru.servlet.view.MiniRequestDispatcher;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class JspResponseHandler {
+public class JspResponseHandler implements StaticHandler {
 
   private static final Logger logger = MiniLogger.getLogger(JspResponseHandler.class.getSimpleName());
 
-  public static boolean handle(MiniHttpServletRequest request, MiniHttpServletResponse response) {
+  @Override
+  public boolean supports(MiniHttpServletRequest request) {
     String requestUri = request.getRequestURI();
-
     if (!requestUri.endsWith(Define.EXT_JSP)) {
       return false;
     }
@@ -28,9 +28,12 @@ public class JspResponseHandler {
     String filePath = MiniServletContainer.getRealPath(requestUri);
     File jspFile = new File(filePath);
 
-    if (!jspFile.exists() || jspFile.isDirectory()) {
-      return false;
-    }
+    return jspFile.exists() && !jspFile.isDirectory();
+  }
+
+  @Override
+  public void handle(MiniHttpServletRequest request, MiniHttpServletResponse response) throws Exception {
+    String requestUri = request.getRequestURI();
 
     String contextPath = MiniServletContainer.getContextPath();
     String relativePath = requestUri;
@@ -38,21 +41,14 @@ public class JspResponseHandler {
       relativePath = requestUri.substring(contextPath.length());
     }
 
-    try {
-      
-      RequestDispatcher requestDispatcher = request.getRequestDispatcher(relativePath);
-      MiniRequestDispatcher miniRequestDispatcher = (MiniRequestDispatcher) requestDispatcher;
-      Map<String, Object> model = new HashMap<>();
-      response.setStatus(HttpServletResponse.SC_OK);
-      
-      miniRequestDispatcher.compileAndExecute(request, response, model);
-      
-      response.flushBuffer();
-      
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
+    RequestDispatcher requestDispatcher = request.getRequestDispatcher(relativePath);
+    MiniRequestDispatcher miniRequestDispatcher = (MiniRequestDispatcher) requestDispatcher;
 
-    return true;
+    Map<String, Object> model = new HashMap<>();
+    response.setStatus(HttpServletResponse.SC_OK);
+
+    miniRequestDispatcher.render(request, response, model);
+
+    response.flushBuffer();
   }
 }

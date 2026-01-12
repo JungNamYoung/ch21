@@ -53,6 +53,7 @@ public class HandlerAdapter {
       miniResponse = adaptReturnValue(ret, model, request);
 
       writeResponse(miniResponse, request, response);
+      
       if (miniResponse instanceof RedirectResult) {
         shouldFlush = false;
       }
@@ -71,14 +72,16 @@ public class HandlerAdapter {
   }
 
   private Object[] resolveMethodArguments(Method method, MiniHttpServletRequest request, MiniHttpServletResponse response, Model model) {
-    Parameter[] params = method.getParameters();
-    Object[] args = new Object[params.length];
-    for (int i = 0; i < params.length; i++) {
+    Parameter[] parameters = method.getParameters();
+    Object[] args = new Object[method.getParameterCount()];
+    
+    for (int i = 0; i < parameters.length; i++) {
+      Parameter targetParameter = parameters[i];
       boolean resolved = false;
-      for (ArgumentResolver r : argumentResolvers) {
-        if (r.supports(params[i])) {
+      for (ArgumentResolver resolver : argumentResolvers) {
+        if (resolver.supports(targetParameter)) {
           try {
-            args[i] = r.resolve(params[i], request, response, model);
+            args[i] = resolver.resolve(targetParameter, request, response, model);
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -87,7 +90,7 @@ public class HandlerAdapter {
         }
       }
       if (!resolved)
-        throw new IllegalArgumentException("Cannot resolve argument: " + params[i]);
+        throw new IllegalArgumentException("Cannot resolve argument: " + parameters[i]);
     }
     return args;
   }
@@ -145,7 +148,7 @@ public class HandlerAdapter {
     if (mr instanceof ViewResult vr) {
       String jspPath = Define.WEB_INF_EX + "jsp/" + vr.viewName() + Define.EXT_JSP;
       try {
-        ((MiniRequestDispatcher) request.getRequestDispatcher(jspPath)).compileAndExecute(request, response, vr.model().getAttributes());
+        ((MiniRequestDispatcher) request.getRequestDispatcher(jspPath)).render(request, response, vr.model().getAttributes());
       } catch (ServletException | IOException e) {
         throw new RuntimeException("Failed to render view: " + vr.viewName(), e);
       }
@@ -186,10 +189,10 @@ public class HandlerAdapter {
     response.getWriter().write(body.toString());
   }
 
-  private void writeText(String body, MiniHttpServletResponse response) throws IOException {
-    response.setContentType("text/plain; charset=UTF-8");
-    response.getWriter().write(body);
-  }
+//  private void writeText(String body, MiniHttpServletResponse response) throws IOException {
+//    response.setContentType("text/plain; charset=UTF-8");
+//    response.getWriter().write(body);
+//  }
 
   private void handleException(Throwable ex, MiniHttpServletResponse response) {
     logger.severe(() -> "Handller error: " + ex.getMessage());

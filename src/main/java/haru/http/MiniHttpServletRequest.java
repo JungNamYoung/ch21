@@ -54,7 +54,6 @@ import jakarta.servlet.http.Part;
 
 public class MiniHttpServletRequest implements HttpServletRequest {
   private HttpExchange exchange;
-  private BufferedReader reader;
   private final Map<String, String> parameters = new HashMap<>();
   private Map<String, Object> attributes = new HashMap<>();
   private MiniHttpSession session;
@@ -64,6 +63,7 @@ public class MiniHttpServletRequest implements HttpServletRequest {
     this.exchange = exchange;
 
     String method = exchange.getRequestMethod();
+    
     if (Define.GET.equalsIgnoreCase(method)) {
       parseQueryParameters(exchange.getRequestURI().getQuery());
     } else if (Define.POST.equalsIgnoreCase(method)) {
@@ -107,7 +107,8 @@ public class MiniHttpServletRequest implements HttpServletRequest {
 
   @Override
   public BufferedReader getReader() {
-    return reader;
+//    return reader;
+    return null;
   }
 
   @Override
@@ -279,18 +280,6 @@ public class MiniHttpServletRequest implements HttpServletRequest {
     // TODO Auto-generated method stub
     return false;
   }
-
-//	@Override
-//	public RequestDispatcher getRequestDispatcher(String path) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
-//	@Override
-//	public String getRealPath(String path) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 
   @Override
   public int getRemotePort() {

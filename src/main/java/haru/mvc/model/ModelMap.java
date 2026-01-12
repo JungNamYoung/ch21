@@ -21,4 +21,9 @@ public class ModelMap implements Model {
   public Map<String, Object> getAttributes() {
     return this.model;
   }
+  
+  @Override
+  public void removeAttribute(String key) {
+    this.model.remove(key);
+  }
 }

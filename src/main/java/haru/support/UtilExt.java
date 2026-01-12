@@ -112,7 +112,7 @@ public class UtilExt {
     }
   }
 
-  public static String resolveWebRoot(TokenEx tokenEx) {
+  public static String resolveWebRoot(PropertyConfig tokenEx) {
     String webappProp = System.getProperty(Haru.JVM_WEB_APP_DIR);
     if (webappProp != null && !webappProp.isBlank()) {
       Path p = Paths.get(webappProp).toAbsolutePath().normalize();

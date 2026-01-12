@@ -70,7 +70,6 @@ public class UserController {
 
   @RequestMapping("/index.do")
   public String index() {
-    //return "/index";
     return "redirect:/selectUser.do";
   }
 }

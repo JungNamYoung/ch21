@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,15 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import haru.constants.Define;
 import haru.logging.MiniLogger;
 
 public class MiniAnnotationScanner {
 
-  private final String basePackageName; // 예 : "app.web"
-  private final String baseResourcePath; // 예 : "app/web"
+  private final String basePackageName;   // 예 : "app.web"
+  private final String baseResourcePath;  // 예 : "app/web"
   private final ClassLoader classLoader;
   private static final Logger logger = MiniLogger.getLogger(MiniAnnotationScanner.class.getSimpleName());
 
@@ -44,20 +43,32 @@ public class MiniAnnotationScanner {
   }
 
   public Set<Class<?>> findTypesAnnotatedWith(Class<? extends Annotation> annotation) {
+
     Set<Class<?>> cached = cache.get(annotation);
     if (cached != null)
       return cached;
 
     Set<Class<?>> annotated = new HashSet<>();
+
     try {
       Set<String> classNames = scanAllClassesInPackage();
+
       for (String className : classNames) {
-        loadClassSafely(className).ifPresent(clazz -> {
-          if (clazz.isAnnotationPresent(annotation) && isConcreteClass(clazz)) {
-            annotated.add(clazz);
-          }
-        });
+
+        // 클래스 로딩 시도
+        Class<?> clazz = loadClassSafelyPlain(className);
+
+        // 로딩 실패 시 건너뜁니다
+        if (clazz == null) {
+          continue;
+        }
+
+        // 어노테이션 존재 + 구체 클래스인지 확인합니다
+        if (clazz.isAnnotationPresent(annotation) && isConcreteClass(clazz)) {
+          annotated.add(clazz);
+        }
       }
+
     } catch (IOException e) {
       logger.warning(() -> "I/O error while scanning package: " + e.getMessage());
     }
@@ -65,6 +76,18 @@ public class MiniAnnotationScanner {
     Set<Class<?>> unmodifiable = Collections.unmodifiableSet(annotated);
     cache.put(annotation, unmodifiable);
     return unmodifiable;
+  }
+
+  private Class<?> loadClassSafelyPlain(String className) {
+    try {
+      return Class.forName(className);
+    } catch (ClassNotFoundException e) {
+      logger.fine(() -> "Class not found: " + className);
+      return null;
+    } catch (LinkageError e) {
+      logger.warning(() -> "Failed to load class: " + className);
+      return null;
+    }
   }
 
   private Set<String> scanAllClassesInPackage() throws IOException {
@@ -76,7 +99,7 @@ public class MiniAnnotationScanner {
       String protocol = url.getProtocol();
 
       if (Define.FILE.equalsIgnoreCase(protocol)) {
-        result.addAll(scanFileProtocol(url));
+        result.addAll(scanFileProtocolEasy(url));
       } else if (Define.JAR.equalsIgnoreCase(protocol)) {
         result.addAll(scanJarProtocol(url));
       } else {
@@ -86,24 +109,57 @@ public class MiniAnnotationScanner {
     return result;
   }
 
-  private Set<String> scanFileProtocol(URL resourceUrl) {
+  private Set<String> scanFileProtocolEasy(URL resourceUrl) {
+
     Set<String> classNames = new HashSet<>();
+
     try {
       Path root = Paths.get(resourceUrl.toURI());
+
       if (!Files.isDirectory(root)) {
         logger.warning(() -> "Not a directory: " + root);
         return classNames;
       }
 
-      try (Stream<Path> paths = Files.walk(root)) {
-        paths.filter(p -> Files.isRegularFile(p) && p.toString().endsWith(".class")).filter(p -> !p.getFileName().toString().contains("$")).map(p -> toClassNameFromFile(p, root, basePackageName)).forEach(classNames::add);
-      }
-    } catch (URISyntaxException e) {
-      logger.warning(() -> "Invalid URI for resource: " + e.getMessage());
-    } catch (IOException ioe) {
-      logger.warning(() -> "Failed to walk file tree: " + ioe.getMessage());
+      scanDirectoryRecursively(root, root, classNames);
+    } catch (Exception e) {
+      logger.warning(() -> "Scan failed: " + e.getMessage());
     }
     return classNames;
+  }
+
+  private void scanDirectoryRecursively(Path currentDir, Path rootDir, Set<String> classNames) throws IOException {
+
+    // 현재 디렉토리 안의 모든 파일/폴더 목록을 가져옵니다
+    try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentDir)) {
+
+      for (Path path : stream) {
+        // 폴더라면 → 다시 그 안으로 들어갑니다
+        if (Files.isDirectory(path)) {
+          scanDirectoryRecursively(path, rootDir, classNames);
+          continue;
+        }
+
+        // 파일이 아니면 무시합니다
+        if (!Files.isRegularFile(path)) {
+          continue;
+        }
+
+        // .class 파일만 대상입니다
+        if (!path.toString().endsWith(".class")) {
+          continue;
+        }
+
+        // 내부 클래스($ 포함)는 제외합니다
+        if (path.getFileName().toString().contains("$")) {
+          continue;
+        }
+
+        // 파일 경로 → 클래스 이름 변환
+        String className = toClassNameFromFile(path, rootDir, basePackageName);
+        classNames.add(className);
+      }
+    }
   }
 
   private Set<String> scanJarProtocol(URL jarUrl) {

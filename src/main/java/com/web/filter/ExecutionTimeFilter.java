@@ -7,7 +7,7 @@ import haru.annotation.web.Filter;
 import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.logging.MiniLogger;
-import haru.servlet.filter.FilterChain;
+import haru.servlet.filter.MiniFilterChain;
 import haru.servlet.filter.MiniFilter;
 import jakarta.servlet.ServletException;
 
@@ -17,7 +17,7 @@ public class ExecutionTimeFilter implements MiniFilter {
   private static final Logger logger = MiniLogger.getLogger(ExecutionTimeFilter.class.getSimpleName());
 
   @Override
-  public void doFilter(MiniHttpServletRequest request, MiniHttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+  public void doFilter(MiniHttpServletRequest request, MiniHttpServletResponse response, MiniFilterChain filterChain) throws IOException, ServletException {
     
     String requestURI = request.getRequestURI();
 

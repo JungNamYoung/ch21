@@ -33,7 +33,7 @@ import haru.http.MiniDispatcherHandler;
 import haru.mvc.interceptor.HandlerInterceptor;
 import haru.mvc.interceptor.InterceptorRegistry;
 import haru.servlet.MiniServletContext;
-import haru.support.TokenEx;
+import haru.support.PropertyConfig;
 import haru.support.UtilExt;
 import jakarta.servlet.ServletException;
 
@@ -82,12 +82,12 @@ public class MiniServletContainer {
 
   public static void main(String[] args) throws IOException, ServletException {
 
-    TokenEx tokenHaru = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_HARU));
-    TokenEx tokenServlet = new TokenEx(Define.STR_BLANK, UtilExt.loadTextSmart(Haru.CONFIG_SERVLET));
+    PropertyConfig propertyHaru = new PropertyConfig(UtilExt.loadTextSmart(Haru.CONFIG_HARU));
+    PropertyConfig propertyServlet = new PropertyConfig(UtilExt.loadTextSmart(Haru.CONFIG_SERVLET));
 
-    int port = Integer.parseInt(tokenHaru.get(Haru.PORT));
+    int port = Integer.parseInt(propertyHaru.get(Haru.PORT));
 
-    contextPath = tokenHaru.get(Haru.CONTEXT_PATH);
+    contextPath = propertyHaru.get(Haru.CONTEXT_PATH);
     if (contextPath == null || contextPath.isBlank() || Define.SLASH.equals(contextPath)) {
       contextPath = Define.SLASH;
     } else if (!contextPath.startsWith(Define.SLASH)) {
@@ -101,14 +101,14 @@ public class MiniServletContainer {
     System.out.printf("-context.path: %s%n", contextPath);
     System.out.println("-user.dir: " + Paths.get("").toAbsolutePath());
 
-    String webAppRoot = UtilExt.resolveWebRoot(tokenServlet);
+    String webAppRoot = UtilExt.resolveWebRoot(propertyServlet);
 
     System.out.printf("-web.app.root: %s%n%n", webAppRoot);
 
     miniServletContext = new MiniServletContext(webAppRoot);
 
     MiniServletContainer container = new MiniServletContainer();
-    String basePackage = tokenHaru.get(Haru.KEY_BASE_PACKAGE).toString();
+    String basePackage = propertyHaru.get(Haru.KEY_BASE_PACKAGE).toString();
     MiniApplicationContext appContext = new MiniApplicationContext();
     appContext.initializeContext(basePackage);
     

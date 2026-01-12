@@ -7,7 +7,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>User</title>
+<title>user</title>
 
 <c:set var="cp" value="${pageContext.request.contextPath eq '/' ? '' : pageContext.request.contextPath}"/>
 

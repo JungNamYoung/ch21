@@ -20,33 +20,31 @@ import java.util.List;
 
 import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
+import haru.http.MiniHttpServletRequest;
 import haru.http.MiniHttpServletResponse;
 import haru.support.FileEx;
 
-public class HtmlResponseHandler {
+public class HtmlResponseHandler implements StaticHandler {
 
-  public static boolean handle(String requestUrl, MiniHttpServletResponse response) {
+  @Override
+  public boolean supports(MiniHttpServletRequest request) {
+    String url = request.getRequestURI();
+    return url.endsWith(Define.EXT_HTML) || url.endsWith(Define.EXT_HTM);
+  }
 
-    if (requestUrl.endsWith(Define.EXT_HTML) || requestUrl.endsWith(Define.EXT_HTM)) {
-      try {
-        response.setContentType(Define.TEXT_HTML);
+  @Override
+  public void handle(MiniHttpServletRequest request, MiniHttpServletResponse response) throws Exception {
+    String requestUrl = request.getRequestURI();
 
-        String filePath = MiniServletContainer.getRealPath(requestUrl);
+    response.setContentType(Define.TEXT_HTML);
 
-        List<String> list = FileEx.readEx(filePath, false);
+    String filePath = MiniServletContainer.getRealPath(requestUrl);
+    List<String> list = FileEx.readEx(filePath, false);
 
-        for (String str : list)
-          response.getWriter().write(str);
-
-        response.flushBuffer();
-
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-
-      return true;
+    for (String str : list) {
+      response.getWriter().write(str);
     }
 
-    return false;
+    response.flushBuffer();
   }
 }

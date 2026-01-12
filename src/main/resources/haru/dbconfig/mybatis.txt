@@ -1,0 +1,7 @@
+haru.mybatis.configs[0].sqlSession=sqlSessionUser
+haru.mybatis.configs[0].tx=txUser
+haru.mybatis.configs[0].config=dbconfig/mybatis-config.xml
+
+//haru.mybatis.configs[1].sqlSession=sqlSessionUser_1
+//haru.mybatis.configs[1].tx=txUser_1
+//haru.mybatis.configs[1].config=dbconfig/mybatis-config_1.xml

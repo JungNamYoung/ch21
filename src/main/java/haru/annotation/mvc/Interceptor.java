@@ -2,8 +2,8 @@ package haru.annotation.mvc;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface Interceptor {
   int order() default 0;
   String[] includePatterns() default "/*";

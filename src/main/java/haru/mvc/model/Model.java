@@ -9,4 +9,6 @@ public interface Model {
   Object getAttribute(String key) ;
 
   Map<String, Object> getAttributes() ;
+  
+  void removeAttribute(String key);
 }

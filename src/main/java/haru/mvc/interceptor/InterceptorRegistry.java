@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import haru.support.PathPatternUtils;
-import haru.support.PathUtils;
+import haru.support.RequestPathUtils;
 
 public final class InterceptorRegistry {
   private final List<InterceptorRegistration> registrations = new ArrayList<>();
@@ -37,7 +36,7 @@ public final class InterceptorRegistry {
   }
 
   public List<HandlerInterceptor> resolveChain(String requestURI) {
-    final String path = PathUtils.normalizeRequestPath(requestURI, contextPath);
+    final String path = RequestPathUtils.normalizeRequestPath(requestURI, contextPath);
 
     List<HandlerInterceptor> result = new ArrayList<>();
 
@@ -76,8 +75,8 @@ public final class InterceptorRegistry {
     for (String raw : patterns) {
       if (raw == null || raw.isBlank())
         continue;
-      final String pat = PathPatternUtils.ensureLeadingSlashForPathPattern(raw.trim());
-      if (PathPatternUtils.matches(pat, path))
+      final String pat = RequestPathUtils.ensureLeadingSlashForPathPattern(raw.trim());
+      if (RequestPathUtils.matches(pat, path))
         return true;
     }
     return false;

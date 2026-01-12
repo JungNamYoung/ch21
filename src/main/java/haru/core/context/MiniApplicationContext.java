@@ -44,274 +44,289 @@ import haru.mybatis.MiniMyBatis;
 import haru.transaction.TransactionalProxyRegister;
 
 public class MiniApplicationContext {
-	private List<BeanHolder> beanHolders = new ArrayList<>();
-	private TransactionalProxyRegister transactionalProxyRegister = new TransactionalProxyRegister();
-	private Map<Class<? extends Annotation>, Set<Class<?>>> annotatedClasses = new HashMap<>();
-	private AspectManager aspectManager = new AspectManager();
-	MiniMyBatis miniMyBatis = new MiniMyBatis();
-	private static final Logger logger = MiniLogger.getLogger(MiniApplicationContext.class.getSimpleName());
-	private boolean initialized;
+  private List<BeanHolder> beanHolders = new ArrayList<>();
+  private TransactionalProxyRegister transactionalProxyRegister = new TransactionalProxyRegister();
+  private Map<Class<? extends Annotation>, Set<Class<?>>> annotatedClasses = new HashMap<>();
+  private AspectManager aspectManager = new AspectManager();
+  MiniMyBatis miniMyBatis = new MiniMyBatis();
+  private static final Logger logger = MiniLogger.getLogger(MiniApplicationContext.class.getSimpleName());
+  private boolean initialized;
 
-	private static final Map<Class<? extends Annotation>, String> ANNOTATION_TO_MSG_MAP = new HashMap<>();
+  private static final Map<Class<? extends Annotation>, String> ANNOTATION_TO_MSG_MAP = new HashMap<>();
 
-	static {
-		ANNOTATION_TO_MSG_MAP.put(Controller.class, "Controller - ");
-		ANNOTATION_TO_MSG_MAP.put(Service.class, "Service - ");
-		ANNOTATION_TO_MSG_MAP.put(Repository.class, "Repository - ");
-		ANNOTATION_TO_MSG_MAP.put(Interceptor.class, "Interceptor - ");
-	}
+  static {
+    ANNOTATION_TO_MSG_MAP.put(Controller.class, "Controller - ");
+    ANNOTATION_TO_MSG_MAP.put(Service.class, "Service - ");
+    ANNOTATION_TO_MSG_MAP.put(Repository.class, "Repository - ");
+    ANNOTATION_TO_MSG_MAP.put(Interceptor.class, "Interceptor - ");
+  }
+  
+  public void initializeContext(String basePackage) {
+    try {
+      scanAnnotatedClasses(basePackage);
+      registerFilters();
 
-	public void initializeContext(String basePackage) {
-		try {
-			scanAnnotatedClasses(basePackage);
-			registerFilters();
-			initTransactionAndAop();
-			initializeBeans();
-			injectDependencies();
-			initialized = true;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
+      initializeInfrastructure();
 
-	private void scanAnnotatedClasses(String basePackage) {
-		MiniAnnotationScanner scanner = new MiniAnnotationScanner(basePackage);
-		registerAnnotatedClasses(Service.class, scanner);
-		registerAnnotatedClasses(Repository.class, scanner);
-		registerAnnotatedClasses(Controller.class, scanner);
-		registerAnnotatedClasses(Aspect.class, scanner);
-		registerAnnotatedClasses(Filter.class, scanner);
-		registerAnnotatedClasses(Interceptor.class, scanner);
-	}
+      initializeBeans();
+      injectDependencies();
+      initialized = true;
 
-	private void registerFilters() {
-		getAnnotatedClasses(Filter.class).forEach(FilterRegistry::register);
-	}
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
 
-	private void initTransactionAndAop() throws Exception {
-		transactionalProxyRegister.registerTransactionalClasses(getAnnotatedClasses(Service.class));
-		transactionalProxyRegister.registerTransactionalClasses(getAnnotatedClasses(Repository.class));
-		aspectManager.registerAspectBeans(getAnnotatedClasses(Aspect.class));
-		miniMyBatis.initSessionFactory();
-	}
+  private void initializeInfrastructure() throws Exception {
+    initializePersistence();
+    initializeAop();
+    initializeTransactionProxies();
+  }
 
-	private void initializeBeans() throws Exception {
-		List<Object> beanContainer = new ArrayList<>();
+  private void initializePersistence() throws Exception {
+    miniMyBatis.initSessionFactory();
+  }
 
-		registerBeans(beanContainer, getAnnotatedClasses(Controller.class));
-		registerBeans(beanContainer, getAnnotatedClasses(Service.class));
-		registerBeans(beanContainer, getAnnotatedClasses(Repository.class));
-		registerBeans(beanContainer, getAnnotatedClasses(Interceptor.class));
+  private void initializeAop() {
+    aspectManager.registerAspectBeans(getAnnotatedClasses(Aspect.class));
+  }
 
-		for (Object bean : beanContainer) {
-			BeanHolder beanHolder = createInfoBeanWithProxy(bean);
-			beanHolders.add(beanHolder);
-		}
-	}
+  private void initializeTransactionProxies() {
+    registerTransactionalFor(Service.class, Repository.class);
+  }
 
-	private BeanHolder createInfoBeanWithProxy(Object bean) throws Exception {
-		String beanName = resolveBeanName(bean.getClass());
-		Object proxyInstance = createProxyIfNeeded(bean);
-		return new BeanHolder(beanName, bean, proxyInstance);
-	}
+  private final void registerTransactionalFor(Class<? extends Annotation>... stereotypes) {
+    for (Class<? extends Annotation> stereotype : stereotypes) {
+      transactionalProxyRegister.registerTransactionalClasses(getAnnotatedClasses(stereotype));
+    }
+  }
 
-	private Object createProxyIfNeeded(Object bean) throws Exception {
+  private void scanAnnotatedClasses(String basePackage) {
+    MiniAnnotationScanner scanner = new MiniAnnotationScanner(basePackage);
+    registerAnnotatedClasses(Service.class, scanner);
+    registerAnnotatedClasses(Repository.class, scanner);
+    registerAnnotatedClasses(Controller.class, scanner);
+    registerAnnotatedClasses(Aspect.class, scanner);
+    registerAnnotatedClasses(Filter.class, scanner);
+    registerAnnotatedClasses(Interceptor.class, scanner);
+  }
 
-		String transactionMangerName = transactionalProxyRegister.findTransactionManagerName(bean.getClass());
+  private void registerFilters() {
+    getAnnotatedClasses(Filter.class).forEach(FilterRegistry::register);
+  }
 
-		if (transactionMangerName != null) {
-			return transactionalProxyRegister.createProxyInstance(bean,
-					miniMyBatis.findMiniTxHandler(transactionMangerName));
-		}
+  private void initializeBeans() throws Exception {
+    List<Object> beanContainer = new ArrayList<>();
 
-		List<Object> aspectInstances = aspectManager.findBeanAspect(bean);
+    registerBeans(beanContainer, getAnnotatedClasses(Controller.class));
+    registerBeans(beanContainer, getAnnotatedClasses(Service.class));
+    registerBeans(beanContainer, getAnnotatedClasses(Repository.class));
+    registerBeans(beanContainer, getAnnotatedClasses(Interceptor.class));
 
-		if (aspectInstances.size() > Define.COUNT_0) {
-			return aspectManager.makeProxyInstance(bean, aspectInstances);
-		}
+    for (Object bean : beanContainer) {
+      BeanHolder beanHolder = createInfoBeanWithProxy(bean);
+      beanHolders.add(beanHolder);
+    }
+  }
 
-		return null;
-	}
+  private BeanHolder createInfoBeanWithProxy(Object bean) throws Exception {
+    String beanName = resolveBeanName(bean.getClass());
+    Object proxyInstance = createProxyIfNeeded(bean);
+    return new BeanHolder(beanName, bean, proxyInstance);
+  }
 
-	private void registerBeans(List<Object> beanContainer, Set<Class<?>> tClasses) {
+  private Object createProxyIfNeeded(Object bean) throws Exception {
 
-		for (Class<?> tClass : tClasses) {
-			Object bean = null;
+    String transactionMangerName = transactionalProxyRegister.findTransactionManagerName(bean.getClass());
 
-			try {
-				bean = tClass.getConstructor().newInstance();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
+    if (transactionMangerName != null) {
+      return transactionalProxyRegister.createProxyInstance(bean, miniMyBatis.findMiniTxHandler(transactionMangerName));
+    }
 
-			String annotationTypeMsg = null;
-			for (Map.Entry<Class<? extends Annotation>, String> entry : ANNOTATION_TO_MSG_MAP.entrySet()) {
-				if (tClass.isAnnotationPresent(entry.getKey())) {
-					annotationTypeMsg = entry.getValue();
-					break;
-				}
-			}
+    List<Object> aspectInstances = aspectManager.findBeanAspect(bean);
 
-			if (annotationTypeMsg == null) {
-				throw new RuntimeException(Define.NOT_APPLICABLE);
-			}
-			String msg = "create : " + annotationTypeMsg;
-			logger.info(msg + tClass.getSimpleName());
+    if (aspectInstances.size() > Define.COUNT_0) {
+      return aspectManager.makeProxyInstance(bean, aspectInstances);
+    }
 
-			beanContainer.add(bean);
-		}
-	}
+    return null;
+  }
 
-	private String resolveBeanName(Class<?> clazz) {
-		if (clazz.isAnnotationPresent(Service.class)) {
-			Service service = clazz.getAnnotation(Service.class);
+  private void registerBeans(List<Object> beanContainer, Set<Class<?>> tClasses) {
 
-			if (!service.value().isEmpty()) {
-				return service.value();
-			}
-		}
+    for (Class<?> tClass : tClasses) {
+      Object bean = null;
 
-		if (clazz.isAnnotationPresent(Repository.class)) {
-			Repository repository = clazz.getAnnotation(Repository.class);
+      try {
+        bean = tClass.getConstructor().newInstance();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
 
-			if (!repository.value().isEmpty()) {
-				return repository.value();
-			}
-		}
+      String annotationTypeMsg = null;
+      for (Map.Entry<Class<? extends Annotation>, String> entry : ANNOTATION_TO_MSG_MAP.entrySet()) {
+        if (tClass.isAnnotationPresent(entry.getKey())) {
+          annotationTypeMsg = entry.getValue();
+          break;
+        }
+      }
 
-		if (clazz.isAnnotationPresent(Controller.class)) {
-			String simpleName = clazz.getSimpleName();
-			return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
-		}
+      if (annotationTypeMsg == null) {
+        throw new RuntimeException(Define.NOT_APPLICABLE);
+      }
+      String msg = "create : " + annotationTypeMsg;
+      logger.info(msg + tClass.getSimpleName());
 
-		if (clazz.isAnnotationPresent(Interceptor.class)) {
-			String simpleName = clazz.getSimpleName();
-			return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
-		}
+      beanContainer.add(bean);
+    }
+  }
 
-		return clazz.getSimpleName();
-	}
+  private String resolveBeanName(Class<?> clazz) {
+    if (clazz.isAnnotationPresent(Service.class)) {
+      Service service = clazz.getAnnotation(Service.class);
 
-	private void injectDependencies() throws Exception {
+      if (!service.value().isEmpty()) {
+        return service.value();
+      }
+    }
 
-		for (BeanHolder beanHolder : beanHolders) {
+    if (clazz.isAnnotationPresent(Repository.class)) {
+      Repository repository = clazz.getAnnotation(Repository.class);
 
-			Object bean = beanHolder.getTargetBean();
+      if (!repository.value().isEmpty()) {
+        return repository.value();
+      }
+    }
 
-			Field[] fields = bean.getClass().getDeclaredFields();
+    if (clazz.isAnnotationPresent(Controller.class)) {
+      String simpleName = clazz.getSimpleName();
+      return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
+    }
 
-			for (Field field : fields) {
-				if ((field.getType() == SqlSession.class)
-						&& (field.isAnnotationPresent(Autowired.class) || field.isAnnotationPresent(Resource.class))) {
-					injectSqlSession(bean, field);
-				} else if (field.isAnnotationPresent(Autowired.class)) {
-					injectAutowiredDependency(bean, field);
-				} else if (field.isAnnotationPresent(Resource.class)) {
-					injectResourceBasedDependency(bean, field);
-				}
-			}
-		}
-	}
+    if (clazz.isAnnotationPresent(Interceptor.class)) {
+      String simpleName = clazz.getSimpleName();
+      return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
+    }
 
-	private void injectAutowiredDependency(Object bean, Field field) {
-		BeanHolder beanHolder = findBeanByType(field.getType());
-		assignDependency(bean, field, beanHolder);
-	}
+    return clazz.getSimpleName();
+  }
 
-	void injectSqlSession(Object bean, Field field) {
+  private void injectDependencies() throws Exception {
 
-		field.setAccessible(true);
+    for (BeanHolder beanHolder : beanHolders) {
 
-		try {
-			SqlSession sqlSession = miniMyBatis.getSqlSessionByType(field.getType());
+      Object bean = beanHolder.getTargetBean();
 
-			field.set(bean, sqlSession);
+      Field[] fields = bean.getClass().getDeclaredFields();
 
-			logger.info("[dependency #1] inject : " + bean.getClass().getSimpleName());
+      for (Field field : fields) {
+        if ((field.getType() == SqlSession.class) && (field.isAnnotationPresent(Autowired.class) || field.isAnnotationPresent(Resource.class))) {
+          injectSqlSession(bean, field);
+        } else if (field.isAnnotationPresent(Autowired.class)) {
+          injectAutowiredDependency(bean, field);
+        } else if (field.isAnnotationPresent(Resource.class)) {
+          injectResourceBasedDependency(bean, field);
+        }
+      }
+    }
+  }
 
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-	}
+  private void injectAutowiredDependency(Object bean, Field field) {
+    BeanHolder beanHolder = findBeanByType(field.getType());
+    assignDependency(bean, field, beanHolder);
+  }
 
-	private void injectResourceBasedDependency(Object bean, Field field) {
-		Resource resource = field.getAnnotation(Resource.class);
-		String resourceName = resource.name();
+  void injectSqlSession(Object bean, Field field) {
 
-		BeanHolder beanHolder = !resourceName.isEmpty() ? findBean(resourceName) : findBeanByType(field.getType());
-		assignDependency(bean, field, beanHolder);
-	}
+    field.setAccessible(true);
 
-	private void assignDependency(Object bean, Field field, BeanHolder beanHolder) {
-		if (beanHolder == null) {
-			throw new RuntimeException("빈 주입 실패: 빈을 찾을 수 없습니다.");
-		}
+    try {
+      SqlSession sqlSession = miniMyBatis.getSqlSessionByType(field.getType());
 
-		Object dependency = beanHolder.getProxyInstance() != null ? beanHolder.getProxyInstance()
-				: beanHolder.getTargetBean();
+      field.set(bean, sqlSession);
 
-		field.setAccessible(true);
+      logger.info("[dependency #1] inject : " + bean.getClass().getSimpleName());
 
-		if (!field.getType().isAssignableFrom(dependency.getClass())) {
-			String msg = "주입 불가능 : 필드 타입 " + field.getType() + "은(는) " + dependency.getClass() + "을(를) 할당할 수 없습니다.";
-			logger.info("error | " + msg);
-		}
+    } catch (IllegalArgumentException | IllegalAccessException e) {
+      e.printStackTrace();
+    }
+  }
 
-		try {
-			field.set(bean, dependency);
-			logger.info("[dependency] inject : " + bean.getClass().getSimpleName() + " - "
-					+ dependency.getClass().getSimpleName());
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("의존성 주입 실패", e);
-		}
-	}
+  private void injectResourceBasedDependency(Object bean, Field field) {
+    Resource resource = field.getAnnotation(Resource.class);
+    String resourceName = resource.name();
 
-	private void registerAnnotatedClasses(Class<? extends Annotation> annotation, MiniAnnotationScanner scanner) {
-		Set<Class<?>> scannedClasses = scanner.findTypesAnnotatedWith(annotation);
-		annotatedClasses.put(annotation, scannedClasses != null ? scannedClasses : Collections.emptySet());
-	}
+    BeanHolder beanHolder = !resourceName.isEmpty() ? findBean(resourceName) : findBeanByType(field.getType());
+    assignDependency(bean, field, beanHolder);
+  }
 
-	private Set<Class<?>> getAnnotatedClasses(Class<? extends Annotation> annotation) {
-		return annotatedClasses.getOrDefault(annotation, Collections.emptySet());
-	}
+  private void assignDependency(Object bean, Field field, BeanHolder beanHolder) {
+    if (beanHolder == null) {
+      throw new RuntimeException("빈 주입 실패: 빈을 찾을 수 없습니다.");
+    }
 
-	public List<BeanHolder> getBeans() {
-		return beanHolders;
-	}
+    Object dependency = beanHolder.getProxyInstance() != null ? beanHolder.getProxyInstance() : beanHolder.getTargetBean();
 
-	public boolean isInitialized() {
-		return initialized;
-	}
+    field.setAccessible(true);
 
-	public <T> T getBean(Class<T> type) {
-		BeanHolder beanHolder = findBeanByType(type);
-		if (beanHolder == null) {
-			throw new IllegalArgumentException("빈을 찾을 수 없습니다: " + type.getName());
-		}
+    if (!field.getType().isAssignableFrom(dependency.getClass())) {
+      String msg = "주입 불가능 : 필드 타입 " + field.getType() + "은(는) " + dependency.getClass() + "을(를) 할당할 수 없습니다.";
+      logger.info("error | " + msg);
+    }
 
-		Object candidate = beanHolder.getProxyInstance() != null ? beanHolder.getProxyInstance()
-				: beanHolder.getTargetBean();
+    try {
+      field.set(bean, dependency);
+      logger.info("[dependency] inject : " + bean.getClass().getSimpleName() + " - " + dependency.getClass().getSimpleName());
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException("의존성 주입 실패", e);
+    }
+  }
 
-		return type.cast(candidate);
-	}
+  private void registerAnnotatedClasses(Class<? extends Annotation> annotation, MiniAnnotationScanner scanner) {
+    Set<Class<?>> scannedClasses = scanner.findTypesAnnotatedWith(annotation);
+    annotatedClasses.put(annotation, scannedClasses != null ? scannedClasses : Collections.emptySet());
+  }
 
-	public BeanHolder findBean(String beanName) {
-		for (BeanHolder beanHolder : beanHolders) {
-			if (beanHolder.getBeanName().equals(beanName))
-				return beanHolder;
-		}
+  private Set<Class<?>> getAnnotatedClasses(Class<? extends Annotation> annotation) {
+    return annotatedClasses.getOrDefault(annotation, Collections.emptySet());
+  }
 
-		return null;
-	}
+  public List<BeanHolder> getBeans() {
+    return beanHolders;
+  }
 
-	private BeanHolder findBeanByType(Class<?> type) {
-		for (BeanHolder beanHolder : beanHolders) {
-			Object candidate = beanHolder.getTargetBean();
-			if (type.isAssignableFrom(candidate.getClass())) {
-				return beanHolder;
-			}
-		}
+  public boolean isInitialized() {
+    return initialized;
+  }
 
-		return null;
-	}
+  public <T> T getBean(Class<T> type) {
+    BeanHolder beanHolder = findBeanByType(type);
+    if (beanHolder == null) {
+      throw new IllegalArgumentException("빈을 찾을 수 없습니다: " + type.getName());
+    }
+
+    Object candidate = beanHolder.getProxyInstance() != null ? beanHolder.getProxyInstance() : beanHolder.getTargetBean();
+
+    return type.cast(candidate);
+  }
+
+  public BeanHolder findBean(String beanName) {
+    for (BeanHolder beanHolder : beanHolders) {
+      if (beanHolder.getBeanName().equals(beanName))
+        return beanHolder;
+    }
+
+    return null;
+  }
+
+  private BeanHolder findBeanByType(Class<?> type) {
+    for (BeanHolder beanHolder : beanHolders) {
+      Object candidate = beanHolder.getTargetBean();
+      if (type.isAssignableFrom(candidate.getClass())) {
+        return beanHolder;
+      }
+    }
+
+    return null;
+  }
 }

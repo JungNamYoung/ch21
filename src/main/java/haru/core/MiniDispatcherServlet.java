@@ -52,10 +52,11 @@ import haru.mvc.result.TextBodyWriter;
 import haru.mvc.view.HtmlResponseHandler;
 import haru.mvc.view.JspResponseHandler;
 import haru.mvc.view.ResponseHandler;
-import haru.servlet.resource.MiniResourceHandler;
+import haru.mvc.view.StaticHandler;
+import haru.servlet.resource.ResourceResponseHandler;
 import haru.servlet.resource.WelcomeFileResolver;
 import haru.servlet.security.SecurityFilter;
-import haru.support.PathUtils;
+import haru.support.RequestPathUtils;
 
 public class MiniDispatcherServlet implements DispatcherServlet {
 
@@ -67,12 +68,15 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   private final InterceptorRegistry interceptorRegistry;
   private final String contextPath;
 
+  private final List<StaticHandler> staticHandlers = List.of(new HtmlResponseHandler(), new JspResponseHandler(), new ResourceResponseHandler());
+
   public MiniDispatcherServlet(String basePackage) {
     this(basePackage, new MiniApplicationContext(), null, MiniServletContainer.getContextPath());
   }
 
   public MiniDispatcherServlet(String basePackage, MiniApplicationContext context, InterceptorRegistry registry, String contextPath) {
-    this.appContext = context != null ? context : new MiniApplicationContext();
+    //this.appContext = context != null ? context : new MiniApplicationContext();
+    this.appContext = context;
     String resolvedContextPath = contextPath != null ? contextPath : MiniServletContainer.getContextPath();
     this.contextPath = resolvedContextPath != null ? resolvedContextPath : Define.SLASH;
     this.interceptorRegistry = registry != null ? registry : new InterceptorRegistry(this.contextPath);
@@ -104,41 +108,37 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
       RequestMapping rm = method.getAnnotation(RequestMapping.class);
       for (String raw : rm.value()) {
-        String path = PathUtils.normalizeMappingPath(raw);
+        String path = RequestPathUtils.normalizeMappingPath(raw);
         HandlerMapping mapping = new HandlerMapping(path, method, beanDef);
 
         HandlerMapping prev = handlerMappings.putIfAbsent(path, mapping);
         if (prev != null) {
           logger.warning(() -> String.format("[Duplicate Mapping] %s => %s::%s (existing: %s::%s)", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName(), prev.getBeanDefinition().getTargetBean().getClass().getSimpleName(), prev.getMethod().getName()));
         } else {
-          //logger.info(() -> String.format("[RequestMapping] %s - %s::%s", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName()));
           logger.info(() -> String.format("[RequestMapping] %s", path));
         }
       }
     }
   }
 
-  private String resolveRequestUri(String requestUrl, String contextPath) {
-    if (!Define.SLASH.equals(contextPath) && requestUrl.startsWith(contextPath)) {
-      return requestUrl.substring(contextPath.length());
-    }
-    return requestUrl;
-  }
-
   private boolean handleByStaticHandlers(MiniHttpServletRequest request, MiniHttpServletResponse response) {
-    String url = request.getRequestURI();
-    if (HtmlResponseHandler.handle(url, response)) {
-      logger.info("HtmlResponseHandler.handle()");
-      return true;
+    
+    for (StaticHandler handler : staticHandlers) {
+      if (!handler.supports(request)) {
+        continue;
+      }
+
+      try {
+        handler.handle(request, response);
+        logger.info(handler.name() + ".handle()");
+        return true;
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        // 여기에서 500 처리/에러 페이지로 전환하는 정책도 넣을 수 있습니다.
+        return true;// “처리하다 실패”도 이 handler가 책임진 것으로 보고 true 처리합니다.
+      }
     }
-    if (JspResponseHandler.handle(request, response)) {
-      logger.info("JspResponseHandler.handle()");
-      return true;
-    }
-    if (MiniResourceHandler.handle(request, response)) {
-      logger.info("MiniResourceHandler.handle()");
-      return true;
-    }
+
     return false;
   }
 
@@ -146,9 +146,10 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return handlerMappings.get(path);
   }
 
+  @Override
   public void service(MiniHttpServletRequest request, MiniHttpServletResponse response) {
     List<HandlerInterceptor> interceptorChain = interceptorRegistry.resolveChain(request.getRequestURI());
-    InterceptorExecutor executor = new InterceptorExecutor(interceptorChain);
+    InterceptorExecutor interceptorExecutor = new InterceptorExecutor(interceptorChain);
 
     Object handler = null;
     Object modelAndView = null;
@@ -167,31 +168,31 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
       handler = mapping;
 
-      interceptorPreHandled = executor.applyPreHandle(request, response, handler);
+      interceptorPreHandled = interceptorExecutor.applyPreHandle(request, response, handler);
       if (!interceptorPreHandled) {
         return;
       }
 
       modelAndView = invokeHandler(handler, request, response);
 
-      executor.applyPostHandle(request, response, handler, modelAndView);
+      interceptorExecutor.applyPostHandle(request, response, handler, modelAndView);
 
-      render(modelAndView, request, response);
     } catch (Exception e) {
       ex = e;
     } finally {
       if (interceptorPreHandled) {
-        executor.triggerAfterCompletion(request, response, handler, ex);
+        interceptorExecutor.triggerAfterCompletion(request, response, handler, ex);
       }
     }
   }
 
   private HandlerMapping resolveHandler(String requestUrl, MiniHttpServletRequest request, MiniHttpServletResponse response) {
+    
     if (handleByStaticHandlers(request, response))
       return null;
 
-    String requestUri = resolveRequestUri(requestUrl, contextPath);
-    requestUri = PathUtils.normalizeMappingPath(requestUri);
+    String requestUri = RequestPathUtils.resolveRequestUri(requestUrl, contextPath);
+    requestUri = RequestPathUtils.normalizeMappingPath(requestUri);
 
     HandlerMapping mapping = findHandlerMapping(requestUri);
     if (mapping == null) {
@@ -222,9 +223,6 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     HandlerMapping mapping = (HandlerMapping) handler;
     handlerAdapter.handle(mapping, request, response);
     return null;
-  }
-
-  private void render(Object modelAndView, MiniHttpServletRequest request, MiniHttpServletResponse response) {
   }
 
   private HandlerAdapter createHandlerAdapter() {
