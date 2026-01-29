@@ -1,5 +1,6 @@
 package com.web.controller;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -9,6 +10,8 @@ import com.web.vo.UserVo;
 
 import haru.annotation.di.Autowired;
 import haru.annotation.mvc.Controller;
+import haru.annotation.mvc.GetMapping;
+import haru.annotation.mvc.PostMapping;
 import haru.annotation.mvc.RequestMapping;
 import haru.logging.MiniLogger;
 import haru.mvc.model.Model;
@@ -17,40 +20,32 @@ import haru.mvc.model.Model;
 public class LoginController {
 
   private static final Logger logger = MiniLogger.getLogger(LoginController.class.getSimpleName());
-  
+
   @Autowired
   LoginService loginService;
 
-  @RequestMapping("/say.do")
-  public String say() {
-    return "login/say";
-  }
+  @RequestMapping("/list-login.do")
+  public String listLogin(Model model) {
 
-  @RequestMapping("/selectLogin.do")
-  public String selectLogin(Model model) {
-    
     List<UserVo> list = loginService.selectLogin(null);
-    
+
     model.addAttribute("results", list);
-    
-    return "login/chat";
+
+    return "login/list-login";
   }
 
-
-  @RequestMapping("/view-login.do")
-  public String viewLogin(Model model) {
-    
-    List<UserVo> list = loginService.selectLogin(null);
-    
-    model.addAttribute("results", list);
-    
-    return "login/view-login";
-  }
-  
-  @RequestMapping("/login/change-login.do")
+  @PostMapping("/change-login.do")
   public String changeLogin(Model model, UserCol userCol) {
-            
+
+    model.addAttribute("message", "사용자 정보가 성공적으로 저장되었습니다.");
+    model.addAttribute("userCol", userCol);
+    
+    return "login/change-login-result";
+  }
+
+  @GetMapping("/change-login.do")
+  public String changeLogin(Model model) {
     return "login/change-login";
   }
-  
+
 }

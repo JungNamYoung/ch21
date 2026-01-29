@@ -21,23 +21,26 @@ import java.lang.reflect.Method;
 import haru.core.context.BeanHolder;
 
 public class HandlerMapping {
-  private String requestPpath;
+  private String requestPath;
+  private final String httpMethod; // "GET", "POST" 등
   private Method method;
   private Object aop;
   private BeanHolder beanHolder;
 
-  public HandlerMapping(String pathRequest, Method method, BeanHolder beanHolder) {
-    this.requestPpath = pathRequest;
+  public HandlerMapping(String pathRequest, String httpMethod, Method method, BeanHolder beanHolder) {
+    this.requestPath = pathRequest;
+    this.httpMethod = httpMethod;
     this.method = method;
     this.beanHolder = beanHolder;
+
   }
 
   public String getPathRequest() {
-    return requestPpath;
+    return requestPath;
   }
 
   public void setPathRequest(String pathRequest) {
-    this.requestPpath = pathRequest;
+    this.requestPath = pathRequest;
   }
 
   public Method getMethod() {
@@ -48,4 +51,7 @@ public class HandlerMapping {
     return beanHolder;
   }
 
+  public String getHttpMethod() {
+    return httpMethod;
+  }
 }

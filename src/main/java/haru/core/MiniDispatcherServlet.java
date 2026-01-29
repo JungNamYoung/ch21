@@ -19,6 +19,7 @@ package haru.core;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -26,6 +27,8 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import haru.annotation.mvc.Controller;
+import haru.annotation.mvc.GetMapping;
+import haru.annotation.mvc.PostMapping;
 import haru.annotation.mvc.RequestMapping;
 import haru.constants.Define;
 import haru.core.bootstrap.MiniServletContainer;
@@ -75,7 +78,7 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   }
 
   public MiniDispatcherServlet(String basePackage, MiniApplicationContext context, InterceptorRegistry registry, String contextPath) {
-    //this.appContext = context != null ? context : new MiniApplicationContext();
+    // this.appContext = context != null ? context : new MiniApplicationContext();
     this.appContext = context;
     String resolvedContextPath = contextPath != null ? contextPath : MiniServletContainer.getContextPath();
     this.contextPath = resolvedContextPath != null ? resolvedContextPath : Define.SLASH;
@@ -103,26 +106,50 @@ public class MiniDispatcherServlet implements DispatcherServlet {
 
   private void registerControllerMethods(Class<?> type, BeanHolder beanDef) {
     for (Method method : type.getDeclaredMethods()) {
-      if (!method.isAnnotationPresent(RequestMapping.class))
-        continue;
 
-      RequestMapping rm = method.getAnnotation(RequestMapping.class);
-      for (String raw : rm.value()) {
-        String path = RequestPathUtils.normalizeMappingPath(raw);
-        HandlerMapping mapping = new HandlerMapping(path, method, beanDef);
+      if (method.isAnnotationPresent(GetMapping.class)) {
+        GetMapping gm = method.getAnnotation(GetMapping.class);
+        registerMappings(beanDef, method, "GET", gm.value());
+      }
 
-        HandlerMapping prev = handlerMappings.putIfAbsent(path, mapping);
-        if (prev != null) {
-          logger.warning(() -> String.format("[Duplicate Mapping] %s => %s::%s (existing: %s::%s)", path, beanDef.getTargetBean().getClass().getSimpleName(), method.getName(), prev.getBeanDefinition().getTargetBean().getClass().getSimpleName(), prev.getMethod().getName()));
-        } else {
-          logger.info(() -> String.format("[RequestMapping] %s", path));
-        }
+      if (method.isAnnotationPresent(PostMapping.class)) {
+        PostMapping pm = method.getAnnotation(PostMapping.class);
+        registerMappings(beanDef, method, "POST", pm.value());
+      }
+
+      if (method.isAnnotationPresent(RequestMapping.class)) {
+        RequestMapping rm = method.getAnnotation(RequestMapping.class);
+        registerMappings(beanDef, method, "ALL", rm.value());
       }
     }
   }
 
+  private void registerMappings(BeanHolder beanDef, Method method, String httpMethod, String[] rawPaths) {
+    if (rawPaths == null || rawPaths.length == 0) {
+      return;
+    }
+    for (String raw : rawPaths) {
+      String path = RequestPathUtils.normalizeMappingPath(raw);
+
+      HandlerMapping mapping = new HandlerMapping(path, httpMethod, method, beanDef);
+
+      String key = toMappingKey(httpMethod, path);
+
+      HandlerMapping prev = handlerMappings.putIfAbsent(key, mapping);
+      if (prev != null) {
+        logger.warning(() -> String.format("[Duplicate Mapping] %s => %s::%s(existing:%s::%s)", key, beanDef.getTargetBean().getClass().getSimpleName(), method.getName(), prev.getBeanDefinition().getTargetBean().getClass().getSimpleName(), prev.getMethod().getName()));
+      } else {
+        logger.info(() -> String.format("[Mapping] %s", key));
+      }
+    }
+  }
+
+  private String toMappingKey(String httpMethod, String path) {
+    return httpMethod.toUpperCase(Locale.ROOT) + " " + path;
+  }
+
   private boolean handleByStaticHandlers(MiniHttpServletRequest request, MiniHttpServletResponse response) {
-    
+
     for (StaticHandler handler : staticHandlers) {
       if (!handler.supports(request)) {
         continue;
@@ -142,8 +169,18 @@ public class MiniDispatcherServlet implements DispatcherServlet {
     return false;
   }
 
-  private HandlerMapping findHandlerMapping(String path) {
-    return handlerMappings.get(path);
+  private HandlerMapping findHandlerMapping(MiniHttpServletRequest req, String contextPath) {
+    String method = req.getMethod().toUpperCase(Locale.ROOT); // "GET", "POST"
+    String path = RequestPathUtils.normalizeRequestPath(req.getRequestURI(), contextPath);
+
+    // 먼저 정확히 METHOD 매핑을 찾습니다.
+    HandlerMapping mapping = handlerMappings.get(toMappingKey(method, path));
+    if (mapping != null)
+      return mapping;
+
+    // 없으면 ALL 매핑(@RequestMapping)을 찾습니다.
+    mapping = handlerMappings.get(toMappingKey("ALL", path));
+    return mapping;
   }
 
   @Override
@@ -187,14 +224,14 @@ public class MiniDispatcherServlet implements DispatcherServlet {
   }
 
   private HandlerMapping resolveHandler(String requestUrl, MiniHttpServletRequest request, MiniHttpServletResponse response) {
-    
+
     if (handleByStaticHandlers(request, response))
       return null;
 
     String requestUri = RequestPathUtils.resolveRequestUri(requestUrl, contextPath);
     requestUri = RequestPathUtils.normalizeMappingPath(requestUri);
 
-    HandlerMapping mapping = findHandlerMapping(requestUri);
+    HandlerMapping mapping = findHandlerMapping(request, contextPath);
     if (mapping == null) {
       ResponseHandler.handleNotFound(response, requestUri);
       return null;

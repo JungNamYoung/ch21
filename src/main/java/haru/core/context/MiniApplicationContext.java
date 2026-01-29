@@ -44,14 +44,14 @@ import haru.mybatis.MiniMyBatis;
 import haru.transaction.TransactionalProxyRegister;
 
 public class MiniApplicationContext {
+  private static final Logger logger = MiniLogger.getLogger(MiniApplicationContext.class.getSimpleName());
+  
   private List<BeanHolder> beanHolders = new ArrayList<>();
   private TransactionalProxyRegister transactionalProxyRegister = new TransactionalProxyRegister();
   private Map<Class<? extends Annotation>, Set<Class<?>>> annotatedClasses = new HashMap<>();
   private AspectManager aspectManager = new AspectManager();
-  MiniMyBatis miniMyBatis = new MiniMyBatis();
-  private static final Logger logger = MiniLogger.getLogger(MiniApplicationContext.class.getSimpleName());
+  MiniMyBatis miniMyBatis = new MiniMyBatis();  
   private boolean initialized;
-
   private static final Map<Class<? extends Annotation>, String> ANNOTATION_TO_MSG_MAP = new HashMap<>();
 
   static {
